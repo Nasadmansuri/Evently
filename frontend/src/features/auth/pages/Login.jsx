@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, CalendarHeart, AlertCircle, Loader2 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 
@@ -43,69 +44,89 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-        <h1 className="text-2xl font-bold text-indigo-600 mb-1">Evently</h1>
-        <p className="text-gray-500 text-sm mb-6">Sign in to your account</p>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-10">
+        {/* Logo */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+            <CalendarHeart className="w-6 h-6 text-white" />
+          </div>
+          <span className="text-2xl font-bold text-gray-900">Evently</span>
+        </div>
+
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">Welcome back</h1>
+        <p className="text-gray-500 mb-6">Login to your account</p>
 
         {error && (
-          <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <div className="mb-4 flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+            <AlertCircle size={16} className="shrink-0" />
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="text"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="you@example.com"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                placeholder="you@university.edu"
+              />
+            </div>
           </div>
 
-         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
             <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-200 bg-gray-50 rounded-xl pl-11 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 tabIndex={-1}
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
+            </div>
+            <div className="text-right mt-2">
+              <Link to="/forgot-password" className="text-sm text-indigo-600 hover:underline">
+                Forgot password?
+              </Link>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 active:scale-[0.98] text-white font-medium py-3 rounded-xl transition-all disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
           >
+            {loading ? <Loader2 className="animate-spin" size={18} /> : null}
             {loading ? 'Signing in...' : 'Sign In'}
+            {!loading && <ArrowRight size={18} />}
           </button>
         </form>
 
-        <div className="flex items-center gap-3 my-5">
+        <div className="flex items-center gap-3 my-6">
           <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs text-gray-400">OR</span>
+          <span className="text-xs text-gray-400">or continue with</span>
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
         <button
           type="button"
-          className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
         >
           <svg width="18" height="18" viewBox="0 0 48 48">
             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.9 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3.5 24 3.5 12.7 3.5 3.5 12.7 3.5 24S12.7 44.5 24 44.5 44.5 35.3 44.5 24c0-1.2-.1-2.4-.3-3.5z"/>
@@ -116,10 +137,10 @@ export default function Login() {
           Continue with Google
         </button>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-500 mt-8">
           Don't have an account?{' '}
-          <Link to="/signup/student" className="text-indigo-600 font-medium hover:underline">
-            Sign up
+          <Link to="/signup/student" className="text-indigo-600 font-semibold hover:underline">
+            Sign up here
           </Link>
         </p>
       </div>
