@@ -1,9 +1,11 @@
-function App() {
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Login from './features/auth/pages/Login';
+
+export default function App() {
   return (
-    <div className="text-3xl font-bold text-indigo-600">
-      Evently
-    </div>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
   );
 }
-
-export default App;
