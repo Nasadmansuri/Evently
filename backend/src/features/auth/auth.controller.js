@@ -35,4 +35,35 @@ async function login(req, res) {
   }
 }
 
-module.exports = { login };
+async function signupStudent(req, res) {
+  try {
+    const {
+      fullName, email, phone, collegeName, courseMajor,
+      facultyName, courseName, academicLevel, academicSemester, academicGroup, password,
+    } = req.body;
+
+    if (!fullName || !email || !collegeName || !password) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const existing = await authModel.findByEmail(email);
+    if (existing) {
+      return res.status(409).json({ message: 'An account with this email already exists' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const isBic = !!(facultyName && courseName); // BIC/Herald/Fishtail branch sends these; Guest doesn't
+
+    const user = await authModel.createStudent({
+      fullName, email, phone, passwordHash,
+      isBic, collegeName, courseMajor,
+      facultyName, courseName, academicLevel, academicSemester, academicGroup,
+    });
+
+    res.status(201).json({ message: 'Account created successfully', user });
+  } catch (err) {
+    res.status(500).json({ message: 'Signup failed', error: err.message });
+  }
+}
+
+module.exports = { login, signupStudent };
