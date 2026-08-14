@@ -183,7 +183,7 @@ export default function StudentSignup() {
                   type="text" required value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={inputClass}
-                  placeholder="alex@university.edu.np"
+                  placeholder="alex@bic.edu.np"
                 />
               </div>
             </div>

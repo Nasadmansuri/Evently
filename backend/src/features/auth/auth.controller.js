@@ -66,4 +66,30 @@ async function signupStudent(req, res) {
   }
 }
 
-module.exports = { login, signupStudent };
+async function signupFaculty(req, res) {
+  try {
+    const { fullName, email, phone, facultyIdCode, department, designation, community, password } = req.body;
+
+    if (!fullName || !email || !facultyIdCode || !department || !designation || !password) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const existing = await authModel.findByEmail(email);
+    if (existing) {
+      return res.status(409).json({ message: 'An account with this email already exists' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = await authModel.createFaculty({
+      fullName, email, phone, passwordHash,
+      facultyIdCode, department, designation, community,
+    });
+
+    res.status(201).json({ message: 'Account created, pending admin approval', user });
+  } catch (err) {
+    res.status(500).json({ message: 'Signup failed', error: err.message });
+  }
+}
+
+module.exports = { login, signupStudent, signupFaculty };

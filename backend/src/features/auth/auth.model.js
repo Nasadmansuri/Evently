@@ -1,5 +1,29 @@
 const pool = require('../../shared/config/db');
 
+async function findByEmail(email) {
+  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+  return rows[0] || null;
+}
+
+async function findById(id) {
+  const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+  return rows[0] || null;
+}
+
+async function createFaculty(data) {
+  const [result] = await pool.query(
+    `INSERT INTO users (
+      full_name, email, phone, password_hash, role,
+      faculty_id_code, department, designation, community, approval_status
+    ) VALUES (?, ?, ?, ?, 'faculty', ?, ?, ?, ?, 'pending')`,
+    [
+      data.fullName, data.email, data.phone || null, data.passwordHash,
+      data.facultyIdCode, data.department, data.designation, data.community,
+    ]
+  );
+  return findById(result.insertId);
+}
+
 async function createStudent(data) {
   const [result] = await pool.query(
     `INSERT INTO users (
@@ -17,14 +41,4 @@ async function createStudent(data) {
   return findById(result.insertId);
 }
 
-async function findByEmail(email) {
-  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-  return rows[0] || null;
-}
-
-async function findById(id) {
-  const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
-  return rows[0] || null;
-}
-
-module.exports = { findByEmail, findById, createStudent };
+module.exports = { findByEmail, findById, createStudent, createFaculty };
