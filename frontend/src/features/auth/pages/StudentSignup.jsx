@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { ACADEMIC_STRUCTURE, GROUPS, matchAffiliatedCollege, getFacultiesForCollege, getSemestersForLevel } from '../../../shared/utils/academicCascade';
+import { showToast } from '../../../shared/utils/toast';
 
 export default function StudentSignup() {
   const navigate = useNavigate();
@@ -106,6 +107,7 @@ export default function StudentSignup() {
         academicGroup: isBic ? academicGroup : undefined,
         password,
       });
+      showToast.success('Registration successful! You can now log in.');
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');

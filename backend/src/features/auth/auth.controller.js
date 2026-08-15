@@ -88,6 +88,12 @@ async function signupFaculty(req, res) {
 
     res.status(201).json({ message: 'Account created, pending admin approval', user });
   } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      const message = err.sqlMessage.includes('email')
+        ? 'An account with this email already exists'
+        : 'This Faculty ID is already registered';
+      return res.status(409).json({ message });
+    }
     res.status(500).json({ message: 'Signup failed', error: err.message });
   }
 }

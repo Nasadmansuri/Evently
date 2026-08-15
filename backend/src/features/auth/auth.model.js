@@ -1,44 +1,119 @@
 const pool = require('../../shared/config/db');
+const normalizeUser = require('../../shared/utils/normalizeUser');
+
+const USER_JOIN_SELECT = `
+  u.*,
+  sp.college_name AS sp_college_name, sp.faculty_name, sp.course_name,
+  sp.academic_level, sp.academic_semester, sp.academic_group,
+  gp.college_name AS gp_college_name, gp.course_major,
+  fp.faculty_id_code, fp.department, fp.designation, fp.community, fp.approval_status
+  FROM users u
+  LEFT JOIN student_profiles sp ON sp.user_id = u.id
+  LEFT JOIN guest_profiles gp ON gp.user_id = u.id
+  LEFT JOIN faculty_profiles fp ON fp.user_id = u.id
+`;
 
 async function findByEmail(email) {
-  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-  return rows[0] || null;
+  const [rows] = await pool.query(`SELECT ${USER_JOIN_SELECT} WHERE u.email = ?`, [email]);
+  return normalizeUser(rows[0]);
 }
 
 async function findById(id) {
-  const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
-  return rows[0] || null;
-}
-
-async function createFaculty(data) {
-  const [result] = await pool.query(
-    `INSERT INTO users (
-      full_name, email, phone, password_hash, role,
-      faculty_id_code, department, designation, community, approval_status
-    ) VALUES (?, ?, ?, ?, 'faculty', ?, ?, ?, ?, 'pending')`,
-    [
-      data.fullName, data.email, data.phone || null, data.passwordHash,
-      data.facultyIdCode, data.department, data.designation, data.community,
-    ]
-  );
-  return findById(result.insertId);
+  const [rows] = await pool.query(`SELECT ${USER_JOIN_SELECT} WHERE u.id = ?`, [id]);
+  return normalizeUser(rows[0]);
 }
 
 async function createStudent(data) {
-  const [result] = await pool.query(
-    `INSERT INTO users (
-      full_name, email, phone, password_hash, role,
-      is_bic_student, college_name, course_major,
-      faculty_name, course_name, academic_level, academic_semester, academic_group
-    ) VALUES (?, ?, ?, ?, 'student', ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      data.fullName, data.email, data.phone || null, data.passwordHash,
-      data.isBic, data.collegeName, data.courseMajor || null,
-      data.facultyName || null, data.courseName || null,
-      data.academicLevel || null, data.academicSemester || null, data.academicGroup || null,
-    ]
-  );
-  return findById(result.insertId);
-}
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
 
+    const [result] = await conn.query(
+      `INSERT INTO users (full_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, 'student')`,
+      [data.fullName, data.email, data.phone || null, data.passwordHash]
+    );
+    const userId = result.insertId;
+
+    if (data.isBic) {
+      await conn.query(
+        `INSERT INTO student_profiles (user_id, college_name, faculty_name, course_name, academic_level, academic_semester, academic_group)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [userId, data.collegeName, data.facultyName, data.courseName, data.academicLevel, data.academicSemester, data.academicGroup]
+      );
+    } else {
+      await conn.query(
+        `INSERT INTO guest_profiles (user_id, college_name, course_major) VALUES (?, ?, ?)`,
+        [userId, data.collegeName, data.courseMajor]
+      );
+    }
+
+    await conn.commit();
+    return findById(userId);
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+// async function createFaculty(data) {
+//   const conn = await pool.getConnection();
+//   try {
+//     await conn.beginTransaction();
+
+//     const [result] = await conn.query(
+//       `INSERT INTO users (full_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, 'faculty')`,
+//       [data.fullName, data.email, data.phone || null, data.passwordHash]
+//     );
+//     const userId = result.insertId;
+
+//     await conn.query(
+//       `INSERT INTO faculty_profiles (user_id, faculty_id_code, department, designation, community, approval_status)
+//        VALUES (?, ?, ?, ?, ?, 'pending')`,
+//       [
+//         userId, 
+//         data.facultyIdCode || data.facultyId || null, // Added fallback just in case controller uses facultyId
+//         data.department || null, 
+//         data.designation || null, 
+//         data.community || null
+//       ]
+//     );
+
+//     await conn.commit();
+//     return findById(userId);
+//   } catch (err) {
+//     await conn.rollback();
+//     console.error("MYSQL TRANSACTION ERROR:", err); // <-- This will now print the exact error to your terminal!
+//     throw err; 
+//   } finally {
+//     conn.release();
+//   }
+// }
+async function createFaculty(data) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const [result] = await conn.query(
+      `INSERT INTO users (full_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, 'faculty')`,
+      [data.fullName, data.email, data.phone || null, data.passwordHash]
+    );
+    const userId = result.insertId;
+
+    await conn.query(
+      `INSERT INTO faculty_profiles (user_id, faculty_id_code, department, designation, community, approval_status)
+       VALUES (?, ?, ?, ?, ?, 'pending')`,
+      [userId, data.facultyIdCode, data.department, data.designation, data.community]
+    );
+
+    await conn.commit();
+    return findById(userId);
+  } catch (err) {
+    await conn.rollback();
+    console.error('MYSQL TRANSACTION ERROR:', err);
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
 module.exports = { findByEmail, findById, createStudent, createFaculty };

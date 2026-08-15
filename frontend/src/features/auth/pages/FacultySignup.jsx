@@ -5,6 +5,7 @@ import {
   UserPlus, Info, AlertCircle, Loader2, Eye, EyeOff, CalendarHeart, ChevronDown,
 } from 'lucide-react';
 import api from '../../../shared/services/api';
+import { showToast } from '../../../shared/utils/toast';
 import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facultyStructure';
 
 export default function FacultySignup() {
@@ -65,6 +66,7 @@ export default function FacultySignup() {
         community: community || 'N/A',
         password,
       });
+      showToast.success('Registration successful! Your account is pending admin approval.');
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');

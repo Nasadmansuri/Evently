@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, CalendarHeart, AlertCircle, Loader2 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
+import { showToast } from '../../../shared/utils/toast';
+import { suggestEmailCorrection } from '../../../shared/utils/emailTypo';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,6 +14,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [emailSuggestion, setEmailSuggestion] = useState(null);
 
   function isValidEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -34,6 +37,7 @@ export default function Login() {
     try {
       const res = await api.post('/auth/login', { email, password });
       login(res.data.user, res.data.token);
+      showToast.success(`Welcome back, ${res.data.user.full_name}`);
       navigate(`/${res.data.user.role}/dashboard`);
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
@@ -69,11 +73,23 @@ export default function Login() {
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <input
                 type="text" required value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailSuggestion(suggestEmailCorrection(e.target.value));
+                }}
                 className="w-full border border-gray-200 bg-gray-50 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
                 placeholder="you@university.edu"
               />
             </div>
+            {emailSuggestion && (
+              <button
+                type="button"
+                onClick={() => { setEmail(emailSuggestion); setEmailSuggestion(null); }}
+                className="text-[11px] text-amber-700 mt-1 hover:underline"
+              >
+                Did you mean <span className="font-semibold">{emailSuggestion}</span>?
+              </button>
+            )}
           </div>
 
           <div>

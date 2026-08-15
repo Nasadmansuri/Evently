@@ -4,6 +4,8 @@ require('dotenv').config();
 const pool = require('./shared/config/db');
 const authRoutes = require('./features/auth/auth.routes');
 const usersRoutes = require('./features/users/users.routes');
+const eventsRoutes = require('./features/events/events.routes');
+const registrationsRoutes = require('./features/registrations/registrations.routes');
 
 const app = express();
 app.use(cors());
@@ -11,6 +13,8 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/events', eventsRoutes);
+app.use('/api/registrations', registrationsRoutes);
 
 app.get('/api/db-test', async (req, res) => {
   try {
