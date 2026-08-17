@@ -56,19 +56,19 @@ export default function Registration() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto space-y-4">
-        <div className="h-32 rounded-2xl bg-gray-100 animate-pulse" />
-        <div className="h-64 rounded-2xl bg-gray-100 animate-pulse" />
+      <div className="mx-auto max-w-2xl space-y-4">
+        <div className="h-32 animate-pulse rounded-[24px] border border-slate-200 bg-slate-100" />
+        <div className="h-64 animate-pulse rounded-[24px] border border-slate-200 bg-slate-100" />
       </div>
     );
   }
 
   if (notFound) {
     return (
-      <div className="flex flex-col items-center justify-center text-center py-20">
-        <FileX className="text-gray-300 mb-4" size={40} />
-        <p className="text-sm font-semibold text-gray-700">This event doesn't exist or has been removed</p>
-        <Link to="/events" className="text-xs text-primary-600 font-medium hover:underline mt-2">← Back to All Events</Link>
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <FileX className="mb-4 text-slate-300" size={40} />
+        <p className="text-sm font-semibold text-slate-700">This event doesn't exist or has been removed</p>
+        <Link to="/events" className="mt-2 text-xs font-medium text-primary-600 hover:underline">← Back to All Events</Link>
       </div>
     );
   }
@@ -77,19 +77,29 @@ export default function Registration() {
   const isBic = event ? user?.is_bic_student : false;
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-0.5">Register for Event</h1>
-      <p className="text-xs sm:text-sm text-gray-500 mb-5">Confirm your details and complete registration</p>
+    <div className="mx-auto max-w-2xl">
+      <h1 className="mb-0.5 text-xl font-bold text-slate-900 sm:text-2xl">Register for Event</h1>
+      <p className="mb-5 text-xs text-slate-500 sm:text-sm">Confirm your details and complete registration</p>
 
-      <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>{event.category}</span>
-        </div>
-        <h2 className="text-base font-semibold text-gray-900 mb-2">{event.title}</h2>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-          <span className="flex items-center gap-1"><Calendar size={12} />{new Date(event.event_date).toLocaleDateString()}</span>
-          <span className="flex items-center gap-1"><Clock size={12} />{event.event_time?.slice(0, 5)}</span>
-          <span className="flex items-center gap-1"><MapPin size={12} />{event.location}</span>
+      <div className="mb-5 rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-700">Event Details</h2>
+        <h3 className="mb-3 text-lg font-bold text-slate-900">{event.title}</h3>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <Calendar size={15} className="text-slate-400" />
+            <span>Date: <strong className="text-slate-900">{new Date(event.event_date).toLocaleDateString()}</strong></span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <Clock size={15} className="text-slate-400" />
+            <span>Time: <strong className="text-slate-900">{event.event_time?.slice(0, 5)}</strong></span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <MapPin size={15} className="text-slate-400" />
+            <span>Location: <strong className="text-slate-900">{event.location}</strong></span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>{event.category}</span>
+          </div>
         </div>
       </div>
 
@@ -100,53 +110,53 @@ export default function Registration() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-7 space-y-5">
+      <form onSubmit={handleSubmit} className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-6 sm:p-8 space-y-6">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 mb-3">Personal Information</h2>
+          <h2 className="text-sm font-semibold text-slate-900 mb-3">Personal Information</h2>
           <div className="space-y-1.5 text-sm">
-            <div className="flex justify-between border-b border-gray-50 pb-1.5">
-              <span className="text-gray-500">Full Name</span>
-              <span className="font-medium text-gray-900">{user?.full_name}</span>
+            <div className="flex justify-between border-b border-slate-50 pb-1.5">
+              <span className="text-slate-500">Full Name</span>
+              <span className="font-medium text-slate-900">{user?.full_name}</span>
             </div>
-            <div className="flex justify-between border-b border-gray-50 pb-1.5">
-              <span className="text-gray-500">Email</span>
-              <span className="font-medium text-gray-900">{user?.email}</span>
+            <div className="flex justify-between border-b border-slate-50 pb-1.5">
+              <span className="text-slate-500">Email</span>
+              <span className="font-medium text-slate-900">{user?.email}</span>
             </div>
-            <div className="flex justify-between border-b border-gray-50 pb-1.5">
-              <span className="text-gray-500">College</span>
-              <span className="font-medium text-gray-900">{user?.college_name}</span>
+            <div className="flex justify-between border-b border-slate-50 pb-1.5">
+              <span className="text-slate-500">College</span>
+              <span className="font-medium text-slate-900">{user?.college_name}</span>
             </div>
             {isBic ? (
               <>
-                <div className="flex justify-between border-b border-gray-50 pb-1.5">
-                  <span className="text-gray-500">Course</span>
-                  <span className="font-medium text-gray-900">{user?.course_name}</span>
+                <div className="flex justify-between border-b border-slate-50 pb-1.5">
+                  <span className="text-slate-500">Course</span>
+                  <span className="font-medium text-slate-900">{user?.course_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Level / Semester / Group</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-slate-500">Level / Semester / Group</span>
+                  <span className="font-medium text-slate-900">
                     {user?.academic_level} / {user?.academic_semester} / {user?.academic_group}
                   </span>
                 </div>
               </>
             ) : (
               <div className="flex justify-between">
-                <span className="text-gray-500">Course / Major</span>
-                <span className="font-medium text-gray-900">{user?.course_major}</span>
+                <span className="text-slate-500">Course / Major</span>
+                <span className="font-medium text-slate-900">{user?.course_major}</span>
               </div>
             )}
           </div>
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
-            <Users size={15} /> Team Information <span className="text-xs font-normal text-gray-400">(optional)</span>
+          <h2 className="text-sm font-semibold text-slate-900 mb-2 flex items-center gap-1.5">
+            <Users size={15} /> Team Information <span className="text-xs font-normal text-slate-400">(optional)</span>
           </h2>
           <textarea
             value={teamMembers}
             onChange={(e) => setTeamMembers(e.target.value)}
             placeholder="List your team members' names, if registering as a team..."
-            className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
+            className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
           />
         </div>
 
@@ -157,7 +167,7 @@ export default function Registration() {
             onChange={(e) => setAgreed(e.target.checked)}
             className="mt-0.5 w-4 h-4 accent-primary-600"
           />
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-slate-600">
             I agree to the event's rules & eligibility criteria and confirm the details above are correct.
           </span>
         </label>
@@ -166,7 +176,7 @@ export default function Registration() {
           <button
             type="button"
             onClick={() => navigate(`/events/${id}`)}
-            className="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium py-2.5 rounded-lg text-sm transition"
+            className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium py-2.5 rounded-lg text-sm transition"
           >
             Cancel
           </button>

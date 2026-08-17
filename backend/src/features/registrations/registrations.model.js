@@ -24,4 +24,17 @@ async function createRegistration({ eventId, userId, teamMembers }) {
   return result.insertId;
 }
 
-module.exports = { findRegistration, getRegistrationCount, createRegistration };
+async function getMyRegistrations(userId) {
+  const [rows] = await pool.query(
+    `SELECT r.id AS registration_id, r.team_members, r.registered_at,
+            e.id, e.title, e.category, e.location, e.event_date, e.event_time, e.status
+     FROM registrations r
+     JOIN events e ON e.id = r.event_id
+     WHERE r.user_id = ?
+     ORDER BY e.event_date ASC`,
+    [userId]
+  );
+  return rows;
+}
+
+module.exports = { findRegistration, getRegistrationCount, createRegistration, getMyRegistrations };

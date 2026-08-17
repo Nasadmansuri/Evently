@@ -42,7 +42,7 @@ async function signupStudent(req, res) {
       facultyName, courseName, academicLevel, academicSemester, academicGroup, password,
     } = req.body;
 
-    if (!fullName || !email || !collegeName || !password) {
+    if (!fullName || !email || !phone || !collegeName || !password) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -70,7 +70,7 @@ async function signupFaculty(req, res) {
   try {
     const { fullName, email, phone, facultyIdCode, department, designation, community, password } = req.body;
 
-    if (!fullName || !email || !facultyIdCode || !department || !designation || !password) {
+    if (!fullName || !email || !phone || !facultyIdCode || !department || !designation || !password) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 

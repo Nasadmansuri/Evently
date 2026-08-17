@@ -35,6 +35,14 @@ async function setApprovalStatus(id, status) {
     `UPDATE faculty_profiles SET approval_status = ? WHERE user_id = ?`,
     [status, id]
   );
+
+  if (result.affectedRows > 0 && status === 'approved') {
+    await pool.query(
+      `INSERT INTO notifications (user_id, title, message) VALUES (?, ?, ?)`,
+      [id, 'Account Approved', 'Your account has been approved. You can now create and manage events.']
+    );
+  }
+
   return result.affectedRows > 0;
 }
 

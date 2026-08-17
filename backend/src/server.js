@@ -15,6 +15,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/registrations', registrationsRoutes);
+app.use('/api/notifications', require('./features/notifications/notifications.routes'));
+app.use('/api/feedback', require('./features/feedback/feedback.routes'));
 
 app.get('/api/db-test', async (req, res) => {
   try {

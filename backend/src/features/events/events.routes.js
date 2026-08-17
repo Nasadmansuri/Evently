@@ -6,6 +6,7 @@ const { requireAuth, requireRole } = require('../../shared/middleware/auth.middl
 router.get('/', requireAuth, eventsController.getAllEvents);
 router.get('/my-events', requireAuth, requireRole('faculty'), eventsController.getMyEvents);
 router.get('/my-stats', requireAuth, requireRole('faculty'), eventsController.getMyStats);
+router.get('/recommended', requireAuth, requireRole('student'), eventsController.getRecommended);
 router.get('/:id', requireAuth, eventsController.getEventById);
 router.post('/', requireAuth, requireRole('faculty'), eventsController.createEvent);
 

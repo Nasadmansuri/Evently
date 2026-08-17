@@ -69,21 +69,21 @@ export default function CreateEvent() {
   }
 
   const inputClass =
-    'w-full border border-gray-200 bg-gray-50 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
+    'w-full border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
   const selectClass =
-    'w-full appearance-none border border-gray-200 bg-gray-50 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
-  const iconClass = 'absolute left-3 top-1/2 -translate-y-1/2 text-gray-400';
-  const chevronClass = 'absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none';
-  const labelClass = 'block text-xs font-medium text-gray-700 mb-1';
+    'w-full appearance-none border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
+  const iconClass = 'absolute left-3 top-1/2 -translate-y-1/2 text-slate-400';
+  const chevronClass = 'absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none';
+  const labelClass = 'block text-xs font-medium text-slate-700 mb-1';
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-7">
-        <h1 className="text-xl font-bold text-gray-900 mb-0.5">Create New Event</h1>
-        <p className="text-xs text-gray-500 mb-5">Fill in the details below to create an event</p>
+    <div className="mx-auto max-w-2xl">
+      <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <h1 className="mb-0.5 text-xl font-bold text-slate-900">Create New Event</h1>
+        <p className="mb-5 text-xs text-slate-500">Fill in the details below to create an event</p>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-600">
             <AlertCircle size={14} className="shrink-0" />
             {error}
           </div>
@@ -91,7 +91,7 @@ export default function CreateEvent() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-gray-900">Basic Information</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Basic Information</h2>
             <div>
               <label className={labelClass}>Event Title *</label>
               <div className="relative">
@@ -133,7 +133,7 @@ export default function CreateEvent() {
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-gray-900">Date & Time</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Date & Time</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>Event Date *</label>
@@ -153,7 +153,7 @@ export default function CreateEvent() {
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-gray-900">Event Details</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Event Details</h2>
             <div>
               <label className={labelClass}>Organizing Department *</label>
               <div className="relative">
@@ -223,18 +223,18 @@ export default function CreateEvent() {
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-gray-900">Event Images</h2>
-            <div className="border-2 border-dashed border-gray-200 rounded-xl py-8 flex flex-col items-center justify-center text-center opacity-50 cursor-not-allowed">
-              <Image className="text-gray-400 mb-2" size={28} />
-              <p className="text-sm font-medium text-gray-500">Coming soon</p>
-              <p className="text-[11px] text-gray-400 mt-0.5">Image upload will be available in a future update</p>
+            <h2 className="text-sm font-semibold text-slate-900">Event Images</h2>
+            <div className="border-2 border-dashed border-slate-200 rounded-xl py-8 flex flex-col items-center justify-center text-center opacity-50 cursor-not-allowed">
+              <Image className="text-slate-400 mb-2" size={28} />
+              <p className="text-sm font-medium text-slate-500">Coming soon</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Image upload will be available in a future update</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 pt-2">
             <button
               type="button" onClick={() => navigate('/faculty/dashboard')}
-              className="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium py-2.5 rounded-lg text-sm transition"
+              className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium py-2.5 rounded-lg text-sm transition"
             >
               Cancel
             </button>

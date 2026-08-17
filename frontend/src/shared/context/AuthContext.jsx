@@ -15,7 +15,13 @@ export function AuthProvider({ children }) {
     }
     api.get('/users/me')
       .then((res) => setUser(res.data))
-      .catch(() => localStorage.removeItem('evently_token'))
+      .catch((err) => {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('evently_token');
+        }
+        // Any other error (network blip, backend restarting, CORS hiccup)
+        // leaves the token intact so the user isn't logged out over a transient failure.
+      })
       .finally(() => setLoading(false));
   }, []);
 

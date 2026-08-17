@@ -10,7 +10,13 @@ import CreateEvent from './features/faculty/pages/CreateEvent';
 import BrowseEvents from './features/events/pages/BrowseEvents';
 import EventDetail from './features/events/pages/EventDetail';
 import MyEvents from './features/faculty/pages/MyEvents';
+import FeedbackBuilder from './features/faculty/pages/FeedbackBuilder';
 import Registration from './features/events/pages/Registration';
+import StudentDashboard from './features/student/pages/StudentDashboard';
+import MyRegistrations from './features/student/pages/MyRegistrations';
+import FeedbackForm from './features/events/pages/FeedbackForm';
+import MyFeedback from './features/student/pages/MyFeedback';
+
 
 export default function App() {
   return (
@@ -80,11 +86,71 @@ export default function App() {
         }
       />
       <Route
+        path="/faculty/events/:eventId/feedback"
+        element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <Layout>
+              <FeedbackBuilder />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/faculty/events/:eventId/feedback"
+        element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <Layout>
+              <FeedbackBuilder />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/events/:id/register"
         element={
           <ProtectedRoute allowedRoles={['student']}>
             <Layout>
               <Registration />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <StudentDashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/my-registrations"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <MyRegistrations />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/events/:id/feedback"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <FeedbackForm />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/my-feedback"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <MyFeedback />
             </Layout>
           </ProtectedRoute>
         }

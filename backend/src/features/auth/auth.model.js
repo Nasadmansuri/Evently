@@ -47,6 +47,11 @@ async function createStudent(data) {
       );
     }
 
+    await conn.query(
+      `INSERT INTO notifications (user_id, title, message) VALUES (?, ?, ?)`,
+      [userId, 'Welcome to Evently', 'Your account is all set up. Browse events to get started.']
+    );
+
     await conn.commit();
     return findById(userId);
   } catch (err) {
@@ -56,39 +61,7 @@ async function createStudent(data) {
     conn.release();
   }
 }
-// async function createFaculty(data) {
-//   const conn = await pool.getConnection();
-//   try {
-//     await conn.beginTransaction();
 
-//     const [result] = await conn.query(
-//       `INSERT INTO users (full_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, 'faculty')`,
-//       [data.fullName, data.email, data.phone || null, data.passwordHash]
-//     );
-//     const userId = result.insertId;
-
-//     await conn.query(
-//       `INSERT INTO faculty_profiles (user_id, faculty_id_code, department, designation, community, approval_status)
-//        VALUES (?, ?, ?, ?, ?, 'pending')`,
-//       [
-//         userId, 
-//         data.facultyIdCode || data.facultyId || null, // Added fallback just in case controller uses facultyId
-//         data.department || null, 
-//         data.designation || null, 
-//         data.community || null
-//       ]
-//     );
-
-//     await conn.commit();
-//     return findById(userId);
-//   } catch (err) {
-//     await conn.rollback();
-//     console.error("MYSQL TRANSACTION ERROR:", err); // <-- This will now print the exact error to your terminal!
-//     throw err; 
-//   } finally {
-//     conn.release();
-//   }
-// }
 async function createFaculty(data) {
   const conn = await pool.getConnection();
   try {

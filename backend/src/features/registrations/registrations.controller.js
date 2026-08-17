@@ -35,4 +35,13 @@ async function register(req, res) {
   }
 }
 
-module.exports = { register };
+async function getMyRegistrations(req, res) {
+  try {
+    const registrations = await registrationsModel.getMyRegistrations(req.user.id);
+    res.json(registrations);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load registrations', error: err.message });
+  }
+}
+
+module.exports = { register, getMyRegistrations };

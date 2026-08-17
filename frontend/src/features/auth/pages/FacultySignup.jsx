@@ -47,7 +47,7 @@ export default function FacultySignup() {
 
     if (!fullName.trim()) return setError('Please enter your full name');
     if (!isValidEmail(email)) return setError('Please enter a valid email address');
-    if (phone && !/^9\d{9}$/.test(phone)) {
+    if (!/^9\d{9}$/.test(phone)) {
       return setError('Please enter a valid 10-digit Nepali phone number (starting with 9)');
     }
     if (!/^[A-Z]{2,5}-[A-Z]{2,5}-\d{3,5}$/i.test(facultyIdCode.trim())) {
@@ -76,32 +76,32 @@ export default function FacultySignup() {
   }
 
   const inputClass =
-    'w-full border border-gray-200 bg-gray-50 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
+    'w-full border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
   const selectClass =
-    'w-full appearance-none border border-gray-200 bg-gray-50 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed';
-  const iconClass = 'absolute left-3 top-1/2 -translate-y-1/2 text-gray-400';
-  const chevronClass = 'absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none';
-  const labelClass = 'block text-xs font-medium text-gray-700 mb-1';
+    'w-full appearance-none border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed';
+  const iconClass = 'absolute left-3 top-1/2 -translate-y-1/2 text-slate-400';
+  const chevronClass = 'absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none';
+  const labelClass = 'block text-xs font-medium text-slate-700 mb-1';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-3 py-6">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-5 sm:p-7">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-3 py-6">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-5 sm:p-7">
         <div className="flex flex-col items-center text-center mb-4">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
               <CalendarHeart className="text-white" size={18} />
             </div>
-            <span className="text-lg font-bold text-gray-900">Evently</span>
+            <span className="text-lg font-bold text-slate-900">Evently</span>
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-0.5">Create your account</h1>
-          <p className="text-xs text-gray-500">Join Evently and never miss a campus event.</p>
+          <h1 className="text-xl font-bold text-slate-900 mb-0.5">Create your account</h1>
+          <p className="text-xs text-slate-500">Join Evently and never miss a campus event.</p>
         </div>
 
-        <div className="flex bg-gray-100 rounded-full p-1 mb-4">
+        <div className="flex bg-slate-100 rounded-full p-1 mb-4">
           <button
             type="button"
             onClick={() => navigate('/signup/student')}
-            className="flex-1 py-1.5 rounded-full text-xs font-medium text-gray-500 hover:text-gray-700"
+            className="flex-1 py-1.5 rounded-full text-xs font-medium text-slate-500 transition-colors hover:text-slate-700"
           >
             Student
           </button>
@@ -156,7 +156,7 @@ export default function FacultySignup() {
               <div className="relative">
                 <Phone className={iconClass} size={16} />
                 <input
-                  type="text" value={phone}
+                  type="text" required value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/[^\d]/g, '').slice(0, 10))}
                   className={inputClass}
                   placeholder="98XXXXXXXX"
@@ -244,7 +244,7 @@ export default function FacultySignup() {
               </select>
               <ChevronDown className={chevronClass} size={14} />
             </div>
-            <p className="text-[11px] text-gray-400 mt-1">
+            <p className="text-[11px] text-slate-400 mt-1">
               BIC DevCorps communities organize campus events — select yours if applicable.
             </p>
           </div>
@@ -261,11 +261,11 @@ export default function FacultySignup() {
                   placeholder="Enter password"
                   autoComplete="new-password"
                 />
-                <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">At least 8 characters</p>
+              <p className="text-[11px] text-slate-400 mt-1">At least 8 characters</p>
             </div>
             <div>
               <label className={labelClass}>Confirm Password</label>
@@ -278,7 +278,7 @@ export default function FacultySignup() {
                   placeholder="Re-enter password"
                   autoComplete="new-password"
                 />
-                <button type="button" onClick={() => setShowConfirmPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabIndex={-1} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
+                <button type="button" onClick={() => setShowConfirmPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" tabIndex={-1} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
                   {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -292,7 +292,7 @@ export default function FacultySignup() {
             </p>
           </div>
 
-          <p className="text-center text-[11px] text-gray-400 leading-snug">
+          <p className="text-center text-[11px] text-slate-400 leading-snug">
             By creating an account you agree to our{' '}
             <Link to="/terms" className="text-primary-600 hover:underline">Terms of Service</Link> and{' '}
             <Link to="/privacy" className="text-primary-600 hover:underline">Privacy Policy</Link>.
@@ -307,7 +307,7 @@ export default function FacultySignup() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-500 mt-4">
+        <p className="text-center text-xs text-slate-500 mt-4">
           Already have an account?{' '}
           <Link to="/login" className="text-primary-600 font-semibold hover:underline">Sign in here</Link>
         </p>

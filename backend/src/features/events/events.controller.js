@@ -45,7 +45,7 @@ async function createEvent(req, res) {
 async function getAllEvents(req, res) {
   try {
     const { category } = req.query;
-    const events = await eventsModel.getAllEvents({ category });
+    const events = await eventsModel.getAllEvents({ category }, req.user.id);
     res.json(events);
   } catch (err) {
     res.status(500).json({ message: 'Failed to load events', error: err.message });
@@ -54,7 +54,7 @@ async function getAllEvents(req, res) {
 
 async function getEventById(req, res) {
   try {
-    const event = await eventsModel.getEventById(req.params.id);
+    const event = await eventsModel.getEventById(req.params.id, req.user.id);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
@@ -64,4 +64,13 @@ async function getEventById(req, res) {
   }
 }
 
-module.exports = { getMyEvents, getMyStats, createEvent, getAllEvents, getEventById };
+async function getRecommended(req, res) {
+  try {
+    const events = await eventsModel.getRecommendedEvents(req.user.id);
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load recommendations', error: err.message });
+  }
+}
+
+module.exports = { getMyEvents, getMyStats, createEvent, getAllEvents, getEventById, getRecommended };
