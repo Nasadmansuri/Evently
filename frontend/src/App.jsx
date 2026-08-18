@@ -16,6 +16,7 @@ import StudentDashboard from './features/student/pages/StudentDashboard';
 import MyRegistrations from './features/student/pages/MyRegistrations';
 import FeedbackForm from './features/events/pages/FeedbackForm';
 import MyFeedback from './features/student/pages/MyFeedback';
+import ManageEvents from './features/admin/pages/ManageEvents';
 
 
 export default function App() {
@@ -96,11 +97,41 @@ export default function App() {
         }
       />
       <Route
-        path="/faculty/events/:eventId/feedback"
+        path="/admin/events"
         element={
-          <ProtectedRoute allowedRoles={['faculty']}>
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Layout>
+              <ManageEvents />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/events/:eventId/feedback"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
             <Layout>
               <FeedbackBuilder />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/events/:eventId/edit"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Layout>
+              <CreateEvent />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/create-event"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Layout>
+              <CreateEvent />
             </Layout>
           </ProtectedRoute>
         }

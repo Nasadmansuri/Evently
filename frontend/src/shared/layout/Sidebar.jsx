@@ -1,8 +1,13 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, PlusSquare, ListChecks, Images, MessageSquare, X, CalendarHeart } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, PlusSquare, ListChecks, Images, MessageSquare, X, CalendarHeart, Users, BarChart3 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { label: 'Approvals', to: '/admin/dashboard', icon: LayoutDashboard, roles: ['admin'] },
+  { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, roles: ['admin'] },
+  { label: 'All Events', to: '/admin/events', icon: CalendarDays, roles: ['admin'] },
+  { label: 'Create Event', to: '/admin/create-event', icon: PlusSquare, roles: ['admin'] },
+  { label: 'User Management', to: '/admin/users', icon: Users, roles: ['admin'], disabled: true },
+  { label: 'Reports', to: '/admin/reports', icon: BarChart3, roles: ['admin'], disabled: true },
+  { label: 'Gallery', to: '/admin/gallery', icon: Images, roles: ['admin'], disabled: true },
   { label: 'Dashboard', to: '/faculty/dashboard', icon: LayoutDashboard, roles: ['faculty'] },
   { label: 'Dashboard', to: '/student/dashboard', icon: LayoutDashboard, roles: ['student'] },
   { label: 'All Events', to: '/events', icon: CalendarDays, roles: ['faculty', 'student'] },

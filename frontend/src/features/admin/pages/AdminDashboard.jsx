@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
-import { ShieldCheck, Check, X, Loader2, AlertCircle, Inbox } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, Check, X, Loader2, AlertCircle, Inbox, CalendarDays, Users, GraduationCap, BarChart3, TrendingUp } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [pending, setPending] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState('');
   const [actioningId, setActioningId] = useState(null);
 
@@ -22,8 +26,21 @@ export default function AdminDashboard() {
     }
   }
 
+  async function loadStats() {
+    setStatsLoading(true);
+    try {
+      const res = await api.get('/events/admin/stats');
+      setStats(res.data);
+    } catch (err) {
+      console.error('Failed to load admin stats:', err);
+    } finally {
+      setStatsLoading(false);
+    }
+  }
+
   useEffect(() => {
     loadPending();
+    loadStats();
   }, []);
 
   async function handleDecision(id, status) {
@@ -46,8 +63,78 @@ export default function AdminDashboard() {
   return (
     <div>
       <div className="mb-5">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Pending Faculty Approvals</h1>
-        <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Admin Dashboard</h1>
+        <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">Platform overview and faculty approvals</p>
+      </div>
+
+      <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50">
+            <CalendarDays className="text-primary-600" size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Total Events</p>
+            <p className="text-xl font-bold text-slate-900">{statsLoading ? '—' : stats?.totalEvents}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+            <Users className="text-emerald-600" size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Total Students</p>
+            <p className="text-xl font-bold text-slate-900">{statsLoading ? '—' : stats?.totalStudents}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-50">
+            <GraduationCap className="text-violet-600" size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Total Faculty</p>
+            <p className="text-xl font-bold text-slate-900">
+              {statsLoading ? '—' : stats?.totalFaculty}
+              {!statsLoading && stats?.pendingFaculty > 0 && (
+                <span className="ml-1.5 text-xs font-medium text-amber-600">({stats.pendingFaculty} pending)</span>
+              )}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
+            <BarChart3 className="text-amber-600" size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Total Participants</p>
+            <p className="text-xl font-bold text-slate-900">{statsLoading ? '—' : stats?.totalParticipants}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100">
+            <TrendingUp className="text-slate-600" size={18} />
+          </div>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Upcoming Events</p>
+            <p className="text-xl font-bold text-slate-900">{statsLoading ? '—' : stats?.upcomingEvents}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => navigate('/admin/events')}
+          className="flex items-center gap-3 rounded-[18px] border border-primary-200 bg-primary-50 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100">
+            <CalendarDays className="text-primary-700" size={18} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-primary-700">Manage All Events</p>
+            <p className="text-[11px] text-primary-600">View, create, and delete events</p>
+          </div>
+        </button>
+      </div>
+
+      <div className="mb-3">
+        <h2 className="text-sm font-semibold text-slate-900">Pending Faculty Approvals</h2>
+        <p className="mt-0.5 text-xs text-slate-500">
           {loading ? 'Loading...' : `${pending.length} account${pending.length === 1 ? '' : 's'} awaiting review`}
         </p>
       </div>

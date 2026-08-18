@@ -4,10 +4,17 @@ import { Search, Calendar, MapPin, AlertCircle, SearchX, CheckCircle2 } from 'lu
 import api from '../../../shared/services/api';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { useAuth } from '../../../shared/context/AuthContext';
+import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
+import { DEPARTMENT_DESIGNATIONS } from '../../../shared/utils/facultyStructure';
 
 
 const CATEGORIES = ['All', 'Technical', 'Cultural', 'Workshop', 'Competition', 'Seminar', 'Sports', 'Conference'];
-
+const ORGANIZING_DEPARTMENTS = [
+  'All',
+  ...Object.keys(ACADEMIC_STRUCTURE),
+  ...Object.keys(DEPARTMENT_DESIGNATIONS),
+  'DevCorps',
+];
 const HEADER_TONE = {
   Technical: 'bg-primary-600',
   Cultural: 'bg-slate-300',
@@ -25,7 +32,7 @@ export default function BrowseEvents() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [sortBy, setSortBy] = useState('date-asc');
+  const [activeDepartment, setActiveDepartment] = useState('All');
   const { user } = useAuth();
 
   async function loadEvents() {
@@ -46,18 +53,17 @@ export default function BrowseEvents() {
     loadEvents();
   }, [activeCategory]);
 
-  const filteredSorted = useMemo(() => {
+   const filteredSorted = useMemo(() => {
     let list = events.filter((ev) => ev.title.toLowerCase().includes(search.toLowerCase()));
-    if (sortBy === 'date-asc') list = [...list].sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
-    if (sortBy === 'date-desc') list = [...list].sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
-    if (sortBy === 'title') list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+    if (activeDepartment !== 'All') list = list.filter((ev) => ev.organizing_department === activeDepartment);
+    list = [...list].sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
     return list;
-  }, [events, search, sortBy]);
+  }, [events, search, activeDepartment]);
 
   function resetFilters() {
     setSearch('');
     setActiveCategory('All');
-    setSortBy('date-asc');
+    setActiveDepartment('All');
   }
 
   function formatEventDate(value) {
@@ -111,16 +117,18 @@ export default function BrowseEvents() {
 
           <div>
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-              Sort By
+              Department
             </label>
             <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              value={activeDepartment}
+              onChange={(e) => setActiveDepartment(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
             >
-              <option value="date-asc">Date: Soonest</option>
-              <option value="date-desc">Date: Latest</option>
-              <option value="title">Title: A–Z</option>
+              {ORGANIZING_DEPARTMENTS.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept === 'All' ? 'All Departments' : dept}
+                </option>
+              ))}
             </select>
           </div>
 

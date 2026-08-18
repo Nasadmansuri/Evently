@@ -217,6 +217,17 @@ export default function EventDetail() {
             <div className="flex flex-col items-center justify-center py-10 text-center">
               {feedbackLoading ? (
                 <Loader2 className="mb-3 animate-spin text-slate-300" size={28} />
+              ) : !feedbackForm && (user?.role === 'admin' || event.created_by === user?.id) ? (
+                <>
+                  <MessageSquare className="mb-3 text-slate-300" size={28} />
+                  <p className="mb-3 text-sm text-slate-500">No feedback form yet for this event</p>
+                  <button
+                    onClick={() => navigate(`/${user.role}/events/${id}/feedback`)}
+                    className="rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
+                  >
+                    Create Feedback Form
+                  </button>
+                </>
               ) : !feedbackForm ? (
                 <>
                   <MessageSquare className="mb-3 text-slate-300" size={28} />

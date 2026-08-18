@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Type, AlignLeft, Tag, MapPin, CalendarDays, Clock, Landmark, Users,
   ClipboardList, Trophy, UserCheck, Image, AlertCircle, Loader2, ChevronDown,
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
+import { useAuth } from '../../../shared/context/AuthContext';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { COMMUNITIES, DEPARTMENT_DESIGNATIONS } from '../../../shared/utils/facultyStructure';
 
@@ -18,6 +19,11 @@ const ORGANIZING_DEPARTMENTS = [
 
 export default function CreateEvent() {
   const navigate = useNavigate();
+  const { eventId } = useParams();
+  const isEditMode = !!eventId;
+  const { user } = useAuth();
+  const dashboardPath = user?.role === 'admin' ? '/admin/events' : '/faculty/dashboard';
+  const [loadingEvent, setLoadingEvent] = useState(isEditMode);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -33,6 +39,32 @@ export default function CreateEvent() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isEditMode) return;
+    async function loadEvent() {
+      try {
+        const res = await api.get(`/events/${eventId}`);
+        const ev = res.data;
+        setTitle(ev.title);
+        setDescription(ev.description);
+        setCategory(ev.category);
+        setLocation(ev.location);
+        setEventDate(ev.event_date?.slice(0, 10));
+        setEventTime(ev.event_time?.slice(0, 5));
+        setOrganizingDepartment(ev.organizing_department);
+        setOrganizingCommunity(ev.organizing_community || '');
+        setRulesEligibility(ev.rules_eligibility || '');
+        setPrizeInfo(ev.prize_info || '');
+        setMaxParticipants(ev.max_participants || '');
+      } catch (err) {
+        setError('Failed to load event for editing');
+      } finally {
+        setLoadingEvent(false);
+      }
+    }
+    loadEvent();
+  }, [eventId]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -51,18 +83,24 @@ export default function CreateEvent() {
 
     setLoading(true);
     try {
-      await api.post('/events', {
+      const payload = {
         title, description, category, location, eventDate, eventTime,
         organizingDepartment,
         organizingCommunity: organizingCommunity || undefined,
         rulesEligibility: rulesEligibility || undefined,
         prizeInfo: prizeInfo || undefined,
         maxParticipants: maxParticipants || undefined,
-      });
-      showToast.success('Event created successfully');
-      navigate('/faculty/dashboard');
+      };
+      if (isEditMode) {
+        await api.patch(`/events/${eventId}`, payload);
+        showToast.success('Event updated successfully');
+      } else {
+        await api.post('/events', payload);
+        showToast.success('Event created successfully');
+      }
+      navigate(dashboardPath);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create event');
+      setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} event`);
     } finally {
       setLoading(false);
     }
@@ -79,8 +117,14 @@ export default function CreateEvent() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h1 className="mb-0.5 text-xl font-bold text-slate-900">Create New Event</h1>
-        <p className="mb-5 text-xs text-slate-500">Fill in the details below to create an event</p>
+        <h1 className="mb-0.5 text-xl font-bold text-slate-900">{isEditMode ? 'Edit Event' : 'Create New Event'}</h1>
+        <p className="mb-5 text-xs text-slate-500">
+          {isEditMode ? 'Update the event details below' : 'Fill in the details below to create an event'}
+        </p>
+
+        {loadingEvent && (
+          <div className="mb-4 h-40 animate-pulse rounded-xl bg-slate-100" />
+        )}
 
         {error && (
           <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-600">
@@ -233,7 +277,7 @@ export default function CreateEvent() {
 
           <div className="flex items-center gap-3 pt-2">
             <button
-              type="button" onClick={() => navigate('/faculty/dashboard')}
+              type="button" onClick={() => navigate(dashboardPath)}
               className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium py-2.5 rounded-lg text-sm transition"
             >
               Cancel
@@ -243,7 +287,7 @@ export default function CreateEvent() {
               className="flex-1 bg-primary-600 hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] text-white font-medium py-2.5 rounded-lg text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 className="animate-spin" size={16} /> : null}
-              {loading ? 'Creating...' : 'Create Event'}
+              {loading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Event')}
             </button>
           </div>
         </form>

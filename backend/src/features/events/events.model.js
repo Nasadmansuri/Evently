@@ -58,6 +58,52 @@ async function getAllEvents({ category } = {}, userId) {
   const [rows] = await pool.query(query, params);
   return rows.map((row) => ({ ...row, is_registered: !!row.is_registered }));
 }
+async function getAllEventsAdmin() {
+  const [rows] = await pool.query(
+    `SELECT e.id, e.title, e.category, e.location, e.event_date, e.event_time,
+            e.status, e.created_by, u.full_name AS organizer_name,
+            (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id) AS registration_count
+     FROM events e
+     JOIN users u ON u.id = e.created_by
+     ORDER BY e.event_date DESC`
+  );
+  return rows;
+}
+
+async function updateEvent(id, data) {
+  await pool.query(
+    `UPDATE events SET
+      title = ?, description = ?, category = ?, location = ?,
+      event_date = ?, event_time = ?, organizing_department = ?,
+      organizing_community = ?, rules_eligibility = ?, prize_info = ?, max_participants = ?
+     WHERE id = ?`,
+    [
+      data.title, data.description, data.category, data.location,
+      data.eventDate, data.eventTime, data.organizingDepartment,
+      data.organizingCommunity || null, data.rulesEligibility || null,
+      data.prizeInfo || null, data.maxParticipants || null, id,
+    ]
+  );
+}
+
+async function deleteEvent(id) {
+  const [result] = await pool.query(`DELETE FROM events WHERE id = ?`, [id]);
+  return result.affectedRows > 0;
+}
+
+async function getAdminStats() {
+  const [[{ totalEvents }]] = await pool.query(`SELECT COUNT(*) AS totalEvents FROM events`);
+  const [[{ totalStudents }]] = await pool.query(`SELECT COUNT(*) AS totalStudents FROM users WHERE role = 'student'`);
+  const [[{ totalFaculty }]] = await pool.query(`SELECT COUNT(*) AS totalFaculty FROM users WHERE role = 'faculty'`);
+  const [[{ pendingFaculty }]] = await pool.query(
+    `SELECT COUNT(*) AS pendingFaculty FROM faculty_profiles WHERE approval_status = 'pending'`
+  );
+  const [[{ totalParticipants }]] = await pool.query(`SELECT COUNT(*) AS totalParticipants FROM registrations`);
+  const [[{ upcomingEvents }]] = await pool.query(
+    `SELECT COUNT(*) AS upcomingEvents FROM events WHERE event_date >= CURDATE()`
+  );
+  return { totalEvents, totalStudents, totalFaculty, pendingFaculty, totalParticipants, upcomingEvents };
+}
 
 async function getEventById(id, userId) {
   const [rows] = await pool.query(
@@ -104,4 +150,4 @@ async function getRecommendedEvents(userId) {
   return rows;
 }
 
-module.exports = { getEventsByFaculty, getFacultyStats, createEvent, getAllEvents, getEventById, getRecommendedEvents };
+module.exports = { getEventsByFaculty, getFacultyStats, createEvent, getAllEvents, getEventById, getRecommendedEvents, getAllEventsAdmin, deleteEvent, getAdminStats, updateEvent };
