@@ -143,13 +143,13 @@ export default function FacultyDashboard() {
               </div>
             </button>
             <button
-              disabled
-              className="w-full cursor-not-allowed items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-left opacity-50"
+              onClick={() => navigate('/faculty/gallery')}
+              className="w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-left transition hover:bg-slate-50"
             >
               <Images size={18} className="text-slate-500" />
               <div>
                 <p className="text-sm font-medium text-slate-900">Event Gallery</p>
-                <p className="text-[11px] text-slate-400">Coming soon</p>
+                <p className="text-[11px] text-slate-500">Browse event photos</p>
               </div>
             </button>
           </div>

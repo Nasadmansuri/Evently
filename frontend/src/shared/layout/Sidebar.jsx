@@ -5,9 +5,9 @@ const NAV_ITEMS = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, roles: ['admin'] },
   { label: 'All Events', to: '/admin/events', icon: CalendarDays, roles: ['admin'] },
   { label: 'Create Event', to: '/admin/create-event', icon: PlusSquare, roles: ['admin'] },
-  { label: 'User Management', to: '/admin/users', icon: Users, roles: ['admin'], disabled: true },
-  { label: 'Reports', to: '/admin/reports', icon: BarChart3, roles: ['admin'], disabled: true },
-  { label: 'Gallery', to: '/admin/gallery', icon: Images, roles: ['admin'], disabled: true },
+  { label: 'User Management', to: '/admin/users', icon: Users, roles: ['admin'] },
+  { label: 'Reports', to: '/admin/reports', icon: BarChart3, roles: ['admin'] },
+  { label: 'Gallery', to: '/admin/gallery', icon: Images, roles: ['admin'] },
   { label: 'Dashboard', to: '/faculty/dashboard', icon: LayoutDashboard, roles: ['faculty'] },
   { label: 'Dashboard', to: '/student/dashboard', icon: LayoutDashboard, roles: ['student'] },
   { label: 'All Events', to: '/events', icon: CalendarDays, roles: ['faculty', 'student'] },
@@ -15,8 +15,8 @@ const NAV_ITEMS = [
   { label: 'My Events', to: '/faculty/my-events', icon: ListChecks, roles: ['faculty'] },
   { label: 'My Registrations', to: '/student/my-registrations', icon: ListChecks, roles: ['student'] },
   { label: 'My Feedback', to: '/student/my-feedback', icon: MessageSquare, roles: ['student'] },
-  { label: 'Gallery', to: '/faculty/gallery', icon: Images, roles: ['faculty'], disabled: true },
-  { label: 'Gallery', to: '/student/gallery', icon: Images, roles: ['student'], disabled: true },
+  { label: 'Gallery', to: '/faculty/gallery', icon: Images, roles: ['faculty'] },
+  { label: 'Gallery', to: '/student/gallery', icon: Images, roles: ['student'] },
 ];
 
 export default function Sidebar({ role, open, onClose }) {

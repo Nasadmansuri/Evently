@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Type, AlignLeft, Tag, MapPin, CalendarDays, Clock, Landmark, Users,
-  ClipboardList, Trophy, UserCheck, Image, AlertCircle, Loader2, ChevronDown,
+  ClipboardList, Trophy, UserCheck, Image, AlertCircle, Loader2, ChevronDown, X, Upload, UsersRound
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
@@ -16,6 +16,9 @@ const ORGANIZING_DEPARTMENTS = [
   ...Object.keys(DEPARTMENT_DESIGNATIONS),
   'DevCorps',
 ];
+const MAX_IMAGES = 10;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -36,6 +39,14 @@ export default function CreateEvent() {
   const [rulesEligibility, setRulesEligibility] = useState('');
   const [prizeInfo, setPrizeInfo] = useState('');
   const [maxParticipants, setMaxParticipants] = useState('');
+  const [isTeamEvent, setIsTeamEvent] = useState(false);
+
+  const [existingImages, setExistingImages] = useState([]);
+  const [newImages, setNewImages] = useState([]); // [{ file, previewUrl }]
+  const [bannerIndex, setBannerIndex] = useState(null); // index into newImages, only relevant when existingImages is empty
+  const [imageError, setImageError] = useState('');
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [deletingImageId, setDeletingImageId] = useState(null);
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -66,6 +77,100 @@ export default function CreateEvent() {
     loadEvent();
   }, [eventId]);
 
+  useEffect(() => {
+    if (!isEditMode) return;
+    async function loadImages() {
+      try {
+        const res = await api.get(`/events/${eventId}/images`);
+        setExistingImages(res.data);
+      } catch (err) {
+        // non-critical, silent
+      }
+    }
+    loadImages();
+  }, [eventId]);
+
+  useEffect(() => {
+    return () => {
+      newImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    };
+  }, []);
+
+  function handleFileSelect(e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
+
+    setImageError('');
+
+    const totalCount = existingImages.length + newImages.length + files.length;
+    if (totalCount > MAX_IMAGES) {
+      setImageError(`You can have a maximum of ${MAX_IMAGES} images per event`);
+      return;
+    }
+
+    const oversized = files.find((f) => f.size > MAX_IMAGE_SIZE);
+    if (oversized) {
+      setImageError(`"${oversized.name}" is over 5MB`);
+      return;
+    }
+
+    const notImage = files.find((f) => !f.type.startsWith('image/'));
+    if (notImage) {
+      setImageError(`"${notImage.name}" is not an image file`);
+      return;
+    }
+
+    const withPreviews = files.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
+    setNewImages((prev) => {
+      const updated = [...prev, ...withPreviews];
+      if (bannerIndex === null && existingImages.length === 0) setBannerIndex(prev.length);
+      return updated;
+    });
+  }
+
+  function removeNewImage(index) {
+    setNewImages((prev) => {
+      const copy = [...prev];
+      URL.revokeObjectURL(copy[index].previewUrl);
+      copy.splice(index, 1);
+      return copy;
+    });
+    setImageError('');
+    setBannerIndex((prev) => {
+      if (prev === null) return null;
+      if (prev === index) return null;
+      return prev > index ? prev - 1 : prev;
+    });
+  }
+
+  async function handleDeleteExistingImage(imageId) {
+    setDeletingImageId(imageId);
+    try {
+      await api.delete(`/events/${eventId}/images/${imageId}`);
+      setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
+      showToast.success('Image deleted');
+    } catch (err) {
+      showToast.error(err.response?.data?.message || 'Failed to delete image');
+    } finally {
+      setDeletingImageId(null);
+    }
+  }
+
+  async function handleSetBanner(imageId) {
+    try {
+      const res = await api.patch(`/events/${eventId}/images/${imageId}/banner`);
+      setExistingImages(res.data);
+      showToast.success('Banner image updated');
+    } catch (err) {
+      showToast.error(err.response?.data?.message || 'Failed to set banner image');
+    }
+  }
+
+  function handleSelectNewBanner(index) {
+    setBannerIndex(index);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
@@ -90,14 +195,40 @@ export default function CreateEvent() {
         rulesEligibility: rulesEligibility || undefined,
         prizeInfo: prizeInfo || undefined,
         maxParticipants: maxParticipants || undefined,
+        isTeamEvent: isTeamEvent, // <-- This sends it to the backend
       };
+
+      let targetEventId = eventId;
       if (isEditMode) {
         await api.patch(`/events/${eventId}`, payload);
         showToast.success('Event updated successfully');
       } else {
-        await api.post('/events', payload);
+        const res = await api.post('/events', payload);
+        targetEventId = res.data.eventId;
         showToast.success('Event created successfully');
       }
+
+      if (newImages.length > 0) {
+        setUploadingImages(true);
+        try {
+          const formData = new FormData();
+          newImages.forEach(({ file }) => formData.append('images', file));
+          const uploadRes = await api.post(`/events/${targetEventId}/images`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+
+          if (!isEditMode && bannerIndex !== null && uploadRes.data[bannerIndex]) {
+            await api.patch(`/events/${targetEventId}/images/${uploadRes.data[bannerIndex].id}/banner`);
+          }
+        } catch (imgErr) {
+          showToast.error(
+            imgErr.response?.data?.message || 'Event saved, but photo upload failed. You can retry from Edit Event.'
+          );
+        } finally {
+          setUploadingImages(false);
+        }
+      }
+
       navigate(dashboardPath);
     } catch (err) {
       setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} event`);
@@ -253,26 +384,141 @@ export default function CreateEvent() {
                 />
               </div>
             </div>
-            <div>
-              <label className={labelClass}>Maximum Participants</label>
-              <div className="relative">
-                <UserCheck className={iconClass} size={16} />
-                <input
-                  type="number" min="1" value={maxParticipants}
-                  onChange={(e) => setMaxParticipants(e.target.value)}
-                  className={inputClass} placeholder="Leave blank for unlimited"
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>Maximum Participants</label>
+                <div className="relative">
+                  <UserCheck className={iconClass} size={16} />
+                  <input
+                    type="number" min="1" value={maxParticipants}
+                    onChange={(e) => setMaxParticipants(e.target.value)}
+                    className={inputClass} placeholder="Leave blank for unlimited"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className={labelClass}>Registration Type</label>
+                <div 
+                  className={`relative flex items-center justify-between cursor-pointer rounded-lg border px-4 py-2 transition-colors ${
+                    isTeamEvent 
+                      ? 'border-primary-500 bg-primary-50/50' 
+                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                  }`}
+                  onClick={() => setIsTeamEvent(!isTeamEvent)}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users size={16} className={isTeamEvent ? 'text-primary-600' : 'text-slate-400'} />
+                    <span className={`text-sm font-medium ${isTeamEvent ? 'text-primary-700' : 'text-slate-700'}`}>
+                      Team Event
+                    </span>
+                  </div>
+                  <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 ease-in-out ${isTeamEvent ? 'bg-primary-600' : 'bg-slate-300'}`}>
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isTeamEvent ? 'translate-x-2' : '-translate-x-2'}`} />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-slate-900">Event Images</h2>
-            <div className="border-2 border-dashed border-slate-200 rounded-xl py-8 flex flex-col items-center justify-center text-center opacity-50 cursor-not-allowed">
-              <Image className="text-slate-400 mb-2" size={28} />
-              <p className="text-sm font-medium text-slate-500">Coming soon</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Image upload will be available in a future update</p>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-slate-900">Event Images</h2>
+              <span className="text-[11px] text-slate-400">Optional · up to {MAX_IMAGES}, 5MB each</span>
             </div>
+
+            {existingImages.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {existingImages.map((img) => (
+                  <button
+                    type="button"
+                    key={img.id}
+                    onClick={() => !img.is_banner && handleSetBanner(img.id)}
+                    className={`group relative aspect-square overflow-hidden rounded-lg border-2 text-left transition ${
+                      img.is_banner ? 'border-primary-500 ring-2 ring-primary-200 cursor-default' : 'border-slate-200 cursor-pointer'
+                    }`}
+                  >
+                    <img
+                      src={`${ASSET_BASE_URL}${img.image_url}`}
+                      alt=""
+                      className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-105"
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+
+                    {img.is_banner && (
+                      <span className="absolute bottom-1.5 left-1.5 rounded-full bg-primary-600 px-1.5 py-0.5 text-[9px] font-semibold text-white shadow-sm">
+                        Cover
+                      </span>
+                    )}
+
+                    <span
+                      onClick={(e) => { e.stopPropagation(); handleDeleteExistingImage(img.id); }}
+                      title="Delete image"
+                      role="button"
+                      tabIndex={0}
+                      className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 shadow-sm transition duration-150 hover:bg-red-600 group-hover:opacity-100"
+                    >
+                      {deletingImageId === img.id ? <Loader2 className="animate-spin" size={12} /> : <X size={12} />}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {newImages.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {newImages.map((img, i) => {
+                  const isCover = existingImages.length === 0 && bannerIndex === i;
+                  return (
+                    <button
+                      type="button"
+                      key={img.previewUrl}
+                      onClick={() => existingImages.length === 0 && handleSelectNewBanner(i)}
+                      className={`group relative aspect-square overflow-hidden rounded-lg border-2 text-left transition ${
+                        isCover ? 'border-primary-500 ring-2 ring-primary-200' : 'border-slate-200'
+                      } ${existingImages.length === 0 ? 'cursor-pointer' : 'cursor-default'}`}
+                    >
+                      <img
+                        src={img.previewUrl}
+                        alt=""
+                        className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-105"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+
+                      {isCover && (
+                        <span className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-full bg-primary-600 px-1.5 py-0.5 text-[9px] font-semibold text-white shadow-sm">
+                          Cover
+                        </span>
+                      )}
+
+                      <span
+                        onClick={(e) => { e.stopPropagation(); removeNewImage(i); }}
+                        title="Remove"
+                        role="button"
+                        tabIndex={0}
+                        className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 shadow-sm transition duration-150 hover:bg-red-600 group-hover:opacity-100"
+                      >
+                        <X size={12} />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-8 text-center transition hover:border-primary-300 hover:bg-primary-50/30">
+              <Upload className="mb-2 text-slate-400" size={24} />
+              <p className="text-sm font-medium text-slate-600">Click to add photos</p>
+              <p className="mt-0.5 text-[11px] text-slate-400">Not required — you can skip this</p>
+              <input type="file" accept="image/*" multiple onChange={handleFileSelect} className="hidden" />
+            </label>
+
+            {imageError && (
+              <div className="flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-600">
+                <AlertCircle size={14} className="shrink-0" />
+                {imageError}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3 pt-2">
@@ -283,11 +529,15 @@ export default function CreateEvent() {
               Cancel
             </button>
             <button
-              type="submit" disabled={loading}
+              type="submit" disabled={loading || uploadingImages}
               className="flex-1 bg-primary-600 hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] text-white font-medium py-2.5 rounded-lg text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {loading ? <Loader2 className="animate-spin" size={16} /> : null}
-              {loading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Event')}
+              {(loading || uploadingImages) ? <Loader2 className="animate-spin" size={16} /> : null}
+              {uploadingImages
+                ? 'Uploading photos...'
+                : loading
+                ? (isEditMode ? 'Saving...' : 'Creating...')
+                : (isEditMode ? 'Save Changes' : 'Create Event')}
             </button>
           </div>
         </form>

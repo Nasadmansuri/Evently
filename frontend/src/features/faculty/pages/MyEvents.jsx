@@ -85,12 +85,20 @@ export default function MyEvents() {
                     <div className="flex items-center gap-1.5"><Calendar size={12} />{new Date(ev.event_date).toLocaleDateString()}</div>
                   </div>
                 </button>
-                <button
-                  onClick={() => navigate(`/faculty/events/${ev.id}/feedback`)}
-                  className="mt-3 w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 transition hover:bg-primary-100"
-                >
-                  Manage Feedback
-                </button>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => navigate(`/faculty/events/${ev.id}/edit`)}
+                    className="flex-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-100"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => navigate(`/faculty/events/${ev.id}/feedback`)}
+                    className="flex-1 rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 transition hover:bg-primary-100"
+                  >
+                    Feedback
+                  </button>
+                </div>
               </div>
             );
           })}

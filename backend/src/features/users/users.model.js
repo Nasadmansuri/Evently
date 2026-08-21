@@ -46,4 +46,37 @@ async function setApprovalStatus(id, status) {
   return result.affectedRows > 0;
 }
 
-module.exports = { getProfile, getPendingFaculty, setApprovalStatus };
+async function getAllUsers({ role, search } = {}) {
+  let query = `
+    SELECT u.id, u.full_name, u.email, u.phone, u.role, u.created_at,
+           sp.college_name AS sp_college_name, sp.faculty_name, sp.course_name,
+           sp.academic_level, sp.academic_semester, sp.academic_group,
+           gp.college_name AS gp_college_name, gp.course_major,
+           fp.faculty_id_code, fp.department, fp.designation, fp.community, fp.approval_status
+    FROM users u
+    LEFT JOIN student_profiles sp ON sp.user_id = u.id
+    LEFT JOIN guest_profiles gp ON gp.user_id = u.id
+    LEFT JOIN faculty_profiles fp ON fp.user_id = u.id
+    WHERE 1=1
+  `;
+  const params = [];
+  if (role) {
+    query += ' AND u.role = ?';
+    params.push(role);
+  }
+  if (search) {
+    query += ' AND (u.full_name LIKE ? OR u.email LIKE ? OR u.id = ?)';
+    const like = `%${search}%`;
+    params.push(like, like, Number(search) || 0);
+  }
+  query += ' ORDER BY u.id DESC';
+  const [rows] = await pool.query(query, params);
+  return rows;
+}
+
+async function deleteUser(id) {
+  const [result] = await pool.query(`DELETE FROM users WHERE id = ?`, [id]);
+  return result.affectedRows > 0;
+}
+
+module.exports = { getProfile, getPendingFaculty, setApprovalStatus, getAllUsers, deleteUser };

@@ -5,6 +5,9 @@ import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { showToast } from '../../../shared/utils/toast';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
+import { formatTime12hr } from '../../../shared/utils/formatTime';
+
+const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
 export default function Registration() {
   const { id } = useParams();
@@ -16,6 +19,7 @@ export default function Registration() {
   const [notFound, setNotFound] = useState(false);
 
   const [teamMembers, setTeamMembers] = useState('');
+  const [registeringAsTeam, setRegisteringAsTeam] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -35,9 +39,14 @@ export default function Registration() {
     loadEvent();
   }, [id]);
 
-  async function handleSubmit(e) {
+async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    
+    if (event.is_team_event && registeringAsTeam && !teamMembers.trim()) {
+      return setError('Please enter your team name and members, or uncheck the team option to register individually.');
+    }
+
     if (!agreed) {
       return setError('Please agree to the event rules & eligibility to continue');
     }
@@ -81,7 +90,13 @@ export default function Registration() {
       <h1 className="mb-0.5 text-xl font-bold text-slate-900 sm:text-2xl">Register for Event</h1>
       <p className="mb-5 text-xs text-slate-500 sm:text-sm">Confirm your details and complete registration</p>
 
-      <div className="mb-5 rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+      <div className="mb-5 overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50">
+        {event.banner_image && (
+          <div className="h-36 w-full">
+            <img src={`${ASSET_BASE_URL}${event.banner_image}`} alt="" className="h-full w-full object-cover" />
+          </div>
+        )}
+        <div className="p-6">
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-700">Event Details</h2>
         <h3 className="mb-3 text-lg font-bold text-slate-900">{event.title}</h3>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -91,7 +106,7 @@ export default function Registration() {
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <Clock size={15} className="text-slate-400" />
-            <span>Time: <strong className="text-slate-900">{event.event_time?.slice(0, 5)}</strong></span>
+            <span>Time: <strong className="text-slate-900">{formatTime12hr(event.event_time)}</strong></span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <MapPin size={15} className="text-slate-400" />
@@ -100,6 +115,7 @@ export default function Registration() {
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>{event.category}</span>
           </div>
+        </div>
         </div>
       </div>
 
@@ -148,17 +164,39 @@ export default function Registration() {
           </div>
         </div>
 
-        <div>
-          <h2 className="text-sm font-semibold text-slate-900 mb-2 flex items-center gap-1.5">
-            <Users size={15} /> Team Information <span className="text-xs font-normal text-slate-400">(optional)</span>
-          </h2>
-          <textarea
-            value={teamMembers}
-            onChange={(e) => setTeamMembers(e.target.value)}
-            placeholder="List your team members' names, if registering as a team..."
-            className="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
-          />
-        </div>
+        {event.is_team_event ? (
+          <div className="space-y-4 border-t border-slate-100 pt-5">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={registeringAsTeam}
+                onChange={(e) => {
+                  setRegisteringAsTeam(e.target.checked);
+                  if (!e.target.checked) setTeamMembers(''); // Clear it if they change their mind
+                }}
+                className="w-4 h-4 accent-primary-600 rounded border-slate-300"
+              />
+              <span className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
+                <Users size={16} className="text-primary-600" />
+                I am registering on behalf of a team
+              </span>
+            </label>
+
+            {registeringAsTeam && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-200 pl-7">
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                  Team Name & Members <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={teamMembers}
+                  onChange={(e) => setTeamMembers(e.target.value)}
+                  placeholder="e.g. Team Alpha - John, Sarah, Mike"
+                  className="w-full border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm"
+                />
+              </div>
+            )}
+          </div>
+        ) : null}
 
         <label className="flex items-start gap-2.5 cursor-pointer">
           <input

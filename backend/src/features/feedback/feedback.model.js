@@ -77,4 +77,16 @@ async function submitResponse({ formId, eventId, userId, starRating, answers }) 
   return result.insertId;
 }
 
-module.exports = { createForm, getFormByEvent, hasSubmitted, submitResponse };
+async function getResponsesForForm(formId) {
+  const [rows] = await pool.query(
+    `SELECT fr.id, fr.star_rating, fr.answers_json, fr.submitted_at, u.full_name
+     FROM feedback_responses fr
+     JOIN users u ON u.id = fr.user_id
+     WHERE fr.form_id = ?
+     ORDER BY fr.submitted_at ASC`,
+    [formId]
+  );
+  return rows.map((r) => ({ ...r, answers: JSON.parse(r.answers_json) }));
+}
+
+module.exports = { createForm, getFormByEvent, hasSubmitted, submitResponse, getResponsesForForm };

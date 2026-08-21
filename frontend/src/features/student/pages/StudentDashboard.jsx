@@ -98,7 +98,7 @@ export default function StudentDashboard() {
 
       <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <QuickAction icon="calendar" color="primary" label="Browse Events" sub="Find and register for events" onClick={() => navigate('/events')} />
-        <QuickAction icon="image" color="green" label="Event Gallery" sub="Coming soon" disabled />
+        <QuickAction icon="image" color="green" label="Event Gallery" sub="Browse event photos" onClick={() => navigate('/student/gallery')} />
         <QuickAction icon="check" color="purple" label="My Registrations" sub="Track your participation" onClick={() => navigate('/student/my-registrations')} />
         <QuickAction icon="chat" color="amber" label="My Feedback" sub="Review and submit event feedback" onClick={() => navigate('/student/my-feedback')} />
       </div>

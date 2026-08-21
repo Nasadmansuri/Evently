@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2, Loader2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2, Loader2, BarChart3 } from 'lucide-react';
 import api from '../../../shared/services/api';
+import { showToast } from '../../../shared/utils/toast';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { useAuth } from '../../../shared/context/AuthContext';
+import { formatTime12hr } from '../../../shared/utils/formatTime';
 
 const TABS = ['Details', 'Gallery', 'Feedback'];
+const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
 export default function EventDetail() {
   const { id } = useParams();
@@ -16,11 +19,34 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState(
-    searchParams.get('tab') === 'feedback' ? 'Feedback' : 'Details'
+    searchParams.get('tab') === 'feedback' ? 'Feedback' : searchParams.get('tab') === 'gallery' ? 'Gallery' : 'Details'
   );
   const [feedbackForm, setFeedbackForm] = useState(null);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [generatingReport, setGeneratingReport] = useState(false);
+
+  async function handleGenerateReport() {
+    setGeneratingReport(true);
+    try {
+      const res = await api.get(`/events/${id}/report`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `event-report-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      showToast.error('Failed to generate report');
+    } finally {
+      setGeneratingReport(false);
+    }
+  }
+
+  const [images, setImages] = useState([]);
+  const [imagesLoading, setImagesLoading] = useState(true);
 
   useEffect(() => {
     async function loadEvent() {
@@ -54,6 +80,21 @@ export default function EventDetail() {
     loadFeedbackForm();
   }, [id]);
 
+  useEffect(() => {
+    async function loadImages() {
+      setImagesLoading(true);
+      try {
+        const res = await api.get(`/events/${id}/images`);
+        setImages(res.data);
+      } catch (err) {
+        console.error('Failed to load images:', err);
+      } finally {
+        setImagesLoading(false);
+      }
+    }
+    loadImages();
+  }, [id]);
+
   if (loading) {
     return (
       <div className="mx-auto max-w-5xl space-y-4">
@@ -81,20 +122,32 @@ export default function EventDetail() {
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-5 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
-        <div className="grid gap-0 lg:grid-cols-[1.1fr_1.3fr]">
-          <div className="relative min-h-[240px] bg-primary-50 p-6">
+        <div className="grid gap-0 lg:grid-cols-[1.3fr_1fr]">
+          <div className="relative min-h-[320px] overflow-hidden p-6 sm:p-8">
+            {event.banner_image ? (
+              <>
+                <img
+                  src={`${ASSET_BASE_URL}${event.banner_image}`}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/35" />
+              </>
+            ) : (
+              <div className="absolute inset-0 bg-primary-50" />
+            )}
             <div className="relative flex h-full flex-col justify-between">
               <div className="flex items-center justify-between gap-3">
                 <span className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 shadow-sm">
-                  {event.status}
+                  {isPastEvent ? 'Ended' : event.status}
                 </span>
                 <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${style.bg} ${style.text}`}>
                   {event.category}
                 </span>
               </div>
-              <div className="rounded-2xl border border-white/80 bg-white/70 p-4 backdrop-blur-sm">
-                <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Featured Event</p>
-                <p className="mt-2 text-xl font-bold text-slate-900">{event.organizing_department}</p>
+              <div className="self-start inline-block rounded-2xl border border-white/80 bg-white/70 p-3.5 backdrop-blur-sm shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">Featured Event</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">{event.organizing_community || event.organizing_department}</p>
               </div>
             </div>
           </div>
@@ -110,6 +163,10 @@ export default function EventDetail() {
                   <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700">
                     <CheckCircle2 size={16} /> Already Registered
                   </span>
+                ) : isPastEvent ? (
+                  <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-500">
+                    Event Ended
+                  </span>
                 ) : (
                   <button
                     onClick={() => navigate(`/events/${id}/register`)}
@@ -118,6 +175,16 @@ export default function EventDetail() {
                     Register Now
                   </button>
                 )
+              )}
+              {user?.role === 'admin' && (
+                <button
+                  onClick={handleGenerateReport}
+                  disabled={generatingReport}
+                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] disabled:opacity-50"
+                >
+                  {generatingReport ? <Loader2 className="animate-spin" size={16} /> : <BarChart3 size={16} />}
+                  {generatingReport ? 'Generating...' : 'Generate Report'}
+                </button>
               )}
             </div>
 
@@ -130,7 +197,7 @@ export default function EventDetail() {
               </div>
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <Clock size={15} className="text-primary-600 shrink-0" />
-                <span><strong className="text-slate-900">Time:</strong> {event.event_time?.slice(0, 5)}</span>
+                <span><strong className="text-slate-900">Time:</strong> {formatTime12hr(event.event_time)}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <MapPin size={15} className="text-primary-600 shrink-0" />
@@ -188,6 +255,12 @@ export default function EventDetail() {
                 <h2 className="mb-2 text-sm font-semibold text-slate-900">Event Information</h2>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-slate-500">Registration Type</span>
+                    <span className="font-medium text-slate-900">
+                      {event.is_team_event ? 'Team Event' : 'Individual'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                     <span className="text-slate-500">Maximum Participants</span>
                     <span className="font-medium text-slate-900">{event.max_participants || 'Unlimited'}</span>
                   </div>
@@ -207,10 +280,36 @@ export default function EventDetail() {
           )}
 
           {activeTab === 'Gallery' && (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-              <Images className="mb-3 text-slate-300" size={28} />
-              <p className="text-sm text-slate-500">Gallery coming soon</p>
-            </div>
+            imagesLoading ? (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[1, 2, 3, 4].map((i) => <div key={i} className="aspect-square rounded-lg bg-slate-100 animate-pulse" />)}
+              </div>
+            ) : images.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Images className="mb-3 text-slate-300" size={28} />
+                <p className="text-sm text-slate-500">No photos have been added to this event yet</p>
+                {(user?.role === 'admin' || event.created_by === user?.id) && (
+                  <p className="mt-1 text-xs text-slate-400">Add photos from Edit Event</p>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {images.map((img) => (
+                  <div key={img.id} className="relative aspect-square overflow-hidden rounded-lg border border-slate-200">
+                    <img
+                      src={`${ASSET_BASE_URL}${img.image_url}`}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                    {img.is_banner === 1 && (
+                      <span className="absolute bottom-1 left-1 rounded-full bg-primary-600 px-1.5 py-0.5 text-[9px] font-semibold text-white">
+                        Banner
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )
           )}
 
           {activeTab === 'Feedback' && (
@@ -244,18 +343,19 @@ export default function EventDetail() {
                   <CheckCircle2 className="mb-3 text-emerald-500" size={28} />
                   <p className="text-sm font-medium text-slate-700">Feedback Submitted ✓</p>
                 </>
-              ) : !isPastEvent ? (
+              ) : !event.is_registered ? (
                 <>
                   <MessageSquare className="mb-3 text-slate-300" size={28} />
-                  <p className="text-sm text-slate-500">Feedback opens once this event has taken place</p>
+                  <p className="text-sm font-medium text-slate-700">Registration Required</p>
+                  <p className="mt-1 text-xs text-slate-500">You must be registered for this event to leave feedback.</p>
                 </>
               ) : (
                 <>
                   <MessageSquare className="mb-3 text-primary-400" size={28} />
-                  <p className="mb-3 text-sm text-slate-500">Share your thoughts on this event</p>
+                  <p className="mb-3 text-sm font-medium text-slate-700">Share your thoughts on this event</p>
                   <button
                     onClick={() => navigate(`/events/${id}/feedback`)}
-                    className="rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
+                    className="mt-3 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98]"
                   >
                     Give Feedback
                   </button>

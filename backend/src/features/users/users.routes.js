@@ -6,5 +6,7 @@ const { requireAuth, requireRole } = require('../../shared/middleware/auth.middl
 router.get('/me', requireAuth, usersController.getMe);
 router.get('/pending-faculty', requireAuth, requireRole('admin'), usersController.getPendingFaculty);
 router.patch('/:id/approval', requireAuth, requireRole('admin'), usersController.updateApproval);
+router.get('/', requireAuth, requireRole('admin'), usersController.getAllUsers);
+router.delete('/:id', requireAuth, requireRole('admin'), usersController.deleteUser);
 
 module.exports = router;

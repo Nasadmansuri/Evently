@@ -37,4 +37,22 @@ async function getMyRegistrations(userId) {
   return rows;
 }
 
-module.exports = { findRegistration, getRegistrationCount, createRegistration, getMyRegistrations };
+async function getEventParticipants(eventId) {
+  const [rows] = await pool.query(
+    `SELECT r.id AS registration_id, r.team_members, r.registered_at,
+            u.full_name, u.email, u.phone,
+            sp.college_name AS sp_college_name, sp.course_name,
+            sp.academic_level, sp.academic_semester, sp.academic_group,
+            gp.college_name AS gp_college_name, gp.course_major
+     FROM registrations r
+     JOIN users u ON u.id = r.user_id
+     LEFT JOIN student_profiles sp ON sp.user_id = u.id
+     LEFT JOIN guest_profiles gp ON gp.user_id = u.id
+     WHERE r.event_id = ?
+     ORDER BY r.registered_at ASC`,
+    [eventId]
+  );
+  return rows;
+}
+
+module.exports = { findRegistration, getRegistrationCount, createRegistration, getMyRegistrations, getEventParticipants };

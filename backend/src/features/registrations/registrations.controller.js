@@ -13,6 +13,14 @@ async function register(req, res) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
+    // Security Gate: Block registration if the event has already passed
+    const eventDate = new Date(event.event_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate day comparison
+    if (eventDate < today) {
+      return res.status(400).json({ message: 'Registration is closed for past events.' });
+    }
+
     const existing = await registrationsModel.findRegistration(eventId, req.user.id);
     if (existing) {
       return res.status(409).json({ message: 'You are already registered for this event' });
