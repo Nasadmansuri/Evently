@@ -93,7 +93,12 @@ async function handleSubmit(e) {
       <div className="mb-5 overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50">
         {event.banner_image && (
           <div className="h-36 w-full">
-            <img src={`${ASSET_BASE_URL}${event.banner_image}`} alt="" className="h-full w-full object-cover" />
+            <img
+              src={`${ASSET_BASE_URL}${event.banner_image}`}
+              alt=""
+              className="h-full w-full object-cover"
+              style={{ objectPosition: 'center 20%' }}
+            />
           </div>
         )}
         <div className="p-6">

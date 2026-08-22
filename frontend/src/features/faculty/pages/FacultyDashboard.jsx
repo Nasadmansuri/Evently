@@ -102,19 +102,24 @@ export default function FacultyDashboard() {
             <p className="py-6 text-center text-xs text-slate-400">No events yet — create your first one.</p>
           ) : (
             <div className="space-y-2">
-              {events.slice(0, 3).map((ev) => (
-                <div key={ev.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">{ev.title}</p>
-                    <p className="text-[11px] text-slate-500">
-                      {new Date(ev.event_date).toLocaleDateString()} · {ev.category}
-                    </p>
+              {events.slice(0, 3).map((ev) => {
+                const isPast = new Date(ev.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
+                return (
+                  <div key={ev.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">{ev.title}</p>
+                      <p className="text-[11px] text-slate-500">
+                        {new Date(ev.event_date).toLocaleDateString()} · {ev.category}
+                      </p>
+                    </div>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
+                      isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                    }`}>
+                      {isPast ? 'Ended' : ev.status}
+                    </span>
                   </div>
-                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium capitalize text-emerald-700">
-                    {ev.status}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

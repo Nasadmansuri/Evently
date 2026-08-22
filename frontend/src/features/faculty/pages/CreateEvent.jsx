@@ -68,6 +68,7 @@ export default function CreateEvent() {
         setRulesEligibility(ev.rules_eligibility || '');
         setPrizeInfo(ev.prize_info || '');
         setMaxParticipants(ev.max_participants || '');
+        setIsTeamEvent(!!ev.is_team_event);
       } catch (err) {
         setError('Failed to load event for editing');
       } finally {

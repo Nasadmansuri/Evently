@@ -153,7 +153,7 @@ async function updateEvent(req, res) {
     const {
       title, description, category, location, eventDate, eventTime,
       organizingDepartment, organizingCommunity, rulesEligibility,
-      prizeInfo, maxParticipants,
+      prizeInfo, maxParticipants, isTeamEvent,
     } = req.body;
 
     if (!title || !description || !category || !location || !eventDate || !eventTime || !organizingDepartment) {
@@ -297,6 +297,16 @@ function drawPill(doc, text, x, y, { bg, color, fontSize = 8, paddingX = 8, padd
   doc.roundedRect(x, y, w, h, h / 2).fill(bg);
   doc.fillColor(color).text(text, x + paddingX, y + paddingY - 0.5);
   return w;
+}
+
+function formatTime12hr(timeString) {
+  if (!timeString) return '—';
+  const [hourStr, minute] = timeString.split(':');
+  let hour = parseInt(hourStr, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12;
+  hour = hour ? hour : 12;
+  return `${hour}:${minute} ${ampm}`;
 }
 
 function drawSectionLabel(doc, label, x, y, width) {
@@ -589,7 +599,7 @@ async function generateReport(req, res) {
     y = drawSectionLabel(doc, 'Event Overview', left, y, contentWidth);
     y = drawMetaGrid(doc, [
       { label: 'Date', value: new Date(event.event_date).toLocaleDateString() },
-      { label: 'Time', value: event.event_time?.slice(0, 5) },
+      { label: 'Time', value: formatTime12hr(event.event_time) },
       { label: 'Location', value: event.location },
       { label: 'Category', value: event.category, badgeColor: CATEGORY_COLORS[event.category] || TEXT_MUTED },
       { label: 'Organizing Dept', value: event.organizing_department },

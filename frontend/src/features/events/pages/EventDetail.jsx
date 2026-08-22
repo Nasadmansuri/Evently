@@ -118,6 +118,8 @@ export default function EventDetail() {
 
   const style = getCategoryStyle(event.category);
   const isPastEvent = new Date(event.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
+  const eventStartDateTime = new Date(`${String(event.event_date).slice(0, 10)}T${event.event_time}`);
+  const hasEventStarted = new Date() >= eventStartDateTime;
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -130,6 +132,7 @@ export default function EventDetail() {
                   src={`${ASSET_BASE_URL}${event.banner_image}`}
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover"
+                  style={{ objectPosition: 'center 20%' }}
                 />
                 <div className="absolute inset-0 bg-black/35" />
               </>
@@ -145,10 +148,12 @@ export default function EventDetail() {
                   {event.category}
                 </span>
               </div>
-              <div className="self-start inline-block rounded-2xl border border-white/80 bg-white/70 p-3.5 backdrop-blur-sm shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">Featured Event</p>
-                <p className="mt-1 text-lg font-bold text-slate-900">{event.organizing_community || event.organizing_department}</p>
-              </div>
+              {event.organizing_community && (
+                <div className="self-start inline-block rounded-2xl border border-white/80 bg-white/70 p-3.5 backdrop-blur-sm shadow-sm">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">Featured Event</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900">{event.organizing_community}</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -348,6 +353,12 @@ export default function EventDetail() {
                   <MessageSquare className="mb-3 text-slate-300" size={28} />
                   <p className="text-sm font-medium text-slate-700">Registration Required</p>
                   <p className="mt-1 text-xs text-slate-500">You must be registered for this event to leave feedback.</p>
+                </>
+              ) : !hasEventStarted ? (
+                <>
+                  <MessageSquare className="mb-3 text-slate-300" size={28} />
+                  <p className="text-sm font-medium text-slate-700">Feedback opens once the event begins</p>
+                  <p className="mt-1 text-xs text-slate-500">Come back once the event is underway to share your thoughts.</p>
                 </>
               ) : (
                 <>

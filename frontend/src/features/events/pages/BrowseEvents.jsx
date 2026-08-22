@@ -423,7 +423,8 @@ export default function BrowseEvents() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {filteredSorted.map((ev) => {
             const headerTone = HEADER_TONE[ev.category] || 'bg-slate-300';
-            const statusText = (ev.status || 'upcoming').toLowerCase();
+            const isPast = new Date(ev.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
+            const statusText = isPast ? 'ended' : (ev.status || 'upcoming').toLowerCase();
 
             return (
               <article
@@ -448,7 +449,9 @@ export default function BrowseEvents() {
                   <span className="relative inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
                     {ev.category}
                   </span>
-                  <span className="relative inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase text-emerald-800 shadow-sm">
+                  <span className={`relative inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase shadow-sm ${
+                    isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-100 text-emerald-800'
+                  }`}>
                     {statusText}
                   </span>
                 </div>
@@ -482,6 +485,10 @@ export default function BrowseEvents() {
                       ev.is_registered ? (
                         <span className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2.5 text-[13px] font-semibold text-emerald-700">
                           <CheckCircle2 size={14} /> Already Registered
+                        </span>
+                      ) : isPast ? (
+                        <span className="flex w-full items-center justify-center rounded-lg bg-slate-100 px-3 py-2.5 text-[13px] font-semibold text-slate-500">
+                          Event Ended
                         </span>
                       ) : (
                         <button

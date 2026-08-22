@@ -422,6 +422,7 @@ export default function ManageEvents() {
           {filteredSorted.map((ev) => {
             const style = getCategoryStyle(ev.category);
             const isOwn = ev.created_by === user?.id;
+            const isPast = new Date(ev.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
             return (
               <div key={ev.id} className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                 <div className={`relative flex h-28 items-start justify-between overflow-hidden px-3 pt-3 ${ev.banner_image ? '' : ''}`}>
@@ -434,7 +435,11 @@ export default function ManageEvents() {
                     <div className={`absolute inset-0 ${style.bg}`} />
                   )}
                   <span className="relative rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-slate-700 shadow-sm">{ev.category}</span>
-                  <span className="relative rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium capitalize text-emerald-700">{ev.status}</span>
+                  <span className={`relative rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
+                    isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                  }`}>
+                    {isPast ? 'Ended' : ev.status}
+                  </span>
                 </div>
                 <div className="p-5">
                 <h3 className="mb-1 line-clamp-1 text-sm font-semibold text-slate-900">{ev.title}</h3>

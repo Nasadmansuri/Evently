@@ -1,4 +1,5 @@
 const feedbackModel = require('./feedback.model');
+const eventsModel = require('../events/events.model');
 
 const VALID_TYPES = ['short_text', 'long_text', 'rating', 'multiple_choice'];
 
@@ -61,6 +62,15 @@ async function submitResponse(req, res) {
     }
     if (starRating < 1 || starRating > 5) {
       return res.status(400).json({ message: 'starRating must be between 1 and 5' });
+    }
+
+    const event = await eventsModel.getEventById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    const eventStart = new Date(`${String(event.event_date).slice(0, 10)}T${event.event_time}`);
+    if (new Date() < eventStart) {
+      return res.status(400).json({ message: 'Feedback opens once the event begins' });
     }
 
     const already = await feedbackModel.hasSubmitted(formId, req.user.id);

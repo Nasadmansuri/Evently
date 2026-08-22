@@ -70,6 +70,7 @@ export default function MyEvents() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {events.map((ev) => {
             const style = getCategoryStyle(ev.category);
+            const isPast = new Date(ev.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
             return (
               <div
                 key={ev.id}
@@ -78,7 +79,11 @@ export default function MyEvents() {
                 <button onClick={() => navigate(`/events/${ev.id}`)} className="block w-full text-left">
                   <div className="mb-2 flex items-center justify-between">
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${style.bg} ${style.text}`}>{ev.category}</span>
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium capitalize text-emerald-700">{ev.status}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
+                      isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                    }`}>
+                      {isPast ? 'Ended' : ev.status}
+                    </span>
                   </div>
                   <h3 className="mb-2 line-clamp-1 text-sm font-semibold text-slate-900">{ev.title}</h3>
                   <div className="space-y-1 text-[11px] text-slate-500">
