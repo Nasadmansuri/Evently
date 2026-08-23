@@ -45,6 +45,9 @@ async function signupStudent(req, res) {
     if (!fullName || !email || !phone || !collegeName || !password) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
 
     const existing = await authModel.findByEmail(email);
     if (existing) {
@@ -60,6 +63,7 @@ async function signupStudent(req, res) {
       facultyName, courseName, academicLevel, academicSemester, academicGroup,
     });
 
+    delete user.password_hash;
     res.status(201).json({ message: 'Account created successfully', user });
   } catch (err) {
     res.status(500).json({ message: 'Signup failed', error: err.message });
@@ -72,6 +76,9 @@ async function signupFaculty(req, res) {
 
     if (!fullName || !email || !phone || !facultyIdCode || !department || !designation || !password) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
 
     const existing = await authModel.findByEmail(email);
@@ -86,6 +93,7 @@ async function signupFaculty(req, res) {
       facultyIdCode, department, designation, community,
     });
 
+    delete user.password_hash;
     res.status(201).json({ message: 'Account created, pending admin approval', user });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {

@@ -71,6 +71,7 @@ export default function Gallery() {
                     src={`${ASSET_BASE_URL}${ev.cover_image}`}
                     alt={ev.title}
                     className="h-full w-full object-cover"
+                    style={{ objectPosition: 'center 32%' }}
                   />
                   <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold text-white">
                     <Camera size={11} /> {ev.photo_count}

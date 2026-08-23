@@ -144,9 +144,16 @@ export default function EventDetail() {
                 <span className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 shadow-sm">
                   {isPastEvent ? 'Ended' : event.status}
                 </span>
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${style.bg} ${style.text}`}>
-                  {event.category}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  {event.is_team_event ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+                      <User size={11} /> Team
+                    </span>
+                  ) : null}
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${style.bg} ${style.text}`}>
+                    {event.category}
+                  </span>
+                </div>
               </div>
               {event.organizing_community && (
                 <div className="self-start inline-block rounded-2xl border border-white/80 bg-white/70 p-3.5 backdrop-blur-sm shadow-sm">
@@ -158,7 +165,7 @@ export default function EventDetail() {
           </div>
 
           <div className="p-5 sm:p-7">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
               <div>
                 <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Campus Event</p>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[2rem]">{event.title}</h1>
@@ -341,7 +348,6 @@ export default function EventDetail() {
                 <>
                   <CheckCircle2 className="mb-3 text-emerald-500" size={28} />
                   <p className="text-sm font-medium text-slate-700">Feedback collection is live for this event</p>
-                  <p className="mt-1 text-xs text-slate-400">"{feedbackForm.title}" — {feedbackForm.questions.length} question{feedbackForm.questions.length === 1 ? '' : 's'}</p>
                 </>
               ) : feedbackSubmitted ? (
                 <>

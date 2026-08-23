@@ -19,7 +19,7 @@ export default function Registration() {
   const [notFound, setNotFound] = useState(false);
 
   const [teamMembers, setTeamMembers] = useState('');
-  const [registeringAsTeam, setRegisteringAsTeam] = useState(false);
+  const [teamChoice, setTeamChoice] = useState(null); // null | 'individual' | 'team'
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -43,8 +43,13 @@ async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     
-    if (event.is_team_event && registeringAsTeam && !teamMembers.trim()) {
-      return setError('Please enter your team name and members, or uncheck the team option to register individually.');
+    if (event.is_team_event) {
+      if (!teamChoice) {
+        return setError("Please choose whether you're registering individually or as a team.");
+      }
+      if (teamChoice === 'team' && !teamMembers.trim()) {
+        return setError('Please enter your team name and members.');
+      }
     }
 
     if (!agreed) {
@@ -53,7 +58,10 @@ async function handleSubmit(e) {
 
     setSubmitting(true);
     try {
-      await api.post('/registrations', { eventId: id, teamMembers: teamMembers || undefined });
+      await api.post('/registrations', {
+        eventId: id,
+        teamMembers: event.is_team_event && teamChoice === 'team' ? teamMembers : undefined,
+      });
       showToast.success("You're registered!");
       navigate(`/events/${id}`);
     } catch (err) {
@@ -92,12 +100,12 @@ async function handleSubmit(e) {
 
       <div className="mb-5 overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50">
         {event.banner_image && (
-          <div className="h-36 w-full">
+          <div className="h-40 w-full">
             <img
               src={`${ASSET_BASE_URL}${event.banner_image}`}
               alt=""
               className="h-full w-full object-cover"
-              style={{ objectPosition: 'center 20%' }}
+              style={{ objectPosition: 'center 32%' }}
             />
           </div>
         )}
@@ -119,6 +127,11 @@ async function handleSubmit(e) {
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>{event.category}</span>
+            {event.is_team_event && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700">
+                <Users size={12} /> Team Event
+              </span>
+            )}
           </div>
         </div>
         </div>
@@ -171,24 +184,39 @@ async function handleSubmit(e) {
 
         {event.is_team_event ? (
           <div className="space-y-4 border-t border-slate-100 pt-5">
-            <label className="flex items-center gap-2.5 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={registeringAsTeam}
-                onChange={(e) => {
-                  setRegisteringAsTeam(e.target.checked);
-                  if (!e.target.checked) setTeamMembers(''); // Clear it if they change their mind
-                }}
-                className="w-4 h-4 accent-primary-600 rounded border-slate-300"
-              />
-              <span className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                <Users size={16} className="text-primary-600" />
-                I am registering on behalf of a team
-              </span>
-            </label>
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-1">
+                Registration Type <span className="text-red-500">*</span>
+              </label>
+              <p className="text-xs text-slate-500 mb-3">This is a team event — choose how you'd like to register.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setTeamChoice('individual'); setTeamMembers(''); }}
+                  className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition ${
+                    teamChoice === 'individual'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  Register Individually
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTeamChoice('team')}
+                  className={`flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-medium transition ${
+                    teamChoice === 'team'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Users size={16} /> Register as a Team
+                </button>
+              </div>
+            </div>
 
-            {registeringAsTeam && (
-              <div className="animate-in fade-in slide-in-from-top-2 duration-200 pl-7">
+            {teamChoice === 'team' && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Team Name & Members <span className="text-red-500">*</span>
                 </label>

@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, AlertCircle, Inbox, Plus } from 'lucide-react';
+import { Calendar, MapPin, AlertCircle, Inbox, Plus, Users } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
+import { isEventPast } from '../../../shared/utils/eventStatus';
+
+const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
 export default function MyEvents() {
   const navigate = useNavigate();
@@ -70,15 +73,35 @@ export default function MyEvents() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {events.map((ev) => {
             const style = getCategoryStyle(ev.category);
-            const isPast = new Date(ev.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
+            const isPast = isEventPast(ev.event_date);
             return (
               <div
                 key={ev.id}
-                className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
+                <div className="relative h-40 w-full overflow-hidden">
+                  {ev.banner_image ? (
+                    <img
+                      src={`${ASSET_BASE_URL}${ev.banner_image}`}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: 'center 32%' }}
+                    />
+                  ) : (
+                    <div className={`h-full w-full ${style.bg}`} />
+                  )}
+                </div>
+                <div className="p-5">
                 <button onClick={() => navigate(`/events/${ev.id}`)} className="block w-full text-left">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${style.bg} ${style.text}`}>{ev.category}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${style.bg} ${style.text}`}>{ev.category}</span>
+                      {ev.is_team_event ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2 py-0.5 text-[11px] font-medium text-white">
+                          <Users size={11} /> Team
+                        </span>
+                      ) : null}
+                    </div>
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
                       isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
                     }`}>
@@ -103,6 +126,7 @@ export default function MyEvents() {
                   >
                     Feedback
                   </button>
+                </div>
                 </div>
               </div>
             );

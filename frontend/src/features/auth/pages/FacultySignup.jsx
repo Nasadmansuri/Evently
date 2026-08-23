@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   User, Mail, Phone, IdCard, Landmark, Briefcase, Users, Lock, ShieldCheck,
-  UserPlus, Info, AlertCircle, Loader2, Eye, EyeOff, CalendarHeart, ChevronDown,
+  UserPlus, Info, AlertCircle, Loader2, Eye, EyeOff, CalendarHeart, ChevronDown, CheckCircle2,
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
@@ -265,7 +265,10 @@ export default function FacultySignup() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">At least 8 characters</p>
+              <p className={`text-[11px] mt-1 flex items-center gap-1 transition-colors ${password.length >= 8 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                {password.length >= 8 ? <CheckCircle2 size={12} /> : null}
+                At least 8 characters
+              </p>
             </div>
             <div>
               <label className={labelClass}>Confirm Password</label>
@@ -282,6 +285,12 @@ export default function FacultySignup() {
                   {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {confirmPassword && (
+                <p className={`text-[11px] mt-1 flex items-center gap-1 ${confirmPassword === password ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {confirmPassword === password ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                  {confirmPassword === password ? 'Passwords match' : 'Passwords do not match'}
+                </p>
+              )}
             </div>
           </div>
 

@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Calendar, MapPin, AlertCircle, SearchX, CheckCircle2, List, CalendarDays, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Search, Calendar, MapPin, AlertCircle, SearchX, CheckCircle2, List, CalendarDays, ChevronLeft, ChevronRight, X, Users } from 'lucide-react';
 import api from '../../../shared/services/api';
 
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
+import { isEventPast } from '../../../shared/utils/eventStatus';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facultyStructure';
@@ -423,7 +424,7 @@ export default function BrowseEvents() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {filteredSorted.map((ev) => {
             const headerTone = HEADER_TONE[ev.category] || 'bg-slate-300';
-            const isPast = new Date(ev.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
+            const isPast = isEventPast(ev.event_date);
             const statusText = isPast ? 'ended' : (ev.status || 'upcoming').toLowerCase();
 
             return (
@@ -432,7 +433,7 @@ export default function BrowseEvents() {
                 className="flex flex-col overflow-hidden rounded-[18px] border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
               >
                 <div
-                  className={`relative flex h-48 w-full shrink-0 items-start justify-between overflow-hidden p-4 ${
+                  className={`relative flex h-40 w-full shrink-0 items-start justify-between overflow-hidden p-4 ${
                     ev.banner_image ? '' : headerTone
                   }`}
                 >
@@ -442,13 +443,21 @@ export default function BrowseEvents() {
                         src={`${ASSET_BASE_URL}${ev.banner_image}`}
                         alt=""
                         className="absolute inset-0 h-full w-full object-cover"
+                        style={{ objectPosition: 'center 32%' }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-black/30" />
                     </>
                   )}
-                  <span className="relative inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
-                    {ev.category}
-                  </span>
+                  <div className="relative flex items-center gap-1.5">
+                    <span className="inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
+                      {ev.category}
+                    </span>
+                    {ev.is_team_event ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-600/95 px-3 py-1 text-[10px] font-bold uppercase text-white shadow-sm">
+                        <Users size={11} /> Team
+                      </span>
+                    ) : null}
+                  </div>
                   <span className={`relative inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase shadow-sm ${
                     isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-100 text-emerald-800'
                   }`}>

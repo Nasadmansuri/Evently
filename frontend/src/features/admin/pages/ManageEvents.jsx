@@ -6,6 +6,7 @@ import api from '../../../shared/services/api';
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 import { useAuth } from '../../../shared/context/AuthContext';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
+import { isEventPast } from '../../../shared/utils/eventStatus';
 import { showToast } from '../../../shared/utils/toast';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facultyStructure';
@@ -422,19 +423,31 @@ export default function ManageEvents() {
           {filteredSorted.map((ev) => {
             const style = getCategoryStyle(ev.category);
             const isOwn = ev.created_by === user?.id;
-            const isPast = new Date(ev.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
+            const isPast = isEventPast(ev.event_date);
             return (
               <div key={ev.id} className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                <div className={`relative flex h-28 items-start justify-between overflow-hidden px-3 pt-3 ${ev.banner_image ? '' : ''}`}>
+                <div className={`relative flex h-40 items-start justify-between overflow-hidden px-3 pt-3 ${ev.banner_image ? '' : ''}`}>
                   {ev.banner_image ? (
                     <>
-                      <img src={`${ASSET_BASE_URL}${ev.banner_image}`} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <img
+                        src={`${ASSET_BASE_URL}${ev.banner_image}`}
+                        alt=""
+                        className="absolute inset-0 h-full w-full object-cover"
+                        style={{ objectPosition: 'center 32%' }}
+                      />
                       <div className="absolute inset-0 bg-black/25" />
                     </>
                   ) : (
                     <div className={`absolute inset-0 ${style.bg}`} />
                   )}
-                  <span className="relative rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-slate-700 shadow-sm">{ev.category}</span>
+                  <div className="relative flex items-center gap-1.5">
+                    <span className="rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-slate-700 shadow-sm">{ev.category}</span>
+                    {ev.is_team_event ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-600/90 px-2 py-0.5 text-[11px] font-medium text-white shadow-sm">
+                        <Users size={11} /> Team
+                      </span>
+                    ) : null}
+                  </div>
                   <span className={`relative rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
                     isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
                   }`}>

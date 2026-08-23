@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarCheck, History, AlertCircle, Inbox, Image, ListChecks, MessageSquare } from 'lucide-react';
+import { CalendarCheck, History, AlertCircle, Inbox, Image, ListChecks, MessageSquare, Users } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
@@ -179,7 +179,14 @@ function EventListCard({ title, items, loading, emptyText, showRegisterLink, onV
               <div key={ev.registration_id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <p className="text-sm font-medium text-slate-900">{ev.title}</p>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${style.bg} ${style.text}`}>{ev.category}</span>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {ev.team_members ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2 py-0.5 text-[10px] font-medium text-white">
+                        <Users size={10} /> Team
+                      </span>
+                    ) : null}
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${style.bg} ${style.text}`}>{ev.category}</span>
+                  </div>
                 </div>
                 <p className="mb-2 text-[11px] text-slate-500">
                   {new Date(ev.event_date).toLocaleDateString()} · {ev.location}

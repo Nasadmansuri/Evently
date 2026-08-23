@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Check, X, Loader2, AlertCircle, Inbox, CalendarDays, Users, GraduationCap, BarChart3, TrendingUp, Images, Plus, Calendar, MapPin } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
+import { isEventPast } from '../../../shared/utils/eventStatus';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -240,7 +241,9 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="space-y-2">
-              {recentEvents.map((ev) => (
+              {recentEvents.map((ev) => {
+                const isPast = isEventPast(ev.event_date);
+                return (
                 <button
                   key={ev.id}
                   onClick={() => navigate(`/events/${ev.id}`)}
@@ -248,16 +251,26 @@ export default function AdminDashboard() {
                 >
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-slate-900">{ev.title}</p>
-                    <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium capitalize text-emerald-700">
-                      {ev.status}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {ev.is_team_event ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2 py-0.5 text-[10px] font-medium text-white">
+                          <Users size={10} /> Team
+                        </span>
+                      ) : null}
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${
+                        isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                      }`}>
+                        {isPast ? 'Ended' : ev.status}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3 text-[11px] text-slate-500">
                     <span className="flex items-center gap-1"><Calendar size={11} />{new Date(ev.event_date).toLocaleDateString()}</span>
                     <span className="flex items-center gap-1"><MapPin size={11} />{ev.location}</span>
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Calendar, MapPin, AlertCircle, Inbox } from 'lucide-react';
+import { Calendar, MapPin, AlertCircle, Inbox, Users } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
+import { isEventPast } from '../../../shared/utils/eventStatus';
 
 export default function MyRegistrations() {
   const navigate = useNavigate();
@@ -94,6 +95,7 @@ export default function MyRegistrations() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((ev) => {
             const style = getCategoryStyle(ev.category);
+            const isPast = isEventPast(ev.event_date);
             return (
               <div
                 key={ev.registration_id}
@@ -101,8 +103,19 @@ export default function MyRegistrations() {
               >
                 <button onClick={() => navigate(`/events/${ev.id}`)} className="block w-full text-left">
                   <div className="mb-3 flex items-center justify-between">
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${style.bg} ${style.text}`}>{ev.category}</span>
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium capitalize text-emerald-700">{ev.status}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${style.bg} ${style.text}`}>{ev.category}</span>
+                      {ev.team_members ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2 py-0.5 text-[11px] font-medium text-white">
+                          <Users size={11} /> Team
+                        </span>
+                      ) : null}
+                    </div>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
+                      isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                    }`}>
+                      {isPast ? 'Ended' : ev.status}
+                    </span>
                   </div>
                   <h3 className="mb-2 line-clamp-2 text-sm font-semibold text-slate-900">{ev.title}</h3>
                   <div className="space-y-1.5 text-[11px] text-slate-500">

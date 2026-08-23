@@ -2,7 +2,8 @@ const pool = require('../../shared/config/db');
 
 async function getEventsByFaculty(userId) {
   const [rows] = await pool.query(
-    `SELECT id, title, event_date, event_time, category, status
+    `SELECT id, title, event_date, event_time, category, status, is_team_event,
+            (SELECT image_url FROM event_images WHERE event_id = events.id AND is_banner = 1 LIMIT 1) AS banner_image
      FROM events
      WHERE created_by = ?
      ORDER BY event_date DESC`,
@@ -82,7 +83,8 @@ async function getAllEvents({ category } = {}, userId) {
 async function getAllEventsAdmin() {
   const [rows] = await pool.query(
     `SELECT e.id, e.title, e.category, e.location, e.event_date, e.event_time,
-            e.status, e.created_by, e.organizing_department, e.organizing_community, u.full_name AS organizer_name,
+            e.status, e.created_by, e.organizing_department, e.organizing_community, e.is_team_event,
+            u.full_name AS organizer_name,
             (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id) AS registration_count,
             (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1) AS banner_image
      FROM events e
@@ -186,7 +188,7 @@ async function addEventImages(eventId, imageUrls) {
   if (bannerCount === 0) {
     await pool.query(
       `UPDATE event_images SET is_banner = 1
-       WHERE id = (SELECT id FROM (SELECT id FROM event_images WHERE event_id = ? ORDER BY uploaded_at ASC LIMIT 1) t)`,
+       WHERE id = (SELECT id FROM (SELECT id FROM event_images WHERE event_id = ? ORDER BY uploaded_at ASC, id ASC LIMIT 1) t)`,
       [eventId]
     );
   }
@@ -220,7 +222,7 @@ async function deleteEventImage(imageId) {
   if (image.is_banner) {
     await pool.query(
       `UPDATE event_images SET is_banner = 1
-       WHERE id = (SELECT id FROM (SELECT id FROM event_images WHERE event_id = ? ORDER BY uploaded_at ASC LIMIT 1) t)`,
+       WHERE id = (SELECT id FROM (SELECT id FROM event_images WHERE event_id = ? ORDER BY uploaded_at ASC, id ASC LIMIT 1) t)`,
       [image.event_id]
     );
   }
@@ -231,7 +233,7 @@ async function deleteEventImage(imageId) {
 async function getGallerySummary() {
   const [rows] = await pool.query(
     `SELECT e.id, e.title, e.category, e.event_date,
-            (SELECT image_url FROM event_images WHERE event_id = e.id ORDER BY uploaded_at ASC LIMIT 1) AS cover_image,
+            (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1) AS cover_image,
             (SELECT COUNT(*) FROM event_images WHERE event_id = e.id) AS photo_count
      FROM events e
      WHERE (SELECT COUNT(*) FROM event_images WHERE event_id = e.id) > 0

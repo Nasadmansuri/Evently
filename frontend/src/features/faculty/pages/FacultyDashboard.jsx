@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, TrendingUp, Plus, CalendarSearch, Images, AlertCircle } from 'lucide-react';
+import { CalendarDays, TrendingUp, Plus, CalendarSearch, Images, AlertCircle, Users } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
+import { isEventPast } from '../../../shared/utils/eventStatus';
 
 export default function FacultyDashboard() {
   const { user } = useAuth();
@@ -103,7 +104,7 @@ export default function FacultyDashboard() {
           ) : (
             <div className="space-y-2">
               {events.slice(0, 3).map((ev) => {
-                const isPast = new Date(ev.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
+                const isPast = isEventPast(ev.event_date);
                 return (
                   <div key={ev.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                     <div>
@@ -112,11 +113,18 @@ export default function FacultyDashboard() {
                         {new Date(ev.event_date).toLocaleDateString()} · {ev.category}
                       </p>
                     </div>
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
-                      isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
-                    }`}>
-                      {isPast ? 'Ended' : ev.status}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {ev.is_team_event ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2 py-0.5 text-[11px] font-medium text-white">
+                          <Users size={11} /> Team
+                        </span>
+                      ) : null}
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
+                        isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                      }`}>
+                        {isPast ? 'Ended' : ev.status}
+                      </span>
+                    </div>
                   </div>
                 );
               })}

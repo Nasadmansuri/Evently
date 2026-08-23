@@ -431,15 +431,25 @@ function drawKpiCards(doc, cards, x, y, width) {
   return y + cardH + 14;
 }
 
-function drawParticipantsTable(doc, participants, x, yStart, width) {
-  const columns = [
-    { key: 'idx', label: '#', width: 22 },
-    { key: 'name', label: 'Name', width: 86 },
-    { key: 'contact', label: 'Email & Phone', width: 128 },
-    { key: 'college', label: 'College / Major', width: 100 },
-    { key: 'sem', label: 'Semester & Group', width: 94 },
-    { key: 'date', label: 'Registered', width: 82 },
-  ];
+function drawParticipantsTable(doc, participants, x, yStart, width, isTeamEvent) {
+  const columns = isTeamEvent
+    ? [
+        { key: 'idx', label: '#', width: 18 },
+        { key: 'name', label: 'Name', width: 76 },
+        { key: 'contact', label: 'Email & Phone', width: 108 },
+        { key: 'college', label: 'College / Major', width: 82 },
+        { key: 'sem', label: 'Semester & Group', width: 78 },
+        { key: 'team', label: 'Team', width: 78 },
+        { key: 'date', label: 'Registered', width: 72 },
+      ]
+    : [
+        { key: 'idx', label: '#', width: 22 },
+        { key: 'name', label: 'Name', width: 86 },
+        { key: 'contact', label: 'Email & Phone', width: 128 },
+        { key: 'college', label: 'College / Major', width: 100 },
+        { key: 'sem', label: 'Semester & Group', width: 94 },
+        { key: 'date', label: 'Registered', width: 82 },
+      ];
   const pad = 6;
   const headerH = 22;
 
@@ -474,7 +484,8 @@ function drawParticipantsTable(doc, participants, x, yStart, width) {
       : '—';
     const contactCol = `${p.email}\n${p.phone || '—'}`;
     const dateCol = new Date(p.registered_at).toLocaleDateString();
-    const cellValues = { idx: String(i + 1), name: p.full_name, contact: contactCol, college: collegeCol, sem: semCol, date: dateCol };
+    const teamCol = p.team_members || '—';
+    const cellValues = { idx: String(i + 1), name: p.full_name, contact: contactCol, college: collegeCol, sem: semCol, team: teamCol, date: dateCol };
 
     doc.font('Helvetica').fontSize(8.5);
     let maxLines = 1;
@@ -670,13 +681,13 @@ async function generateReport(req, res) {
     y = drawKpiCards(doc, [
       { label: 'Total Registrations', value: String(participants.length) },
       { label: 'Max Capacity', value: event.max_participants ? String(event.max_participants) : 'Unlimited' },
-      { label: 'Attendance Rate', value: attendanceRate },
+      { label: 'Registration Rate', value: attendanceRate },
       { label: 'Feedback Received', value: String(responses.length) },
     ], left, y, contentWidth);
 
     y = ensureSpace(doc, y, 18 + 22 + 30);
     y = drawSectionLabel(doc, 'Registered Participants', left, y, contentWidth);
-    y = drawParticipantsTable(doc, participants, left, y, contentWidth);
+    y = drawParticipantsTable(doc, participants, left, y, contentWidth, !!event.is_team_event);
 
     if (form && responses.length > 0) {
       y = ensureSpace(doc, y, 80);
