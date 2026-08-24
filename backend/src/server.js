@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const pool = require('./shared/config/db');;
+require('./shared/config/mailer');
 const authRoutes = require('./features/auth/auth.routes');
 const usersRoutes = require('./features/users/users.routes');
 const eventsRoutes = require('./features/events/events.routes');
