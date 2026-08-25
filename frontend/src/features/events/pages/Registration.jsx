@@ -127,9 +127,13 @@ async function handleSubmit(e) {
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>{event.category}</span>
-            {event.is_team_event && (
+            {event.is_team_event ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700">
                 <Users size={12} /> Team Event
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                Individual
               </span>
             )}
           </div>
