@@ -1,5 +1,7 @@
 const registrationsModel = require('./registrations.model');
 const eventsModel = require('../events/events.model');
+const usersModel = require('../users/users.model');
+const { sendMail, buildRegistrationConfirmationEmail } = require('../../shared/services/mailer.service');
 
 async function register(req, res) {
   try {
@@ -38,6 +40,29 @@ async function register(req, res) {
     });
 
     res.status(201).json({ message: 'Registered successfully', registrationId });
+
+    // Fire-and-forget confirmation email — runs after the response is sent,
+    // so a slow/failed email never delays or breaks registration itself.
+    usersModel.getProfile(req.user.id)
+      .then((profile) => {
+        const html = buildRegistrationConfirmationEmail({
+          studentName: profile.full_name,
+          eventTitle: event.title,
+          eventDate: event.event_date,
+          eventTime: event.event_time,
+          location: event.location,
+          category: event.category,
+          teamName: event.is_team_event ? teamMembers : null,
+          eventId: event.id,
+          organizerName: event.organizing_department,
+        });
+        return sendMail({
+          to: profile.email,
+          subject: `✅ Registration Confirmed: ${event.title}`,
+          html,
+        });
+      })
+      .catch((err) => console.error('Registration confirmation email failed:', err.message));
   } catch (err) {
     res.status(500).json({ message: 'Registration failed', error: err.message });
   }
