@@ -1,15 +1,16 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarX2 } from 'lucide-react';
 
-const DOT_TONE = {
-  Technical: 'bg-primary-600',
-  Cultural: 'bg-slate-400',
-  Workshop: 'bg-orange-500',
-  Competition: 'bg-violet-600',
-  Seminar: 'bg-amber-700',
-  Sports: 'bg-pink-500',
-  Conference: 'bg-slate-600',
+const CATEGORY_STYLE = {
+  Technical: { dot: 'bg-primary-600', chip: 'bg-primary-50 text-primary-700' },
+  Cultural: { dot: 'bg-slate-400', chip: 'bg-slate-100 text-slate-600' },
+  Workshop: { dot: 'bg-orange-500', chip: 'bg-orange-50 text-orange-700' },
+  Competition: { dot: 'bg-violet-600', chip: 'bg-violet-50 text-violet-700' },
+  Seminar: { dot: 'bg-amber-700', chip: 'bg-amber-50 text-amber-800' },
+  Sports: { dot: 'bg-pink-500', chip: 'bg-pink-50 text-pink-700' },
+  Conference: { dot: 'bg-slate-600', chip: 'bg-slate-100 text-slate-700' },
 };
+const DEFAULT_STYLE = { dot: 'bg-slate-400', chip: 'bg-slate-100 text-slate-600' };
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function dateKey(d) {
@@ -19,10 +20,8 @@ function dateKey(d) {
 
 /**
  * Shared month-grid calendar used by both BrowseEvents.jsx (faculty/student)
- * and ManageEvents.jsx (admin). Previously this ~150-line block was
- * duplicated in both files; extracted here so a fix only needs to happen
- * once. Parent is responsible for its own filtering - this component just
- * renders whatever `events` array it's given.
+ * and ManageEvents.jsx (admin). Parent owns its own filtering - this
+ * component just renders whatever `events` array it's given.
  */
 export default function EventCalendar({ events, onDayClick, onEventClick }) {
   const [monthCursor, setMonthCursor] = useState(() => {
@@ -96,126 +95,165 @@ export default function EventCalendar({ events, onDayClick, onEventClick }) {
   const today = new Date();
   const todayKey = dateKey(today);
   const isSameDay = (a, b) => a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const isCurrentMonth = isSameDay(new Date(monthCursor.getFullYear(), monthCursor.getMonth(), 1), new Date(today.getFullYear(), today.getMonth(), 1));
 
   return (
-    <div className="rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-slate-100 bg-gradient-to-b from-slate-50/80 to-white px-4 py-3.5 sm:px-5">
         <button
           onClick={() => setMonthCursor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
-          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          aria-label="Previous month"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-900 hover:shadow-sm"
         >
           <ChevronLeft size={18} />
         </button>
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-slate-900 sm:text-base">
+
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-base font-bold tracking-tight text-slate-900 sm:text-lg">
             {monthCursor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </h2>
-          <button
-            onClick={goToToday}
-            className="rounded-full border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500 transition hover:border-primary-300 hover:text-primary-600"
-          >
-            Today
-          </button>
+          {!isCurrentMonth && (
+            <button
+              onClick={goToToday}
+              className="rounded-full border border-primary-200 bg-primary-50 px-2.5 py-1 text-[10px] font-semibold text-primary-700 transition hover:bg-primary-100"
+            >
+              Today
+            </button>
+          )}
         </div>
+
         <button
           onClick={() => setMonthCursor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
-          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          aria-label="Next month"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-900 hover:shadow-sm"
         >
           <ChevronRight size={18} />
         </button>
       </div>
 
-      <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 border-b border-slate-100 pb-3">
-        {Object.entries(DOT_TONE).map(([cat, tone]) => (
-          <span key={cat} className="flex items-center gap-1 text-[10px] text-slate-500">
-            <span className={`h-1.5 w-1.5 rounded-full ${tone}`} /> {cat}
+      {/* Legend */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 border-b border-slate-100 px-4 py-2.5 sm:px-5">
+        {Object.entries(CATEGORY_STYLE).map(([cat, style]) => (
+          <span key={cat} className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+            <span className={`h-2 w-2 rounded-full ${style.dot}`} /> {cat}
           </span>
         ))}
       </div>
 
-      {!monthHasEvents && (
-        <p className="mb-2 text-center text-xs text-slate-400">No events this month</p>
-      )}
-
-      <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
-        {WEEKDAYS.map((wd) => (
-          <div key={wd} className="pb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-            {wd}
+      <div className="p-3 sm:p-4">
+        {!monthHasEvents && (
+          <div className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-slate-50 py-3 text-xs font-medium text-slate-400">
+            <CalendarX2 size={14} /> No events this month
           </div>
-        ))}
+        )}
 
-        {calendarCells.map((cellDate, i) => {
-          if (!cellDate) return <div key={i} className="min-h-[64px] sm:min-h-[92px]" />;
-          const key = dateKey(cellDate);
-          const dayEvents = eventsByDate[key] || [];
-          const isToday = isSameDay(cellDate, today);
-          const isPast = key < todayKey;
+        {/* Weekday row */}
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+          {WEEKDAYS.map((wd) => (
+            <div key={wd} className="pb-2 text-center text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              {wd}
+            </div>
+          ))}
 
-          return (
-            <div
-              key={i}
-              onClick={() => dayEvents.length > 0 && handleDayClick(key)}
-              className={`relative min-h-[64px] rounded-lg border p-1 transition sm:min-h-[92px] sm:p-1.5 ${
-                isToday ? 'border-primary-300 bg-primary-50/40' : 'border-slate-100'
-              } ${isPast ? 'opacity-50' : ''} ${dayEvents.length > 0 ? 'cursor-pointer hover:border-primary-200 hover:bg-slate-50' : ''}`}
-            >
-              <span className={`text-[10px] font-semibold sm:text-[11px] ${isToday ? 'text-primary-700' : 'text-slate-500'}`}>
-                {cellDate.getDate()}
-              </span>
+          {calendarCells.map((cellDate, i) => {
+            if (!cellDate) return <div key={i} className="min-h-[72px] sm:min-h-[104px]" />;
+            const key = dateKey(cellDate);
+            const dayEvents = eventsByDate[key] || [];
+            const isToday = isSameDay(cellDate, today);
+            const isPast = key < todayKey;
+            const hasEvents = dayEvents.length > 0;
 
-              <div className="mt-1 space-y-1">
-                {dayEvents.slice(0, 2).map((ev) => (
+            return (
+              <div
+                key={i}
+                onClick={() => hasEvents && handleDayClick(key)}
+                onKeyDown={(e) => {
+                  if (hasEvents && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    handleDayClick(key);
+                  }
+                }}
+                role={hasEvents ? 'button' : undefined}
+                tabIndex={hasEvents ? 0 : undefined}
+                aria-label={hasEvents ? `${dayEvents.length} event${dayEvents.length === 1 ? '' : 's'} on ${cellDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}` : undefined}
+                className={`group relative flex min-h-[72px] flex-col rounded-xl border p-1.5 transition sm:min-h-[104px] sm:p-2 ${
+                  isToday
+                    ? 'border-primary-400 bg-primary-50/60 ring-1 ring-primary-200'
+                    : 'border-slate-100 bg-white'
+                } ${isPast && !isToday ? 'opacity-60' : ''} ${
+                  hasEvents
+                    ? 'cursor-pointer hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-400'
+                    : ''
+                }`}
+              >
+                <span
+                  className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold sm:h-6 sm:w-6 sm:text-xs ${
+                    isToday ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-600'
+                  }`}
+                >
+                  {cellDate.getDate()}
+                </span>
+
+                <div className="mt-1 flex flex-1 flex-col gap-1">
+                  {dayEvents.slice(0, 2).map((ev) => {
+                    const style = CATEGORY_STYLE[ev.category] || DEFAULT_STYLE;
+                    return (
+                      <div
+                        key={ev.id}
+                        title={ev.title}
+                        className={`truncate rounded-md px-1.5 py-0.5 text-left text-[9px] font-semibold sm:text-[10.5px] ${style.chip}`}
+                      >
+                        {ev.title}
+                      </div>
+                    );
+                  })}
+                  {dayEvents.length > 2 && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setExpandedDay(expandedDay === key ? null : key); }}
+                      className="mt-auto self-start px-1.5 text-[9px] font-bold text-primary-600 hover:underline sm:text-[10.5px]"
+                    >
+                      +{dayEvents.length - 2} more
+                    </button>
+                  )}
+                </div>
+
+                {expandedDay === key && (
                   <div
-                    key={ev.id}
-                    className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-left text-[9px] font-medium text-slate-700 sm:text-[10px]"
-                    title={ev.title}
+                    ref={expandedPopupRef}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute left-0 top-full z-10 mt-1.5 w-56 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-xl"
                   >
-                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_TONE[ev.category] || 'bg-slate-400'}`} />
-                    <span className="truncate">{ev.title}</span>
+                    <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                      {cellDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </p>
+                    <div className="max-h-48 space-y-1 overflow-y-auto">
+                      {dayEvents.map((ev) => {
+                        const style = CATEGORY_STYLE[ev.category] || DEFAULT_STYLE;
+                        return (
+                          <button
+                            key={ev.id}
+                            onClick={() => { setExpandedDay(null); onEventClick(ev.id); }}
+                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                          >
+                            <span className={`h-2 w-2 shrink-0 rounded-full ${style.dot}`} />
+                            <span className="truncate">{ev.title}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={() => handleDayClick(key)}
+                      className="mt-2 w-full rounded-lg bg-primary-600 px-2 py-1.5 text-[10.5px] font-bold text-white transition hover:bg-primary-700"
+                    >
+                      View all in List →
+                    </button>
                   </div>
-                ))}
-                {dayEvents.length > 2 && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setExpandedDay(expandedDay === key ? null : key); }}
-                    className="px-1 text-[9px] font-semibold text-primary-600 hover:underline sm:text-[10px]"
-                  >
-                    +{dayEvents.length - 2} more
-                  </button>
                 )}
               </div>
-
-              {expandedDay === key && (
-                <div
-                  ref={expandedPopupRef}
-                  onClick={(e) => e.stopPropagation()}
-                  className="absolute left-0 top-full z-10 mt-1 w-52 rounded-xl border border-slate-200 bg-white p-2 shadow-lg"
-                >
-                  <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                    {cellDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </p>
-                  <div className="max-h-48 space-y-0.5 overflow-y-auto">
-                    {dayEvents.map((ev) => (
-                      <button
-                        key={ev.id}
-                        onClick={() => { setExpandedDay(null); onEventClick(ev.id); }}
-                        className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                      >
-                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_TONE[ev.category] || 'bg-slate-400'}`} />
-                        <span className="truncate">{ev.title}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => handleDayClick(key)}
-                    className="mt-1.5 w-full rounded-lg bg-primary-50 px-2 py-1.5 text-[10px] font-semibold text-primary-700 hover:bg-primary-100"
-                  >
-                    View all in List →
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
