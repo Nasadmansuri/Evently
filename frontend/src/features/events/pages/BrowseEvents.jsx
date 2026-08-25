@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, MapPin, AlertCircle, SearchX, CheckCircle2, List, CalendarDays, ChevronLeft, ChevronRight, X, Users } from 'lucide-react';
 import api from '../../../shared/services/api';
@@ -58,7 +58,26 @@ export default function BrowseEvents() {
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
   const [expandedDay, setExpandedDay] = useState(null);
+  const expandedPopupRef = useRef(null);
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (!expandedDay) return;
+    function handleClickOutside(e) {
+      if (expandedPopupRef.current && !expandedPopupRef.current.contains(e.target)) {
+        setExpandedDay(null);
+      }
+    }
+    function handleEscape(e) {
+      if (e.key === 'Escape') setExpandedDay(null);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [expandedDay]);
 
   async function loadEvents() {
     setLoading(true);
@@ -381,6 +400,7 @@ export default function BrowseEvents() {
 
                   {expandedDay === key && (
                     <div
+                      ref={expandedPopupRef}
                       onClick={(e) => e.stopPropagation()}
                       className="absolute left-0 top-full z-10 mt-1 w-52 rounded-xl border border-slate-200 bg-white p-2 shadow-lg"
                     >
