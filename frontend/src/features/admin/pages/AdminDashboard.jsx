@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Check, X, Loader2, AlertCircle, Inbox, CalendarDays, Users, GraduationCap, BarChart3, TrendingUp, Images, Plus, Calendar, MapPin } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
-import { isEventPast } from '../../../shared/utils/eventStatus';
+import { isEventPast, getEventStatus } from '../../../shared/utils/eventStatus';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -243,6 +243,7 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               {recentEvents.map((ev) => {
                 const isPast = isEventPast(ev.event_date);
+                const liveStatus = getEventStatus(ev.event_date, ev.event_time);
                 return (
                 <button
                   key={ev.id}
@@ -258,9 +259,13 @@ export default function AdminDashboard() {
                         </span>
                       ) : null}
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${
-                        isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                        liveStatus === 'ended'
+                          ? 'bg-slate-100 text-slate-500'
+                          : liveStatus === 'ongoing'
+                          ? 'bg-amber-50 text-amber-700'
+                          : 'bg-emerald-50 text-emerald-700'
                       }`}>
-                        {isPast ? 'Ended' : ev.status}
+                        {liveStatus === 'ongoing' ? 'Ongoing' : isPast ? 'Ended' : ev.status}
                       </span>
                     </div>
                   </div>

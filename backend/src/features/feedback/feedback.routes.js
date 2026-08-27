@@ -5,6 +5,7 @@ const { requireAuth, requireRole } = require('../../shared/middleware/auth.middl
 
 router.post('/forms', requireAuth, requireRole('faculty', 'admin'), controller.createForm);
 router.get('/forms/event/:eventId', requireAuth, controller.getFormByEvent);
+router.get('/my-submitted', requireAuth, requireRole('student'), controller.getMySubmittedEvents);
 router.post('/responses', requireAuth, requireRole('student'), controller.submitResponse);
 
 module.exports = router;

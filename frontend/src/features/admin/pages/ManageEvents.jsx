@@ -7,7 +7,7 @@ import EventCalendar from '../../../shared/components/EventCalendar';
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 import { useAuth } from '../../../shared/context/AuthContext';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
-import { isEventPast } from '../../../shared/utils/eventStatus';
+import { isEventPast, getEventStatus } from '../../../shared/utils/eventStatus';
 import { showToast } from '../../../shared/utils/toast';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facultyStructure';
@@ -37,6 +37,7 @@ export default function ManageEvents() {
   const [activeDepartment, setActiveDepartment] = useState('All');
   const [viewMode, setViewMode] = useState('list');
   const [dateFilter, setDateFilter] = useState(null);
+  const [ongoingOnly, setOngoingOnly] = useState(false);
 
   async function loadEvents() {
     setLoading(true);
@@ -65,9 +66,10 @@ export default function ManageEvents() {
       }
     }
     if (dateFilter) list = list.filter((ev) => dateKey(ev.event_date) === dateFilter);
+    if (ongoingOnly) list = list.filter((ev) => getEventStatus(ev.event_date, ev.event_time) === 'ongoing');
     list = [...list].sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
     return list;
-  }, [events, search, activeCategory, activeDepartment, dateFilter]);
+  }, [events, search, activeCategory, activeDepartment, dateFilter, ongoingOnly]);
 
   const calendarFiltered = useMemo(() => {
     let list = events.filter((ev) => ev.title.toLowerCase().includes(search.toLowerCase()));
@@ -119,6 +121,20 @@ export default function ManageEvents() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setOngoingOnly((v) => !v)}
+            className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition ${
+              ongoingOnly
+                ? 'border-amber-300 bg-amber-50 text-amber-700'
+                : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+            }`}
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              {ongoingOnly && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />}
+              <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${ongoingOnly ? 'bg-amber-600' : 'bg-slate-300'}`} />
+            </span>
+            Ongoing Only
+          </button>
           <div className="flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
             <button
               onClick={() => setViewMode('list')}
@@ -252,6 +268,7 @@ export default function ManageEvents() {
             const style = getCategoryStyle(ev.category);
             const isOwn = ev.created_by === user?.id;
             const isPast = isEventPast(ev.event_date);
+            const liveStatus = getEventStatus(ev.event_date, ev.event_time);
             return (
               <div key={ev.id} className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                 <div className={`relative flex h-40 items-start justify-between overflow-hidden px-3 pt-3 ${ev.banner_image ? '' : ''}`}>
@@ -277,9 +294,13 @@ export default function ManageEvents() {
                     ) : null}
                   </div>
                   <span className={`relative rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
-                    isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                    liveStatus === 'ended'
+                      ? 'bg-slate-100 text-slate-500'
+                      : liveStatus === 'ongoing'
+                      ? 'bg-amber-50 text-amber-700'
+                      : 'bg-emerald-50 text-emerald-700'
                   }`}>
-                    {isPast ? 'Ended' : ev.status}
+                    {liveStatus === 'ongoing' ? 'Ongoing' : isPast ? 'Ended' : ev.status}
                   </span>
                 </div>
                 <div className="p-5">

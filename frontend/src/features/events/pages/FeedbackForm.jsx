@@ -8,6 +8,7 @@ export default function FeedbackForm() {
   const navigate = useNavigate();
   const [form, setForm] = useState(null);
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
+  const [myResponse, setMyResponse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -21,6 +22,7 @@ export default function FeedbackForm() {
         const res = await api.get(`/feedback/forms/event/${id}`);
         setForm(res.data.form);
         setAlreadySubmitted(res.data.alreadySubmitted);
+        setMyResponse(res.data.myResponse);
       } catch (err) {
         setError('Failed to load feedback form');
       } finally {
@@ -84,10 +86,56 @@ export default function FeedbackForm() {
 
   if (alreadySubmitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <CheckCircle2 className="mb-4 text-emerald-500" size={40} />
-        <p className="text-sm font-semibold text-slate-700">Feedback Submitted ✓</p>
-        <Link to={`/events/${id}`} className="mt-2 text-xs font-medium text-primary-600 hover:underline">
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-5 flex items-center gap-3 rounded-[20px] border border-emerald-100 bg-emerald-50 px-5 py-4">
+          <CheckCircle2 className="shrink-0 text-emerald-500" size={24} />
+          <div>
+            <p className="text-sm font-semibold text-emerald-800">Feedback Submitted</p>
+            <p className="text-xs text-emerald-600">Here's what you shared for this event.</p>
+          </div>
+        </div>
+
+        <div className="space-y-5 rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-900">Overall Rating</label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Star
+                  key={n}
+                  size={24}
+                  className={n <= (myResponse?.star_rating || 0) ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}
+                />
+              ))}
+            </div>
+          </div>
+
+          {form.questions.map((q) => {
+            const answer = myResponse?.answers?.[q.id];
+            return (
+              <div key={q.id}>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">{q.question_text}</label>
+
+                {q.question_type === 'rating' ? (
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Star
+                        key={n}
+                        size={18}
+                        className={n <= (answer || 0) ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                    {answer || '—'}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <Link to={`/events/${id}`} className="mt-4 inline-block text-xs font-medium text-primary-600 hover:underline">
           ← Back to Event
         </Link>
       </div>

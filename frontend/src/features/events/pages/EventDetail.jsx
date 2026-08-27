@@ -6,6 +6,7 @@ import { showToast } from '../../../shared/utils/toast';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
+import { getEventStatus } from '../../../shared/utils/eventStatus';
 
 const TABS = ['Details', 'Gallery', 'Feedback'];
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
@@ -117,9 +118,9 @@ export default function EventDetail() {
   }
 
   const style = getCategoryStyle(event.category);
-  const isPastEvent = new Date(event.event_date) < new Date(new Date().setHours(0, 0, 0, 0));
-  const eventStartDateTime = new Date(`${String(event.event_date).slice(0, 10)}T${event.event_time}`);
-  const hasEventStarted = new Date() >= eventStartDateTime;
+  const liveStatus = getEventStatus(event.event_date, event.event_time);
+  const isPastEvent = liveStatus === 'ended';
+  const hasEventStarted = liveStatus !== 'upcoming';
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -141,8 +142,10 @@ export default function EventDetail() {
             )}
             <div className="relative flex h-full flex-col justify-between">
               <div className="flex items-center justify-between gap-3">
-                <span className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 shadow-sm">
-                  {isPastEvent ? 'Ended' : event.status}
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] shadow-sm ${
+                  liveStatus === 'ongoing' ? 'bg-amber-500/95 text-white' : 'bg-white/90 text-slate-600'
+                }`}>
+                  {liveStatus === 'ongoing' ? 'Ongoing' : isPastEvent ? 'Ended' : event.status}
                 </span>
                 <div className="flex items-center gap-1.5">
                   {event.is_team_event ? (
@@ -272,6 +275,14 @@ export default function EventDetail() {
                       {event.is_team_event ? 'Team Event' : 'Individual'}
                     </span>
                   </div>
+                  {user?.role === 'student' && event.is_registered && event.is_team_event && (
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <span className="text-slate-500">Your Registration</span>
+                      <span className="max-w-[60%] text-right font-medium text-slate-900">
+                        {event.my_team_members ? event.my_team_members : 'Registered Individually'}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                     <span className="text-slate-500">Maximum Participants</span>
                     <span className="font-medium text-slate-900">{event.max_participants || 'Unlimited'}</span>
@@ -353,6 +364,12 @@ export default function EventDetail() {
                 <>
                   <CheckCircle2 className="mb-3 text-emerald-500" size={28} />
                   <p className="text-sm font-medium text-slate-700">Feedback Submitted ✓</p>
+                  <button
+                    onClick={() => navigate('/student/my-feedback')}
+                    className="mt-3 text-xs font-medium text-primary-600 hover:underline"
+                  >
+                    View in My Feedback →
+                  </button>
                 </>
               ) : !event.is_registered ? (
                 <>

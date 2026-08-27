@@ -134,6 +134,7 @@ async function getEventById(id, userId) {
   const [rows] = await pool.query(
     `SELECT e.*, u.full_name AS organizer_name,
             (r.id IS NOT NULL) AS is_registered,
+            r.team_members AS my_team_members,
             (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1) AS banner_image
      FROM events e
      JOIN users u ON u.id = e.created_by

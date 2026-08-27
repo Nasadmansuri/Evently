@@ -5,6 +5,7 @@ import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { getStudentCourseLabel } from '../../../shared/utils/studentInfo';
+import { getEventStatus } from '../../../shared/utils/eventStatus';
 
 
 export default function StudentDashboard() {
@@ -31,12 +32,13 @@ export default function StudentDashboard() {
     loadRegistrations();
   }, []);
 
-  const { upcoming, past } = useMemo(() => {
+  const { upcoming, past, ongoing } = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const up = registrations.filter((r) => new Date(r.event_date) >= today);
     const pa = registrations.filter((r) => new Date(r.event_date) < today);
-    return { upcoming: up, past: pa };
+    const live = registrations.filter((r) => getEventStatus(r.event_date, r.event_time) === 'ongoing');
+    return { upcoming: up, past: pa, ongoing: live };
   }, [registrations]);
 
   return (

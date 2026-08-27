@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, AlertCircle, Inbox, Plus, Users } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
-import { isEventPast } from '../../../shared/utils/eventStatus';
+import { isEventPast, getEventStatus } from '../../../shared/utils/eventStatus';
 
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
@@ -74,6 +74,7 @@ export default function MyEvents() {
           {events.map((ev) => {
             const style = getCategoryStyle(ev.category);
             const isPast = isEventPast(ev.event_date);
+            const liveStatus = getEventStatus(ev.event_date, ev.event_time);
             return (
               <div
                 key={ev.id}
@@ -103,9 +104,13 @@ export default function MyEvents() {
                       ) : null}
                     </div>
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
-                      isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                      liveStatus === 'ended'
+                        ? 'bg-slate-100 text-slate-500'
+                        : liveStatus === 'ongoing'
+                        ? 'bg-amber-50 text-amber-700'
+                        : 'bg-emerald-50 text-emerald-700'
                     }`}>
-                      {isPast ? 'Ended' : ev.status}
+                      {liveStatus === 'ongoing' ? 'Ongoing' : isPast ? 'Ended' : ev.status}
                     </span>
                   </div>
                   <h3 className="mb-2 line-clamp-1 text-sm font-semibold text-slate-900">{ev.title}</h3>

@@ -6,10 +6,11 @@ import EventCalendar from '../../../shared/components/EventCalendar';
 
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
-import { isEventPast } from '../../../shared/utils/eventStatus';
+import { isEventPast, getEventStatus } from '../../../shared/utils/eventStatus';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facultyStructure';
+import EventCard from '../../../shared/components/EventCard';
 
 
 const CATEGORIES = ['All', 'Technical', 'Cultural', 'Workshop', 'Competition', 'Seminar', 'Sports', 'Conference'];
@@ -43,6 +44,7 @@ export default function BrowseEvents() {
   const [activeDepartment, setActiveDepartment] = useState('All');
   const [viewMode, setViewMode] = useState('list');
   const [dateFilter, setDateFilter] = useState(null);
+  const [ongoingOnly, setOngoingOnly] = useState(false);
   const { user } = useAuth();
 
   async function loadEvents() {
@@ -74,9 +76,10 @@ export default function BrowseEvents() {
       }
     }
     if (dateFilter) list = list.filter((ev) => dateKey(ev.event_date) === dateFilter);
+    if (ongoingOnly) list = list.filter((ev) => getEventStatus(ev.event_date, ev.event_time) === 'ongoing');
     list = [...list].sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
     return list;
-  }, [events, search, activeDepartment, dateFilter]);
+  }, [events, search, activeDepartment, dateFilter, ongoingOnly]);
 
   const calendarFiltered = useMemo(() => {
     let list = events.filter((ev) => ev.title.toLowerCase().includes(search.toLowerCase()));
@@ -118,23 +121,39 @@ export default function BrowseEvents() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">All Events</h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Browse and participate in exciting college events</p>
         </div>
-        <div className="flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setViewMode('list')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              viewMode === 'list' ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+            onClick={() => setOngoingOnly((v) => !v)}
+            className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition ${
+              ongoingOnly
+                ? 'border-amber-300 bg-amber-50 text-amber-700'
+                : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
             }`}
           >
-            <List size={14} /> List
+            <span className="relative flex h-1.5 w-1.5">
+              {ongoingOnly && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />}
+              <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${ongoingOnly ? 'bg-amber-600' : 'bg-slate-300'}`} />
+            </span>
+            Ongoing Only
           </button>
-          <button
-            onClick={() => setViewMode('calendar')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              viewMode === 'calendar' ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <CalendarDays size={14} /> Calendar
-          </button>
+          <div className="flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                viewMode === 'list' ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <List size={14} /> List
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                viewMode === 'calendar' ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <CalendarDays size={14} /> Calendar
+            </button>
+          </div>
         </div>
       </div>
 
@@ -249,98 +268,17 @@ export default function BrowseEvents() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {filteredSorted.map((ev) => {
-            const headerTone = HEADER_TONE[ev.category] || 'bg-slate-300';
-            const isPast = isEventPast(ev.event_date);
-            const statusText = isPast ? 'ended' : (ev.status || 'upcoming').toLowerCase();
-
-            return (
-              <article
-                key={ev.id}
-                className="flex flex-col overflow-hidden rounded-[18px] border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
-              >
-                <div
-                  className={`relative flex h-40 w-full shrink-0 items-start justify-between overflow-hidden p-4 ${
-                    ev.banner_image ? '' : headerTone
-                  }`}
-                >
-                  {ev.banner_image && (
-                    <>
-                      <img
-                        src={`${ASSET_BASE_URL}${ev.banner_image}`}
-                        alt=""
-                        className="absolute inset-0 h-full w-full object-cover"
-                        style={{ objectPosition: 'center 32%' }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-black/30" />
-                    </>
-                  )}
-                  <div className="relative flex items-center gap-1.5">
-                    <span className="inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
-                      {ev.category}
-                    </span>
-                    {ev.is_team_event ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-600/95 px-3 py-1 text-[10px] font-bold uppercase text-white shadow-sm">
-                        <Users size={11} /> Team
-                      </span>
-                    ) : null}
-                  </div>
-                  <span className={`relative inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase shadow-sm ${
-                    isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-100 text-emerald-800'
-                  }`}>
-                    {statusText}
-                  </span>
-                </div>
-
-                <div className="flex flex-col gap-3 p-4">
-                  <h3 className="text-[1.5rem] font-bold leading-[1.15] tracking-tight text-slate-800">
-                    {ev.title}
-                  </h3>
-
-                  <p className="line-clamp-2 text-[12px] leading-[1.6] text-slate-600">{ev.description}</p>
-
-                  <div className="space-y-2 text-[13px] font-medium text-slate-700">
-                    <div className="flex items-center gap-3">
-                      <Calendar size={15} className="text-slate-500" />
-                      <span>{formatEventDate(ev.event_date)}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <MapPin size={15} className="text-slate-500" />
-                      <span>{ev.location}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-auto flex flex-col gap-2.5 pt-1">
-                    <button
-                      onClick={() => navigate(`/events/${ev.id}`)}
-                      className="w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-[13px] font-semibold text-primary-700 transition hover:bg-primary-100"
-                    >
-                      View Details
-                    </button>
-                    {user?.role === 'student' && (
-                      ev.is_registered ? (
-                        <span className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2.5 text-[13px] font-semibold text-emerald-700">
-                          <CheckCircle2 size={14} /> Already Registered
-                        </span>
-                      ) : isPast ? (
-                        <span className="flex w-full items-center justify-center rounded-lg bg-slate-100 px-3 py-2.5 text-[13px] font-semibold text-slate-500">
-                          Event Ended
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => navigate(`/events/${ev.id}/register`)}
-                          className="w-full rounded-lg bg-primary-600 px-3 py-2.5 text-[13px] font-semibold text-white shadow-sm transition hover:bg-primary-700 hover:shadow-md"
-                        >
-                          Register Now
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredSorted.map((ev) => (
+            <EventCard
+              key={ev.id}
+              event={ev}
+              isPast={isEventPast(ev.event_date)}
+              onViewDetails={() => navigate(`/events/${ev.id}`)}
+              onRegister={() => navigate(`/events/${ev.id}/register`)}
+              showRegisterAction={user?.role === 'student'}
+            />
+          ))}
         </div>
       )}
     </div>

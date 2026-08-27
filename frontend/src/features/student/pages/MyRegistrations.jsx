@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Calendar, MapPin, AlertCircle, Inbox, Users } from 'lucide-react';
+import { AlertCircle, Inbox } from 'lucide-react';
 import api from '../../../shared/services/api';
-import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { isEventPast } from '../../../shared/utils/eventStatus';
+import EventCard from '../../../shared/components/EventCard';
 
 export default function MyRegistrations() {
   const navigate = useNavigate();
@@ -11,6 +11,7 @@ export default function MyRegistrations() {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [feedbackStatus, setFeedbackStatus] = useState({}); // { eventId: 'none' | 'open' | 'submitted' }
 
   const activeTab = searchParams.get('tab') === 'past' ? 'past' : 'upcoming';
 
@@ -36,6 +37,36 @@ export default function MyRegistrations() {
       upcoming: registrations.filter((r) => new Date(r.event_date) >= today),
       past: registrations.filter((r) => new Date(r.event_date) < today),
     };
+  }, [registrations]);
+
+  // "Live" = the event has actually started (date + time), regardless of
+  // which tab it's sorted into by date alone. An event starting 9am today
+  // is feedback-eligible even though it's still listed under "Upcoming"
+  // until midnight - so we check every registration, not just past ones.
+  function hasStarted(ev) {
+    return new Date() >= new Date(`${String(ev.event_date).slice(0, 10)}T${ev.event_time}`);
+  }
+
+  useEffect(() => {
+    const liveEvents = registrations.filter(hasStarted);
+    if (liveEvents.length === 0) return;
+    let cancelled = false;
+    async function loadStatuses() {
+      const entries = await Promise.all(
+        liveEvents.map(async (ev) => {
+          try {
+            const res = await api.get(`/feedback/forms/event/${ev.id}`);
+            if (!res.data.form) return [ev.id, 'none'];
+            return [ev.id, res.data.alreadySubmitted ? 'submitted' : 'open'];
+          } catch {
+            return [ev.id, 'none'];
+          }
+        })
+      );
+      if (!cancelled) setFeedbackStatus(Object.fromEntries(entries));
+    }
+    loadStatuses();
+    return () => { cancelled = true; };
   }, [registrations]);
 
   const items = activeTab === 'upcoming' ? upcoming : past;
@@ -92,46 +123,32 @@ export default function MyRegistrations() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((ev) => {
-            const style = getCategoryStyle(ev.category);
-            const isPast = isEventPast(ev.event_date);
+            const live = hasStarted(ev);
             return (
-              <div
+              <EventCard
                 key={ev.registration_id}
-                className="rounded-[20px] border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <button onClick={() => navigate(`/events/${ev.id}`)} className="block w-full text-left">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${style.bg} ${style.text}`}>{ev.category}</span>
-                      {ev.team_members ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-600 px-2 py-0.5 text-[11px] font-medium text-white">
-                          <Users size={11} /> Team
-                        </span>
-                      ) : null}
-                    </div>
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
-                      isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
-                    }`}>
-                      {isPast ? 'Ended' : ev.status}
-                    </span>
-                  </div>
-                  <h3 className="mb-2 line-clamp-2 text-sm font-semibold text-slate-900">{ev.title}</h3>
-                  <div className="space-y-1.5 text-[11px] text-slate-500">
-                    <div className="flex items-center gap-1.5"><Calendar size={12} className="shrink-0" />{new Date(ev.event_date).toLocaleDateString()}</div>
-                    <div className="flex items-center gap-1.5"><MapPin size={12} className="shrink-0" />{ev.location}</div>
-                  </div>
-                </button>
-                {activeTab === 'past' && (
-                  <button
-                    onClick={() => navigate(`/events/${ev.id}?tab=feedback`)}
-                    className="mt-3 w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 transition hover:bg-primary-100"
-                  >
-                    Give Feedback
-                  </button>
-                )}
-              </div>
+                event={{ ...ev, is_team_event: !!ev.team_members }}
+                isPast={isEventPast(ev.event_date)}
+                onViewDetails={() => navigate(`/events/${ev.id}`)}
+                footer={
+                  !live ? (
+                    <span className="text-[11px] text-slate-400">Feedback opens once event starts</span>
+                  ) : feedbackStatus[ev.id] === 'submitted' ? (
+                    <span className="text-[11px] font-semibold text-emerald-600">Feedback Submitted ✓</span>
+                  ) : feedbackStatus[ev.id] === 'open' ? (
+                    <button
+                      onClick={() => navigate(`/events/${ev.id}/feedback`)}
+                      className="rounded-full bg-primary-50 px-3 py-1.5 text-[11px] font-semibold text-primary-700 transition hover:bg-primary-100"
+                    >
+                      Give Feedback
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-slate-400">No feedback form yet</span>
+                  )
+                }
+              />
             );
           })}
         </div>

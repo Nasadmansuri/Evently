@@ -68,6 +68,24 @@ async function hasSubmitted(formId, userId) {
   return rows.length > 0;
 }
 
+async function getMyResponse(formId, userId) {
+  const [rows] = await pool.query(
+    `SELECT star_rating, answers_json, submitted_at
+     FROM feedback_responses WHERE form_id = ? AND user_id = ?`,
+    [formId, userId]
+  );
+  if (rows.length === 0) return null;
+  return { ...rows[0], answers: JSON.parse(rows[0].answers_json) };
+}
+
+async function getMySubmittedEventIds(userId) {
+  const [rows] = await pool.query(
+    `SELECT event_id FROM feedback_responses WHERE user_id = ?`,
+    [userId]
+  );
+  return rows.map((r) => r.event_id);
+}
+
 async function submitResponse({ formId, eventId, userId, starRating, answers }) {
   const [result] = await pool.query(
     `INSERT INTO feedback_responses (form_id, event_id, user_id, star_rating, answers_json)
@@ -89,4 +107,4 @@ async function getResponsesForForm(formId) {
   return rows.map((r) => ({ ...r, answers: JSON.parse(r.answers_json) }));
 }
 
-module.exports = { createForm, getFormByEvent, hasSubmitted, submitResponse, getResponsesForForm };
+module.exports = { createForm, getFormByEvent, hasSubmitted, getMyResponse, getMySubmittedEventIds, submitResponse, getResponsesForForm };

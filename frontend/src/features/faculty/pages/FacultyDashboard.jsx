@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, TrendingUp, Plus, CalendarSearch, Images, AlertCircle, Users } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
-import { isEventPast } from '../../../shared/utils/eventStatus';
+import { isEventPast, getEventStatus } from '../../../shared/utils/eventStatus';
 
 export default function FacultyDashboard() {
   const { user } = useAuth();
@@ -105,6 +105,7 @@ export default function FacultyDashboard() {
             <div className="space-y-2">
               {events.slice(0, 3).map((ev) => {
                 const isPast = isEventPast(ev.event_date);
+                const liveStatus = getEventStatus(ev.event_date, ev.event_time);
                 return (
                   <div key={ev.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                     <div>
@@ -120,9 +121,13 @@ export default function FacultyDashboard() {
                         </span>
                       ) : null}
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${
-                        isPast ? 'bg-slate-100 text-slate-500' : 'bg-emerald-50 text-emerald-700'
+                        liveStatus === 'ended'
+                          ? 'bg-slate-100 text-slate-500'
+                          : liveStatus === 'ongoing'
+                          ? 'bg-amber-50 text-amber-700'
+                          : 'bg-emerald-50 text-emerald-700'
                       }`}>
-                        {isPast ? 'Ended' : ev.status}
+                        {liveStatus === 'ongoing' ? 'Ongoing' : isPast ? 'Ended' : ev.status}
                       </span>
                     </div>
                   </div>

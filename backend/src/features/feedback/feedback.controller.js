@@ -42,14 +42,26 @@ async function getFormByEvent(req, res) {
     if (!form) return res.json({ form: null });
 
     let alreadySubmitted = false;
+    let myResponse = null;
     if (req.user.role === 'student') {
-      alreadySubmitted = await feedbackModel.hasSubmitted(form.id, req.user.id);
+      myResponse = await feedbackModel.getMyResponse(form.id, req.user.id);
+      alreadySubmitted = !!myResponse;
     }
 
-    res.json({ form, alreadySubmitted });
+    res.json({ form, alreadySubmitted, myResponse });
   } catch (err) {
     console.error('getFormByEvent error:', err);
     res.status(500).json({ message: 'Failed to load feedback form', error: err.message });
+  }
+}
+
+async function getMySubmittedEvents(req, res) {
+  try {
+    const eventIds = await feedbackModel.getMySubmittedEventIds(req.user.id);
+    res.json({ eventIds });
+  } catch (err) {
+    console.error('getMySubmittedEvents error:', err);
+    res.status(500).json({ message: 'Failed to load submitted feedback', error: err.message });
   }
 }
 
@@ -92,4 +104,4 @@ async function submitResponse(req, res) {
   }
 }
 
-module.exports = { createForm, getFormByEvent, submitResponse };
+module.exports = { createForm, getFormByEvent, submitResponse, getMySubmittedEvents };

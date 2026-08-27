@@ -36,4 +36,22 @@ async function markAllAsRead(userId) {
   return result.affectedRows;
 }
 
-module.exports = { getByUser, getUnreadCount, markAsRead, markAllAsRead };
+/**
+ * Bulk-inserts one notification row per user. Title is defensively
+ * truncated to 200 chars to match the `title` column's varchar(200) limit —
+ * without this, an unusually long event title could throw a DB error and
+ * crash the fire-and-forget notification step (and, worse, silently swallow
+ * that error, hiding a real bug). Message has no length limit (TEXT column).
+ */
+async function createForUsers(userIds, { title, message }) {
+  if (!userIds || userIds.length === 0) return 0;
+  const safeTitle = String(title).slice(0, 200);
+  const values = userIds.map((userId) => [userId, safeTitle, message]);
+  const [result] = await pool.query(
+    `INSERT INTO notifications (user_id, title, message) VALUES ?`,
+    [values]
+  );
+  return result.affectedRows;
+}
+
+module.exports = { getByUser, getUnreadCount, markAsRead, markAllAsRead, createForUsers };

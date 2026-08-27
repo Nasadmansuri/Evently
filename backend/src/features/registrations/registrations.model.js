@@ -27,7 +27,9 @@ async function createRegistration({ eventId, userId, teamMembers }) {
 async function getMyRegistrations(userId) {
   const [rows] = await pool.query(
     `SELECT r.id AS registration_id, r.team_members, r.registered_at,
-            e.id, e.title, e.category, e.location, e.event_date, e.event_time, e.status
+            e.id, e.title, e.category, e.location, e.event_date, e.event_time, e.status,
+            e.is_team_event, e.organizing_department, e.organizing_community,
+            (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1) AS banner_image
      FROM registrations r
      JOIN events e ON e.id = r.event_id
      WHERE r.user_id = ?
