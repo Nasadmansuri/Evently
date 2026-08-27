@@ -344,8 +344,16 @@ const TEXT_DARK = '#111827';
 const TEXT_BODY = '#374151';
 const TEXT_MUTED = '#6B7280';
 const CATEGORY_COLORS = {
-  Technical: '#2563EB', Cultural: '#6B7280', Workshop: '#F97316',
-  Competition: '#9333EA', Seminar: '#B45309', Sports: '#035352', Conference: '#475569',
+  Technical: '#2563EB',
+  Hackathon: '#059669',
+  Workshop: '#D97706',
+  Competition: '#9333EA',
+  Cultural: '#E11D48',
+  Seminar: '#4F46E5',
+  Sports: '#0D9488',
+  Conference: '#475569',
+  Exhibition: '#0891B2',
+  'Social & Networking': '#7C3AED',
 };
 const SLATE = '#334155';
 const CARD_BORDER = '#E4E4E7';

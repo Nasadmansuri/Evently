@@ -7,11 +7,11 @@
 :root {
   font-family: 'Manrope', sans-serif;
   color: #0f172a;
-  background: #f1f5f9;
+  background: #f8fafc;
 }
 
 html {
-  background: #f1f5f9;
+  background: #f8fafc;
   scrollbar-gutter: stable;
   overflow-y: scroll;
 }
@@ -19,7 +19,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: #f1f5f9;
+  background: #f8fafc;
 }
 
 * {

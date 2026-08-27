@@ -3,17 +3,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Type, AlignLeft, Tag, MapPin, CalendarDays, Clock, Landmark, Users,
   ClipboardList, Trophy, UserCheck, Image, AlertCircle, Loader2, ChevronDown, X, Upload, UsersRound, Map, ExternalLink,
-  RotateCcw, FileText, CheckCircle2, Info, Lock, CalendarClock
+  RotateCcw, FileText, CheckCircle2, Info, Lock, CalendarClock, Sparkles, Check, ArrowRight
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { COMMUNITIES, DEPARTMENT_DESIGNATIONS } from '../../../shared/utils/facultyStructure';
 import { isEventPast } from '../../../shared/utils/eventStatus';
+import { fireCelebrationConfetti } from '../../../shared/utils/confetti';
 import VenueLocationModal from '../../../shared/components/VenueLocationModal';
-
-const CATEGORIES = ['Technical', 'Cultural', 'Workshop', 'Competition', 'Seminar', 'Sports', 'Conference'];
+import { ALL_CATEGORIES as CATEGORIES } from '../../../shared/utils/categoryColors';
 const ORGANIZING_DEPARTMENTS = [
   ...Object.keys(ACADEMIC_STRUCTURE),
   ...Object.keys(DEPARTMENT_DESIGNATIONS),
@@ -131,13 +132,13 @@ export default function CreateEvent() {
       try {
         const res = await api.get(`/events/${eventId}`);
         const ev = res.data;
-        setTitle(ev.title);
-        setDescription(ev.description);
-        setCategory(ev.category);
-        setLocation(ev.location);
-        setEventDate(ev.event_date?.slice(0, 10));
-        setEventTime(ev.event_time?.slice(0, 5));
-        setOrganizingDepartment(ev.organizing_department);
+        setTitle(ev.title || '');
+        setDescription(ev.description || '');
+        setCategory(ev.category || '');
+        setLocation(ev.location || '');
+        setEventDate(ev.event_date ? ev.event_date.slice(0, 10) : '');
+        setEventTime(ev.event_time ? ev.event_time.slice(0, 5) : '');
+        setOrganizingDepartment(ev.organizing_department || '');
         setOrganizingCommunity(ev.organizing_community || '');
         setRulesEligibility(ev.rules_eligibility || '');
         setPrizeInfo(ev.prize_info || '');
@@ -162,65 +163,57 @@ export default function CreateEvent() {
     async function loadImages() {
       try {
         const res = await api.get(`/events/${eventId}/images`);
-        setExistingImages(res.data);
+        setExistingImages(res.data || []);
       } catch (err) {
-        // non-critical, silent
+        console.error('Failed to load images:', err);
       }
     }
     loadImages();
   }, [eventId]);
 
-  useEffect(() => {
-    return () => {
-      newImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
-    };
-  }, []);
-
   function handleFileSelect(e) {
-    const files = Array.from(e.target.files || []);
-    e.target.value = '';
-    if (files.length === 0) return;
-
     setImageError('');
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
 
-    const totalCount = existingImages.length + newImages.length + files.length;
-    if (totalCount > MAX_IMAGES) {
-      setImageError(`You can have a maximum of ${MAX_IMAGES} images per event`);
+    const currentTotal = existingImages.length + newImages.length;
+    if (currentTotal + files.length > MAX_IMAGES) {
+      setImageError(`You can upload at most ${MAX_IMAGES} images (currently ${currentTotal})`);
       return;
     }
 
-    const oversized = files.find((f) => f.size > MAX_IMAGE_SIZE);
-    if (oversized) {
-      setImageError(`"${oversized.name}" is over 5MB`);
+    const invalid = files.find((f) => f.size > MAX_IMAGE_SIZE);
+    if (invalid) {
+      setImageError(`"${invalid.name}" exceeds the 5MB size limit`);
       return;
     }
 
-    const notImage = files.find((f) => !f.type.startsWith('image/'));
-    if (notImage) {
-      setImageError(`"${notImage.name}" is not an image file`);
-      return;
-    }
+    const added = files.map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
 
-    const withPreviews = files.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
     setNewImages((prev) => {
-      const updated = [...prev, ...withPreviews];
-      if (bannerIndex === null && existingImages.length === 0) setBannerIndex(prev.length);
-      return updated;
+      const next = [...prev, ...added];
+      if (existingImages.length === 0 && bannerIndex === null) {
+        setBannerIndex(0);
+      }
+      return next;
     });
+    e.target.value = '';
   }
 
   function removeNewImage(index) {
     setNewImages((prev) => {
-      const copy = [...prev];
-      URL.revokeObjectURL(copy[index].previewUrl);
-      copy.splice(index, 1);
-      return copy;
-    });
-    setImageError('');
-    setBannerIndex((prev) => {
-      if (prev === null) return null;
-      if (prev === index) return null;
-      return prev > index ? prev - 1 : prev;
+      const target = prev[index];
+      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
+      const next = prev.filter((_, i) => i !== index);
+      if (bannerIndex === index) {
+        setBannerIndex(next.length > 0 ? 0 : null);
+      } else if (bannerIndex > index) {
+        setBannerIndex(bannerIndex - 1);
+      }
+      return next;
     });
   }
 
@@ -229,7 +222,7 @@ export default function CreateEvent() {
     try {
       await api.delete(`/events/${eventId}/images/${imageId}`);
       setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
-      showToast.success('Image deleted');
+      showToast.success('Photo removed');
     } catch (err) {
       showToast.error(err.response?.data?.message || 'Failed to delete image');
     } finally {
@@ -239,11 +232,13 @@ export default function CreateEvent() {
 
   async function handleSetBanner(imageId) {
     try {
-      const res = await api.patch(`/events/${eventId}/images/${imageId}/banner`);
-      setExistingImages(res.data);
-      showToast.success('Banner image updated');
+      await api.patch(`/events/${eventId}/images/${imageId}/banner`);
+      setExistingImages((prev) =>
+        prev.map((img) => ({ ...img, is_banner: img.id === imageId ? 1 : 0 }))
+      );
+      showToast.success('Cover photo updated');
     } catch (err) {
-      showToast.error(err.response?.data?.message || 'Failed to set banner image');
+      showToast.error('Failed to set cover image');
     }
   }
 
@@ -285,12 +280,17 @@ export default function CreateEvent() {
     setLoading(true);
     try {
       const payload = {
-        title, description, category, location, eventDate, eventTime,
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        location: location.trim(),
+        eventDate,
+        eventTime,
         organizingDepartment,
         organizingCommunity: organizingCommunity || undefined,
-        rulesEligibility: rulesEligibility || undefined,
-        prizeInfo: prizeInfo || undefined,
-        maxParticipants: maxParticipants || undefined,
+        rulesEligibility: rulesEligibility.trim() || undefined,
+        prizeInfo: prizeInfo.trim() || undefined,
+        maxParticipants: maxParticipants ? Number(maxParticipants) : undefined,
         isTeamEvent: isTeamEvent,
         publishType,
         publishDate: publishType === 'scheduled' ? publishDate : undefined,
@@ -305,6 +305,7 @@ export default function CreateEvent() {
         targetEventId = res.data.eventId;
         localStorage.removeItem('evently_event_draft');
         setDraftRestored(false);
+        fireCelebrationConfetti();
         if (res.data.isScheduled) {
           showToast.success('Event scheduled for automatic release!');
         } else {
@@ -347,55 +348,63 @@ export default function CreateEvent() {
   }
 
   const inputClass =
-    'w-full border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
+    'w-full border border-slate-200/90 bg-slate-50/70 rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-600 focus:bg-white transition';
   const selectClass =
-    'w-full appearance-none border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
+    'w-full appearance-none border border-slate-200/90 bg-slate-50/70 rounded-xl pl-9 pr-8 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-600 focus:bg-white transition';
   const iconClass = 'absolute left-3 top-1/2 -translate-y-1/2 text-slate-400';
   const chevronClass = 'absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none';
-  const labelClass = 'block text-xs font-medium text-slate-700 mb-1';
+  const labelClass = 'block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5';
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <div className="flex items-start justify-between">
+    <div className="mx-auto max-w-3xl pb-16">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-2xs">
+        {/* Header Strip */}
+        <div className="flex items-start justify-between pb-5 border-b border-slate-100">
           <div>
-            <h1 className="mb-0.5 text-xl font-bold text-slate-900">{isEditMode ? 'Edit Event' : 'Create New Event'}</h1>
-            <p className="mb-5 text-xs text-slate-500">
-              {isEditMode ? 'Update the event details below' : 'Fill in the details below to create an event'}
+            <div className="flex items-center gap-2 mb-1">
+              <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
+                {isEditMode ? 'Event Management' : 'Publishing Wizard'}
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              {isEditMode ? 'Edit Campus Event' : 'Create New Event'}
+            </h1>
+            <p className="mt-1 text-xs sm:text-sm text-slate-600">
+              {isEditMode ? 'Update event parameters, schedule, venue, or media.' : 'Publish workshops, hackathons, seminars, or festivals to the student portal.'}
             </p>
           </div>
+
           {!isEditMode && (title || description || location) && (
             <button
               type="button"
               onClick={handleDiscardDraft}
-              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition"
               title="Clear all fields"
             >
-              <RotateCcw size={12} /> Clear Form
+              <RotateCcw size={13} /> Clear Draft
             </button>
           )}
         </div>
 
         {draftRestored && !isEditMode && (
-          <div className="mb-4 flex items-center justify-between gap-2 rounded-xl border border-emerald-100 bg-emerald-50/80 p-3 text-xs text-emerald-900 animate-in fade-in duration-200">
-            <div className="flex items-center gap-2 font-medium">
-              <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+          <div className="mt-5 flex items-center justify-between gap-2 rounded-2xl border border-emerald-100 bg-emerald-50/80 p-3.5 text-xs text-emerald-900 animate-in fade-in duration-200 shadow-2xs">
+            <div className="flex items-center gap-2 font-semibold">
+              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
               <span>Restored unsaved draft automatically</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={handleDiscardDraft}
-                className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline"
+                className="text-xs font-bold text-rose-600 hover:underline"
               >
-                Clear Inputs
+                Discard
               </button>
               <button
                 type="button"
                 onClick={() => setDraftRestored(false)}
                 className="rounded-md p-1 text-emerald-700 hover:bg-emerald-100 transition"
                 title="Dismiss message"
-                aria-label="Dismiss message"
               >
                 <X size={14} />
               </button>
@@ -404,50 +413,63 @@ export default function CreateEvent() {
         )}
 
         {isEditMode && isConcludedEvent && (
-          <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs font-medium text-amber-900 animate-in fade-in duration-200">
-            <Lock size={16} className="text-amber-600 shrink-0" />
+          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs font-medium text-amber-900 shadow-2xs">
+            <Lock size={18} className="text-amber-600 shrink-0" />
             <span>
-              This is a concluded event record. Date and time are locked to preserve historical accuracy. You can update the title, description, rules, prizes, and gallery photos.
+              This is a concluded event record. Date and time are locked to preserve historical record integrity. You can still modify the description, guidelines, and photo gallery.
             </span>
           </div>
         )}
 
         {loadingEvent && (
-          <div className="mb-4 h-40 animate-pulse rounded-xl bg-slate-100" />
+          <div className="mt-5 h-40 animate-pulse rounded-2xl bg-slate-100" />
         )}
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-600">
-            <AlertCircle size={14} className="shrink-0" />
-            {error}
+          <div className="mt-5 flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700 shadow-xs">
+            <AlertCircle size={16} className="shrink-0 text-rose-600" />
+            <span className="font-semibold">{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900">Basic Information</h2>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-7">
+          {/* 1. Basic Information */}
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-[10px] text-white font-black">1</span>
+              Event Essentials
+            </h2>
+
             <div>
               <label className={labelClass}>Event Title *</label>
               <div className="relative">
-                <Type className={iconClass} size={16} />
-                <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} placeholder="Enter event title" />
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Description *</label>
-              <div className="relative">
-                <AlignLeft className={`${iconClass} top-4 translate-y-0`} size={16} />
-                <textarea
-                  value={description} onChange={(e) => setDescription(e.target.value)}
-                  className={`${inputClass} min-h-[90px] resize-y`}
-                  placeholder="Describe the event in detail..."
+                <Type className={iconClass} size={15} />
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. AI & Cloud Innovation Summit 2026"
                 />
               </div>
             </div>
+
+            <div>
+              <label className={labelClass}>Description *</label>
+              <div className="relative">
+                <AlignLeft className={`${iconClass} top-4 translate-y-0`} size={15} />
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className={`${inputClass} min-h-[100px] resize-y`}
+                  placeholder="Provide an overview of the event, key themes, speakers, and student takeaways..."
+                />
+              </div>
+            </div>
+
             <div>
               <label className={labelClass}>Category *</label>
               <div className="relative">
-                <Tag className={iconClass} size={16} />
+                <Tag className={iconClass} size={15} />
                 <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectClass}>
                   <option value="">Select category</option>
                   {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -457,51 +479,41 @@ export default function CreateEvent() {
             </div>
           </div>
 
-          {/* Campus Location & Venue Section */}
-          <div className="space-y-3">
+          {/* 2. Campus Location & Timing */}
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900">Campus Venue & Location</h2>
-                <p className="text-[11px] text-slate-500">Biratnagar International College (Bhrikuti Chowk, Biratnagar)</p>
-              </div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-[10px] text-white font-black">2</span>
+                Venue & Timing
+              </h2>
               <button
                 type="button"
                 onClick={() => setShowLocationPreview(true)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-700 hover:text-primary-800 transition"
+                className="inline-flex items-center gap-1 text-xs font-bold text-primary-700 hover:underline"
               >
                 <Map size={13} />
-                <span>Preview Map</span>
+                <span>Preview Campus Map</span>
               </button>
             </div>
 
             <div>
-              <label className={labelClass}>Venue / Hall / Room Name *</label>
+              <label className={labelClass}>Venue / Campus Room *</label>
               <div className="relative">
-                <MapPin className={iconClass} size={16} />
+                <MapPin className={iconClass} size={15} />
                 <input
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className={inputClass}
-                  placeholder="e.g. Wulfruna, SR-Wolves, SR-Compton"
+                  placeholder="e.g. Main Auditorium, Wulfruna Hall, Lab 304"
                 />
               </div>
             </div>
-          </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-900">Date & Time</h2>
-              {isConcludedEvent && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10.5px] font-bold text-slate-600 border border-slate-200">
-                  <Lock size={11} /> Locked (Concluded Event)
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Event Date *</label>
                 <div className="relative">
-                  <CalendarDays className={iconClass} size={16} />
+                  <CalendarDays className={iconClass} size={15} />
                   <input
                     type="date"
                     disabled={isConcludedEvent}
@@ -515,7 +527,7 @@ export default function CreateEvent() {
               <div>
                 <label className={labelClass}>Event Time *</label>
                 <div className="relative">
-                  <Clock className={iconClass} size={16} />
+                  <Clock className={iconClass} size={15} />
                   <input
                     type="time"
                     disabled={isConcludedEvent}
@@ -528,12 +540,17 @@ export default function CreateEvent() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900">Event Details</h2>
+          {/* 3. Department & Participation Scope */}
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-[10px] text-white font-black">3</span>
+              Academic Department & Capacity
+            </h2>
+
             <div>
               <label className={labelClass}>Organizing Department *</label>
               <div className="relative">
-                <Landmark className={iconClass} size={16} />
+                <Landmark className={iconClass} size={15} />
                 <select
                   value={organizingDepartment}
                   onChange={(e) => {
@@ -550,11 +567,12 @@ export default function CreateEvent() {
                 <ChevronDown className={chevronClass} size={14} />
               </div>
             </div>
+
             {organizingDepartment === 'DevCorps' && (
               <div>
                 <label className={labelClass}>DevCorps Community *</label>
                 <div className="relative">
-                  <Users className={iconClass} size={16} />
+                  <Users className={iconClass} size={15} />
                   <select value={organizingCommunity} onChange={(e) => setOrganizingCommunity(e.target.value)} className={selectClass}>
                     <option value="">Select community</option>
                     {COMMUNITIES.filter((c) => c !== 'N/A').map((c) => <option key={c} value={c}>{c}</option>)}
@@ -563,33 +581,12 @@ export default function CreateEvent() {
                 </div>
               </div>
             )}
-            <div>
-              <label className={labelClass}>Rules & Eligibility</label>
-              <div className="relative">
-                <ClipboardList className={`${iconClass} top-4 translate-y-0`} size={16} />
-                <textarea
-                  value={rulesEligibility} onChange={(e) => setRulesEligibility(e.target.value)}
-                  className={`${inputClass} min-h-[70px] resize-y`}
-                  placeholder="Who can participate, any restrictions..."
-                />
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Prize Information</label>
-              <div className="relative">
-                <Trophy className={`${iconClass} top-4 translate-y-0`} size={16} />
-                <textarea
-                  value={prizeInfo} onChange={(e) => setPrizeInfo(e.target.value)}
-                  className={`${inputClass} min-h-[70px] resize-y`}
-                  placeholder="Prizes or certificates, if any..."
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Maximum Participants</label>
+                <label className={labelClass}>Maximum Seats</label>
                 <div className="relative">
-                  <UserCheck className={iconClass} size={16} />
+                  <UserCheck className={iconClass} size={15} />
                   <input
                     type="number" min="1" value={maxParticipants}
                     onChange={(e) => setMaxParticipants(e.target.value)}
@@ -597,67 +594,101 @@ export default function CreateEvent() {
                   />
                 </div>
               </div>
-              
+
               <div>
-                <label className={labelClass}>Registration Type</label>
-                <div 
-                  className={`relative flex items-center justify-between cursor-pointer rounded-lg border px-4 py-2 transition-colors ${
-                    isTeamEvent 
-                      ? 'border-primary-500 bg-primary-50/50' 
-                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
-                  }`}
+                <label className={labelClass}>Entry Format</label>
+                <button
+                  type="button"
                   onClick={() => setIsTeamEvent(!isTeamEvent)}
+                  className={`w-full flex items-center justify-between rounded-xl border p-2.5 transition-all ${
+                    isTeamEvent
+                      ? 'border-primary-500 bg-primary-50/70 shadow-2xs'
+                      : 'border-slate-200/90 bg-white hover:bg-slate-100'
+                  }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Users size={16} className={isTeamEvent ? 'text-primary-600' : 'text-slate-400'} />
-                    <span className={`text-sm font-medium ${isTeamEvent ? 'text-primary-700' : 'text-slate-700'}`}>
-                      Team Event
+                    <Users size={15} className={isTeamEvent ? 'text-primary-700' : 'text-slate-400'} />
+                    <span className={`text-xs font-bold ${isTeamEvent ? 'text-primary-800' : 'text-slate-700'}`}>
+                      {isTeamEvent ? 'Team Participation' : 'Individual Entry'}
                     </span>
                   </div>
-                  <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 ease-in-out ${isTeamEvent ? 'bg-primary-600' : 'bg-slate-300'}`}>
-                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isTeamEvent ? 'translate-x-2' : '-translate-x-2'}`} />
+                  <div className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${isTeamEvent ? 'bg-primary-700' : 'bg-slate-300'}`}>
+                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isTeamEvent ? 'translate-x-4.5' : 'translate-x-1'}`} />
                   </div>
-                </div>
+                </button>
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
+          {/* 4. Rules & Awards */}
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-[10px] text-white font-black">4</span>
+              Guidelines & Awards
+            </h2>
+
+            <div>
+              <label className={labelClass}>Rules & Eligibility</label>
+              <div className="relative">
+                <ClipboardList className={`${iconClass} top-4 translate-y-0`} size={15} />
+                <textarea
+                  value={rulesEligibility}
+                  onChange={(e) => setRulesEligibility(e.target.value)}
+                  className={`${inputClass} min-h-[80px] resize-y`}
+                  placeholder="Eligibility criteria, code of conduct, prerequisites..."
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>Awards & Prize Information</label>
+              <div className="relative">
+                <Trophy className={`${iconClass} top-4 translate-y-0`} size={15} />
+                <textarea
+                  value={prizeInfo}
+                  onChange={(e) => setPrizeInfo(e.target.value)}
+                  className={`${inputClass} min-h-[80px] resize-y`}
+                  placeholder="Cash prizes, certificates, medals, or sponsor giveaways..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Photos & Cover Media */}
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-900">Event Images</h2>
-              <span className="text-[11px] text-slate-400">Optional · up to {MAX_IMAGES}, 5MB each</span>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-[10px] text-white font-black">5</span>
+                Event Media
+              </h2>
+              <span className="text-[11px] font-medium text-slate-400">Up to {MAX_IMAGES} photos (5MB each)</span>
             </div>
 
             {existingImages.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
                 {existingImages.map((img) => (
                   <button
                     type="button"
                     key={img.id}
                     onClick={() => !img.is_banner && handleSetBanner(img.id)}
-                    className={`group relative aspect-square overflow-hidden rounded-lg border-2 text-left transition ${
-                      img.is_banner ? 'border-primary-500 ring-2 ring-primary-200 cursor-default' : 'border-slate-200 cursor-pointer'
+                    className={`group relative aspect-square overflow-hidden rounded-xl border-2 text-left transition ${
+                      img.is_banner ? 'border-primary-600 ring-2 ring-primary-200' : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <img
                       src={`${ASSET_BASE_URL}${img.image_url}`}
                       alt=""
-                      className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-105"
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-
                     {img.is_banner && (
-                      <span className="absolute bottom-1.5 left-1.5 rounded-full bg-primary-600 px-1.5 py-0.5 text-[9px] font-semibold text-white shadow-sm">
+                      <span className="absolute bottom-1.5 left-1.5 rounded-md bg-primary-700 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-sm">
                         Cover
                       </span>
                     )}
-
                     <span
                       onClick={(e) => { e.stopPropagation(); handleDeleteExistingImage(img.id); }}
                       title="Delete image"
-                      role="button"
-                      tabIndex={0}
-                      className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 shadow-sm transition duration-150 hover:bg-red-600 group-hover:opacity-100"
+                      className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition hover:bg-rose-600 group-hover:opacity-100 shadow-xs"
                     >
                       {deletingImageId === img.id ? <Loader2 className="animate-spin" size={12} /> : <X size={12} />}
                     </span>
@@ -667,7 +698,7 @@ export default function CreateEvent() {
             )}
 
             {newImages.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
                 {newImages.map((img, i) => {
                   const isCover = existingImages.length === 0 && bannerIndex === i;
                   return (
@@ -675,29 +706,24 @@ export default function CreateEvent() {
                       type="button"
                       key={img.previewUrl}
                       onClick={() => existingImages.length === 0 && handleSelectNewBanner(i)}
-                      className={`group relative aspect-square overflow-hidden rounded-lg border-2 text-left transition ${
-                        isCover ? 'border-primary-500 ring-2 ring-primary-200' : 'border-slate-200'
-                      } ${existingImages.length === 0 ? 'cursor-pointer' : 'cursor-default'}`}
+                      className={`group relative aspect-square overflow-hidden rounded-xl border-2 text-left transition ${
+                        isCover ? 'border-primary-600 ring-2 ring-primary-200' : 'border-slate-200 hover:border-slate-300'
+                      }`}
                     >
                       <img
                         src={img.previewUrl}
                         alt=""
-                        className="h-full w-full object-cover transition-transform duration-200 ease-out group-hover:scale-105"
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
                       />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-
                       {isCover && (
-                        <span className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-full bg-primary-600 px-1.5 py-0.5 text-[9px] font-semibold text-white shadow-sm">
+                        <span className="absolute bottom-1.5 left-1.5 rounded-md bg-primary-700 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-sm">
                           Cover
                         </span>
                       )}
-
                       <span
                         onClick={(e) => { e.stopPropagation(); removeNewImage(i); }}
                         title="Remove"
-                        role="button"
-                        tabIndex={0}
-                        className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 shadow-sm transition duration-150 hover:bg-red-600 group-hover:opacity-100"
+                        className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition hover:bg-rose-600 group-hover:opacity-100 shadow-xs"
                       >
                         <X size={12} />
                       </span>
@@ -707,34 +733,29 @@ export default function CreateEvent() {
               </div>
             )}
 
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-8 text-center transition hover:border-primary-300 hover:bg-primary-50/30">
+            <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-8 text-center transition hover:border-primary-400 hover:bg-primary-50/20">
               <Upload className="mb-2 text-slate-400" size={24} />
-              <p className="text-sm font-medium text-slate-600">Click to add photos</p>
-              <p className="mt-0.5 text-[11px] text-slate-400">Not required — you can skip this</p>
+              <p className="text-xs font-bold text-slate-700">Click or drag to add photos</p>
+              <p className="mt-0.5 text-[11px] text-slate-400">JPG, PNG, or WebP up to 5MB</p>
               <input type="file" accept="image/*" multiple onChange={handleFileSelect} className="hidden" />
             </label>
 
             {imageError && (
-              <div className="flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-600">
-                <AlertCircle size={14} className="shrink-0" />
-                {imageError}
+              <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                <AlertCircle size={14} className="shrink-0 text-rose-600" />
+                <span>{imageError}</span>
               </div>
             )}
           </div>
 
-          {/* Publishing Schedule Card (Only on Create Event) */}
+          {/* 6. Publishing Schedule */}
           {!isEditMode && (
-            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 sm:p-5 space-y-4">
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                    <CalendarClock size={16} className="text-primary-600" />
-                    Publishing Options
-                  </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Decide when this event should become visible to campus students
-                  </p>
-                </div>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-[10px] text-white font-black">6</span>
+                  Publishing Options
+                </h2>
                 <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
                   publishType === 'scheduled' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                 }`}>
@@ -742,13 +763,13 @@ export default function CreateEvent() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setPublishType('now')}
-                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${
+                  className={`flex items-start gap-3 rounded-xl border p-3.5 text-left transition ${
                     publishType === 'now'
-                      ? 'border-primary-500 bg-white shadow-xs ring-2 ring-primary-100'
+                      ? 'border-primary-600 bg-white shadow-xs ring-2 ring-primary-100'
                       : 'border-slate-200 bg-white/70 hover:bg-white'
                   }`}
                 >
@@ -759,16 +780,16 @@ export default function CreateEvent() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900">Publish Immediately</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Visible right now to all students</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Goes live immediately to all campus students</p>
                   </div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setPublishType('scheduled')}
-                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${
+                  className={`flex items-start gap-3 rounded-xl border p-3.5 text-left transition ${
                     publishType === 'scheduled'
-                      ? 'border-amber-500 bg-white shadow-xs ring-2 ring-amber-100'
+                      ? 'border-amber-600 bg-white shadow-xs ring-2 ring-amber-100'
                       : 'border-slate-200 bg-white/70 hover:bg-white'
                   }`}
                 >
@@ -785,7 +806,7 @@ export default function CreateEvent() {
               </div>
 
               {publishType === 'scheduled' && (
-                <div className="rounded-xl border border-amber-200/80 bg-amber-50/60 p-3.5 space-y-3 animate-in fade-in duration-150">
+                <div className="rounded-xl border border-amber-200/80 bg-amber-50/60 p-4 space-y-3 animate-in fade-in duration-150">
                   <p className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
                     <Clock size={14} className="text-amber-600" />
                     Set Scheduled Release Date & Time
@@ -818,43 +839,17 @@ export default function CreateEvent() {
                       </div>
                     </div>
                   </div>
-
-                  {publishDate && publishTime && (
-                    publishDate > eventDate ? (
-                      <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-[11.5px] font-medium text-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                        <div className="flex items-start gap-2">
-                          <AlertCircle size={15} className="text-rose-600 shrink-0 mt-0.5" />
-                          <div>
-                            <strong className="font-bold text-rose-950">Publish Date is after Event Date:</strong>
-                            <p className="mt-0.5 text-rose-800">
-                              Event occurs on <strong>{eventDate}</strong>, but scheduled release is set to <strong>{publishDate}</strong>.
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setEventDate(publishDate)}
-                          className="shrink-0 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 active:scale-95 transition text-center"
-                        >
-                          Sync Event Date to {publishDate}
-                        </button>
-                      </div>
-                    ) : (
-                      <p className="text-[11px] font-semibold text-amber-800">
-                        ✓ This event will be automatically published on {new Date(`${publishDate}T${publishTime}`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {publishTime}.
-                      </p>
-                    )
-                  )}
                 </div>
               )}
             </div>
           )}
 
-          <div className="flex items-center gap-3 pt-2">
+          {/* Action Bar */}
+          <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={() => navigate(isEditMode ? `/events/${eventId}` : dashboardPath)}
-              className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold py-2.5 rounded-xl text-xs transition"
+              className="flex-1 border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold py-3 rounded-xl text-xs transition active:scale-95"
             >
               {isEditMode ? 'Back to Event Page' : 'Cancel'}
             </button>
@@ -863,16 +858,16 @@ export default function CreateEvent() {
               disabled={loading || uploadingImages}
               className={`flex-1 ${
                 publishType === 'scheduled' && !isEditMode
-                  ? 'bg-amber-600 hover:bg-amber-700 hover:shadow-lg hover:shadow-amber-200'
-                  : 'bg-primary-700 hover:bg-primary-800 hover:shadow-lg hover:shadow-primary-200'
-              } active:scale-[0.98] text-white font-bold py-2.5 rounded-xl text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2`}
+                  ? 'bg-amber-600 hover:bg-amber-700'
+                  : 'bg-primary-700 hover:bg-primary-800'
+              } active:scale-95 text-white font-bold py-3 rounded-xl text-xs shadow-xs hover:shadow-md transition-all disabled:opacity-50 flex items-center justify-center gap-2`}
             >
               {(loading || uploadingImages) ? <Loader2 className="animate-spin" size={15} /> : null}
               {uploadingImages
                 ? 'Uploading photos...'
                 : loading
                 ? (isEditMode ? 'Saving...' : publishType === 'scheduled' ? 'Scheduling...' : 'Creating...')
-                : (isEditMode ? 'Save Changes' : publishType === 'scheduled' ? 'Schedule Event' : 'Create & Publish Event')}
+                : (isEditMode ? 'Save Changes' : publishType === 'scheduled' ? 'Schedule Event Release' : 'Create & Publish Event')}
             </button>
           </div>
         </form>

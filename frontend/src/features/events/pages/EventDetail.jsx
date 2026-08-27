@@ -4,14 +4,16 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import {
   Calendar, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2,
   Loader2, BarChart3, Navigation, Landmark, Edit3, FileDown, Star, Sparkles,
-  Trash2, AlertTriangle, ShieldAlert, X, Send, ArrowRight
+  Trash2, AlertTriangle, ShieldAlert, X, Send, ArrowRight, Trophy, Award,
+  ClipboardCheck, PlayCircle
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
-import { getEventStatus } from '../../../shared/utils/eventStatus';
+import { getEventStatus, isEventPast } from '../../../shared/utils/eventStatus';
 import VenueLocationModal from '../../../shared/components/VenueLocationModal';
 import AddToCalendarButton from '../../../shared/components/AddToCalendarButton';
 
@@ -187,7 +189,7 @@ export default function EventDetail() {
 
   const style = getCategoryStyle(event.category);
   const liveStatus = getEventStatus(event.event_date, event.event_time, event.status, event.publish_at);
-  const isPastEvent = liveStatus === 'ended';
+  const isPastEvent = liveStatus === 'ended' || isEventPast(event.event_date, event.event_time);
   const hasEventStarted = liveStatus !== 'upcoming';
   const isOrganizerOrAdmin = user?.role === 'admin' || event.created_by === user?.id;
 
@@ -651,90 +653,120 @@ export default function EventDetail() {
       )}
 
       {/* Tabs & Content */}
-      <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-        <div className="flex border-b border-slate-200 bg-slate-50/80">
+      <div className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-2xs">
+        <div className="flex border-b border-slate-200/80 bg-slate-50/80 p-1.5 gap-1">
           {(event.status === 'cancelled' ? ['Details', 'Gallery'] : TABS).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 px-5 py-3.5 text-xs sm:text-sm font-bold transition sm:flex-none ${
+              className={`relative rounded-xl px-5 py-2.5 text-xs sm:text-sm font-bold transition-colors ${
                 activeTab === tab
-                  ? 'border-b-2 border-primary-600 bg-white text-primary-600'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'text-white'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              {tab}
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="eventDetailTabIndicator"
+                  className="absolute inset-0 rounded-xl bg-primary-700 shadow-xs"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10">{tab}</span>
             </button>
           ))}
         </div>
 
-          <div className="p-5 sm:p-7">
-            {activeTab === 'Details' && (
-              <div className="space-y-5">
-                <div>
-                  <h2 className="mb-1.5 text-sm font-semibold text-slate-900">Description</h2>
-                  <p className="text-sm leading-7 text-slate-600">{event.description}</p>
-                </div>
+        <div className="p-5 sm:p-7">
+          {activeTab === 'Details' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div>
+                <h2 className="mb-2 text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-primary-600 inline-block" /> About This Event
+                </h2>
+                <p className="text-sm leading-7 text-slate-600 whitespace-pre-wrap">{event.description}</p>
+              </div>
 
-                {event.rules_eligibility && (
-                  <div>
-                    <h2 className="mb-1.5 text-sm font-semibold text-slate-900">Rules & Eligibility</h2>
-                    <p className="text-sm leading-7 text-slate-600">{event.rules_eligibility}</p>
+              {/* Rules & Eligibility Section */}
+              {event.rules_eligibility && (
+                <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-5 shadow-2xs space-y-2">
+                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-50 text-primary-700 border border-primary-100">
+                      <ClipboardCheck size={16} />
+                    </div>
+                    <span>Rules & Eligibility</span>
                   </div>
-                )}
+                  <p className="text-xs sm:text-sm leading-relaxed text-slate-600 whitespace-pre-wrap pl-9">
+                    {event.rules_eligibility}
+                  </p>
+                </div>
+              )}
 
+              {/* Prize Information Card */}
               {event.prize_info && (
-                <div>
-                  <h2 className="mb-1.5 text-sm font-semibold text-slate-900">Prize Information</h2>
-                  <p className="text-sm leading-7 text-slate-600">{event.prize_info}</p>
+                <div className="rounded-2xl border border-amber-200/90 bg-gradient-to-br from-amber-50/80 via-amber-50/30 to-white p-5 shadow-2xs space-y-2">
+                  <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800 border border-amber-200">
+                      <Trophy size={16} />
+                    </div>
+                    <span>Awards & Prize Information</span>
+                  </div>
+                  <p className="text-xs sm:text-sm leading-relaxed text-amber-900/90 whitespace-pre-wrap pl-9 font-medium">
+                    {event.prize_info}
+                  </p>
                 </div>
               )}
 
               <div>
-                <h2 className="mb-2 text-sm font-semibold text-slate-900">Event Information</h2>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span className="text-slate-500">Registration Type</span>
-                    <span className="font-medium text-slate-900">
+                <h2 className="mb-3 text-sm font-bold text-slate-900">Event Overview & Logistics</h2>
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/50 divide-y divide-slate-100 text-sm">
+                  <div className="flex items-center justify-between p-3.5">
+                    <span className="text-slate-500 text-xs font-medium">Registration Type</span>
+                    <span className="font-bold text-slate-900 text-xs">
                       {event.is_team_event ? 'Team Event' : 'Individual'}
                     </span>
                   </div>
                   {user?.role === 'student' && event.is_registered && !!event.is_team_event && (
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-slate-500">Your Registration</span>
-                      <span className="max-w-[60%] text-right font-medium text-slate-900">
+                    <div className="flex items-center justify-between p-3.5">
+                      <span className="text-slate-500 text-xs font-medium">Your Registration</span>
+                      <span className="max-w-[60%] text-right font-bold text-slate-900 text-xs">
                         {event.my_team_members ? event.my_team_members : 'Registered Individually'}
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span className="text-slate-500">Maximum Participants</span>
-                    <span className="font-medium text-slate-900">{event.max_participants || 'Unlimited'}</span>
+                  <div className="flex items-center justify-between p-3.5">
+                    <span className="text-slate-500 text-xs font-medium">Maximum Capacity</span>
+                    <span className="font-bold text-slate-900 text-xs">{event.max_participants ? `${event.max_participants} Participants` : 'Unlimited'}</span>
                   </div>
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span className="text-slate-500">Organizing Department</span>
-                    <span className="font-medium text-slate-900">{event.organizing_department || 'General Campus'}</span>
+                  <div className="flex items-center justify-between p-3.5">
+                    <span className="text-slate-500 text-xs font-medium">Organizing Department</span>
+                    <span className="font-bold text-slate-900 text-xs">{event.organizing_department || 'General Campus'}</span>
                   </div>
                   {event.organizing_community && (
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-slate-500">Organizing Community</span>
-                      <span className="font-medium text-slate-900">{event.organizing_community}</span>
+                    <div className="flex items-center justify-between p-3.5">
+                      <span className="text-slate-500 text-xs font-medium">Student Community</span>
+                      <span className="font-bold text-slate-900 text-xs">{event.organizing_community}</span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span className="text-slate-500">Venue / Location</span>
+                  <div className="flex items-center justify-between p-3.5">
+                    <span className="text-slate-500 text-xs font-medium">Venue / Campus Room</span>
                     <button
                       type="button"
                       onClick={() => setShowLocationModal(true)}
-                      className="inline-flex items-center gap-1 font-semibold text-primary-700 hover:underline"
+                      className="inline-flex items-center gap-1 font-bold text-primary-700 hover:underline text-xs"
                     >
                       <MapPin size={13} />
                       <span>{event.location || 'Biratnagar International College'}</span>
                     </button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Created By</span>
-                    <span className="font-medium text-slate-900">{event.organizer_name || 'Faculty Organizer'}</span>
+                  <div className="flex items-center justify-between p-3.5">
+                    <span className="text-slate-500 text-xs font-medium">Lead Organizer</span>
+                    <span className="font-bold text-slate-900 text-xs">{event.organizer_name || 'Faculty Organizer'}</span>
                   </div>
                 </div>
               </div>
@@ -754,13 +786,13 @@ export default function EventDetail() {
                 <button
                   type="button"
                   onClick={() => setShowLocationModal(true)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-primary-600 active:scale-95 transition"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-xs active:scale-95 transition"
                 >
                   <Navigation size={13} />
                   <span>View Map & Directions</span>
                 </button>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {activeTab === 'Gallery' && (

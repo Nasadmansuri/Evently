@@ -7,6 +7,7 @@ import { showToast } from '../../../shared/utils/toast';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
 import { getGoogleCalendarUrl, downloadIcsFile } from '../../../shared/utils/calendarIntegration';
+import { fireCelebrationConfetti } from '../../../shared/utils/confetti';
 
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
@@ -65,6 +66,7 @@ export default function Registration() {
       });
       showToast.success("You're registered!");
       setRegisteredSuccess(true);
+      fireCelebrationConfetti();
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed, please try again');
     } finally {
@@ -168,7 +170,7 @@ export default function Registration() {
   }
 
   const style = getCategoryStyle(event?.category);
-  const isBic = event ? user?.is_bic_student : false;
+  const isBic = Boolean(user?.is_bic_student || user?.college_name?.toLowerCase() === 'bic' || user?.college_name?.toLowerCase()?.includes('biratnagar'));
 
   return (
     <div className="mx-auto max-w-2xl">

@@ -1,26 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Images, AlertCircle, Camera, Search, Calendar, ArrowRight,
-  Sparkles, Filter, Layers, Eye
+  Images, AlertCircle, Camera, Search, Calendar, ArrowRight, Sparkles, X
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../../../shared/services/api';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
-
-const CATEGORIES = ['All', 'Technical', 'Cultural', 'Workshop', 'Competition', 'Seminar', 'Sports', 'Conference'];
-
-const CARD_GRADIENT = {
-  Technical: 'from-blue-50 via-blue-50/40 to-white',
-  Cultural: 'from-slate-100 via-slate-50/40 to-white',
-  Workshop: 'from-orange-50 via-orange-50/40 to-white',
-  Competition: 'from-purple-50 via-purple-50/40 to-white',
-  Seminar: 'from-amber-50 via-amber-50/40 to-white',
-  Sports: 'from-pink-50 via-pink-50/40 to-white',
-  Conference: 'from-slate-100 via-slate-50/40 to-white',
-};
-const DEFAULT_GRADIENT = 'from-primary-50 via-primary-50/30 to-white';
 
 export default function Gallery() {
   const navigate = useNavigate();
@@ -35,7 +22,7 @@ export default function Gallery() {
     setError('');
     try {
       const res = await api.get('/events/gallery-summary');
-      setEvents(res.data);
+      setEvents(res.data || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Could not load gallery');
     } finally {
@@ -51,6 +38,25 @@ export default function Gallery() {
     return events.reduce((acc, ev) => acc + (Number(ev.photo_count) || 0), 0);
   }, [events]);
 
+  // Dynamic category filter list: only show categories that actually have albums + their live counts
+  const availableCategories = useMemo(() => {
+    const counts = {};
+    events.forEach((ev) => {
+      if (ev.category) {
+        counts[ev.category] = (counts[ev.category] || 0) + 1;
+      }
+    });
+
+    const list = [{ id: 'All', label: 'All Albums', count: events.length }];
+    Object.entries(counts)
+      .sort((a, b) => b[1] - a[1]) // Sort most popular categories first
+      .forEach(([cat, count]) => {
+        list.push({ id: cat, label: cat, count });
+      });
+
+    return list;
+  }, [events]);
+
   const filteredEvents = useMemo(() => {
     return events.filter((ev) => {
       const matchSearch =
@@ -63,72 +69,105 @@ export default function Gallery() {
   }, [events, search, activeCategory]);
 
   return (
-    <div className="pb-10">
-      {/* Page Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-6 pb-12">
+      {/* 1. Header Row */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Campus Gallery</h1>
-          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-            {loading ? 'Loading photos...' : `${totalPhotos} photos captured across ${events.length} event albums`}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
+              Campus Media Archive
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+            Campus Photo Gallery
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-600">
+            {loading ? 'Loading photos...' : `${totalPhotos} photos captured across ${events.length} campus event albums.`}
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-80">
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search albums..."
-            className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs font-medium text-slate-900 shadow-2xs transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            placeholder="Search albums, hackathons, seminars..."
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-8 text-xs font-medium text-slate-900 transition placeholder:text-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-2xs"
           />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              title="Clear search"
+            >
+              <X size={13} />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Category Filter Pills */}
-      <div className="mb-6 flex flex-wrap gap-1.5 overflow-x-auto pb-1">
-        {CATEGORIES.map((cat) => {
-          const isActive = activeCategory === cat;
-          return (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95 ${
-                isActive
-                  ? 'bg-primary-700 text-white shadow-sm shadow-primary-700/20'
-                  : 'bg-white text-slate-600 border border-slate-200/80 hover:border-slate-300 hover:text-slate-900'
-              }`}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
+      {/* 2. Dynamic Category Filter Pills (Only categories with active photo albums) */}
+      {!loading && availableCategories.length > 1 && (
+        <div className="flex flex-wrap gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1.5 shadow-2xs w-fit">
+          {availableCategories.map((cat) => {
+            const isActive = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`relative flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                  isActive ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="galleryCategoryPill"
+                    className="absolute inset-0 rounded-xl bg-primary-700 shadow-xs"
+                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10">{cat.label}</span>
+                <span className={`relative z-10 rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  {cat.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {error && (
-        <div className="mb-6 flex items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs text-red-600">
-          <span className="flex items-center gap-2">
-            <AlertCircle size={15} className="shrink-0 text-red-500" />
+        <div className="flex items-center justify-between gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700 shadow-xs">
+          <span className="flex items-center gap-2 font-semibold">
+            <AlertCircle size={16} className="shrink-0 text-rose-600" />
             {error}
           </span>
-          <button onClick={loadGallery} className="font-semibold underline">Retry</button>
+          <button onClick={loadGallery} className="font-bold underline hover:text-rose-900">Retry</button>
         </div>
       )}
 
       {loading ? (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-72 animate-pulse rounded-[24px] border border-slate-200/80 bg-slate-100" />
+            <div key={i} className="h-72 animate-pulse rounded-2xl border border-slate-200/80 bg-slate-100" />
           ))}
         </div>
       ) : filteredEvents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-[24px] border border-slate-200/80 bg-white py-16 text-center shadow-xs">
-          <div className="mb-3.5 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
-            <Images size={28} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.25 }}
+          className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 px-6 text-center shadow-2xs"
+        >
+          <div className="mb-3.5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 text-primary-700 border border-primary-100">
+            <Images size={26} />
           </div>
-          <h3 className="text-base font-bold text-slate-800">No Photo Albums Found</h3>
-          <p className="mt-1 max-w-sm text-xs text-slate-500">
+          <h3 className="text-base font-bold text-slate-900">No Photo Albums Found</h3>
+          <p className="mt-1 max-w-sm text-xs text-slate-500 leading-relaxed">
             {search || activeCategory !== 'All'
               ? 'No event albums match your current filters. Try selecting a different category or clearing search.'
               : 'Photos uploaded to events by organizers will automatically show up here.'}
@@ -136,26 +175,30 @@ export default function Gallery() {
           {(search || activeCategory !== 'All') && (
             <button
               onClick={() => { setSearch(''); setActiveCategory('All'); }}
-              className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              className="mt-4 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-xs active:scale-95 transition"
             >
               Reset Filters
             </button>
           )}
-        </div>
+        </motion.div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredEvents.map((ev) => {
+          {filteredEvents.map((ev, idx) => {
             const style = getCategoryStyle(ev.category);
-            const gradient = CARD_GRADIENT[ev.category] || DEFAULT_GRADIENT;
             const photoCount = Number(ev.photo_count) || 0;
+            const dateObj = new Date(ev.event_date);
+            const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 
             return (
-              <article
+              <motion.article
                 key={ev.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: idx * 0.03 }}
                 onClick={() => navigate(`/events/${ev.id}?tab=gallery`)}
-                className={`group flex cursor-pointer flex-col overflow-hidden rounded-[24px] bg-gradient-to-br ${gradient} p-3 shadow-sm ring-1 ring-slate-900/5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg`}
+                className="group flex cursor-pointer flex-col overflow-hidden rounded-[22px] border border-slate-200/85 bg-white p-3.5 shadow-2xs hover:shadow-md hover:border-primary-300 hover:-translate-y-1 transition-all duration-200"
               >
-                {/* Inset Photo Banner with Glossy Badge */}
+                {/* 1. Inset Poster Frame */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-100 ring-1 ring-black/5">
                   {ev.cover_image ? (
                     <img
@@ -168,44 +211,73 @@ export default function Gallery() {
                       style={{ objectPosition: 'center 30%' }}
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-slate-200">
-                      <Images size={28} className="text-slate-400" />
+                    <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] p-4 text-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md mb-1.5 border border-white/15">
+                        <Sparkles size={18} className="text-emerald-300" />
+                      </div>
+                      <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-emerald-200/90 line-clamp-1">
+                        {ev.category || 'Event'}
+                      </span>
                     </div>
                   )}
 
-                  {/* Photo Count Badge */}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-5" />
+
+                  {/* Category Pill on bottom-left */}
+                  <div className="absolute bottom-2.5 left-2.5 z-10">
+                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold shadow-xs ${style.bg} ${style.text} bg-white/95 backdrop-blur-xs`}>
+                      {ev.category}
+                    </span>
+                  </div>
+
+                  {/* Photo Count on bottom-right */}
                   <span className="absolute bottom-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/75 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-white shadow-md">
                     <Camera size={12} className="text-emerald-300" />
                     <span>{photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}</span>
                   </span>
                 </div>
 
-                {/* Card Content & Action */}
-                <div className="flex flex-1 flex-col gap-2 px-1.5 pt-3.5">
+                {/* 2. Card Content */}
+                <div className="flex flex-1 flex-col pt-3.5 px-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
-                      {ev.category}
-                    </span>
                     <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-500">
-                      <Calendar size={12} />
-                      {new Date(ev.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                      <Calendar size={12} className="text-slate-400" />
+                      {dateStr}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary-700 bg-primary-50 px-2 py-0.5 rounded-md border border-primary-100">
+                      Album
                     </span>
                   </div>
 
-                  <h3 className="line-clamp-2 text-base font-bold leading-snug tracking-tight text-slate-900 group-hover:text-primary-800 transition-colors">
+                  <h3 className="mt-2 text-base font-bold leading-snug tracking-tight text-slate-900 line-clamp-2 group-hover:text-primary-700 transition">
                     {ev.title}
                   </h3>
 
-                  <div className="mt-auto flex items-center justify-between pt-3">
-                    <span className="text-[11px] font-semibold text-slate-400">
-                      Event Photo Album
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition group-hover:bg-primary-700">
+                  {/* 3. Card Footer */}
+                  <div className="mt-auto flex items-center justify-between gap-3 pt-3.5 border-t border-slate-100">
+                    <div className="min-w-0 flex-1 pr-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Organizer</p>
+                      <p
+                        className="truncate text-xs font-semibold text-slate-700"
+                        title={ev.organizing_community ? `${ev.organizing_department} (${ev.organizing_community})` : (ev.organizing_department || '')}
+                      >
+                        {ev.organizing_community ? `${ev.organizing_department} · ${ev.organizing_community}` : (ev.organizing_department || 'Campus Department')}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/events/${ev.id}?tab=gallery`);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary-700 group-hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-2xs transition active:scale-95 shrink-0"
+                    >
                       View Photos <ArrowRight size={13} />
-                    </span>
+                    </button>
                   </div>
                 </div>
-              </article>
+              </motion.article>
             );
           })}
         </div>

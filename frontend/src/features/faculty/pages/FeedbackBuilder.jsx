@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
+import { fireCelebrationConfetti } from '../../../shared/utils/confetti';
 
 const QUESTION_TYPES = [
   { value: 'short_text', label: 'Short Text' },
@@ -124,6 +125,7 @@ export default function FeedbackBuilder() {
           options: q.questionType === 'multiple_choice' ? q.options.map((o) => o.trim()).filter(Boolean) : undefined,
         })),
       });
+      fireCelebrationConfetti();
       showToast.success('Feedback form created successfully!');
       navigate(`/events/${eventId}?tab=feedback`);
     } catch (err) {

@@ -2,13 +2,16 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CalendarCheck, History, AlertCircle, Inbox, Image, ListChecks, MessageSquare,
-  Users, CalendarDays, TrendingUp, Sparkles, ArrowRight, PlayCircle, Plus, ChevronRight
+  Users, CalendarDays, TrendingUp, Sparkles, ArrowRight, PlayCircle, ChevronRight,
+  MapPin, Clock, CheckCircle2, Award, Building2, GraduationCap, Mail
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { getStudentCourseLabel } from '../../../shared/utils/studentInfo';
-import { getEventStatus } from '../../../shared/utils/eventStatus';
+import { getEventStatus, isEventPast } from '../../../shared/utils/eventStatus';
+import { formatTime12hr } from '../../../shared/utils/formatTime';
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -23,7 +26,7 @@ export default function StudentDashboard() {
     setError('');
     try {
       const res = await api.get('/registrations/my');
-      setRegistrations(res.data);
+      setRegistrations(res.data || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Could not load your registrations');
     } finally {
@@ -36,203 +39,294 @@ export default function StudentDashboard() {
   }, []);
 
   const { upcoming, past, ongoing } = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const up = registrations.filter((r) => new Date(r.event_date) >= today);
-    const pa = registrations.filter((r) => new Date(r.event_date) < today);
-    const live = registrations.filter((r) => getEventStatus(r.event_date, r.event_time) === 'ongoing');
+    const up = [];
+    const pa = [];
+    const live = [];
+
+    registrations.forEach((r) => {
+      const status = getEventStatus(r.event_date, r.event_time, r.status, r.publish_at);
+      if (status === 'ongoing') {
+        live.push(r);
+        up.push(r); // Active ongoing events remain in current view
+      } else if (status === 'ended' || isEventPast(r.event_date, r.event_time) || r.status === 'cancelled') {
+        pa.push(r);
+      } else {
+        up.push(r);
+      }
+    });
+
     return { upcoming: up, past: pa, ongoing: live };
   }, [registrations]);
 
   const displayedEvents = activeTab === 'upcoming' ? upcoming : past;
 
   return (
-    <div className="space-y-6">
-      {/* Header Profile & Welcome Banner */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Student Dashboard</h1>
-          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-            Welcome back, {user?.full_name}! Stay updated with upcoming campus events and track your participation.
-          </p>
-          <div className="mt-2.5 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-primary-50 border border-primary-100 px-3 py-1 text-[11px] font-semibold text-primary-700">
-              College: {user?.college_name || 'Affiliated Campus'}
-            </span>
-            <span className="rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
-              {getStudentCourseLabel(user)}
-            </span>
-            <span className="rounded-full bg-violet-50 border border-violet-100 px-3 py-1 text-[11px] font-semibold text-violet-700">
-              {user?.email}
-            </span>
-          </div>
-        </div>
+    <div className="space-y-6 pb-12">
+      {/* 1. Human-Crafted Integrated Welcome Header */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-2xs">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
+                Student Portal
+              </span>
+              <span className="text-xs font-semibold text-slate-300">·</span>
+              <span className="text-xs font-medium text-slate-500">
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
 
-        <button
-          onClick={() => navigate('/events')}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-600 active:scale-[0.98] shrink-0"
-        >
-          <CalendarDays size={15} /> Explore All Events
-        </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                Welcome back, {user?.full_name?.split(' ')[0] || 'Student'}! 👋
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-slate-600">
+                Stay updated with campus activities, track your entries, and share post-event reviews.
+              </p>
+            </div>
+
+            {/* Clean, Uniform Academic Credentials Badges */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                <Building2 size={13} className="text-slate-500 shrink-0" />
+                {user?.is_bic_student || user?.college_name?.toLowerCase() === 'bic' ? 'Biratnagar International College' : (user?.college_name || 'Affiliated Campus')}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50/90 border border-emerald-200/80 px-2.5 py-1 text-xs font-bold text-emerald-800">
+                <GraduationCap size={14} className="text-emerald-700 shrink-0" />
+                {getStudentCourseLabel(user) || 'Computing & IT'}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-medium text-slate-600">
+                <Mail size={13} className="text-slate-400 shrink-0" />
+                {user?.email}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => navigate('/events')}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-3 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all shrink-0 self-start sm:self-center"
+          >
+            <CalendarDays size={16} /> Explore All Events
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="flex items-center justify-between gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-          <span className="flex items-center gap-2">
-            <AlertCircle size={15} className="shrink-0 text-red-500" />
+        <div className="flex items-center justify-between gap-2 text-xs text-rose-700 bg-rose-50 border border-rose-100 rounded-2xl px-4 py-3 shadow-xs">
+          <span className="flex items-center gap-2 font-medium">
+            <AlertCircle size={16} className="shrink-0 text-rose-600" />
             {error}
           </span>
-          <button onClick={loadRegistrations} className="font-semibold underline shrink-0 hover:text-red-800">
+          <button onClick={loadRegistrations} className="font-bold underline shrink-0 hover:text-rose-900">
             Retry
           </button>
         </div>
       )}
 
-      {/* 4-KPI Metric Grid */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex items-center gap-3.5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 border border-primary-100">
-            <CalendarCheck size={20} />
+      {/* 2. Sophisticated, Curated 4-KPI Metric Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Total Registered */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Registered</p>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-100/80">
+              <CalendarCheck size={18} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">Total Registered</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? '—' : registrations.length}</p>
-          </div>
+          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : registrations.length}</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">All-time campus entries</p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
-            <TrendingUp size={20} />
+        {/* Upcoming Events */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Upcoming Events</p>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
+              <TrendingUp size={18} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">Upcoming Events</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? '—' : upcoming.length}</p>
-          </div>
+          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : upcoming.length}</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Scheduled on your agenda</p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
-            <PlayCircle size={20} />
+        {/* Live / Ongoing */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Live / Ongoing</p>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+              <PlayCircle size={18} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">Live / Ongoing</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? '—' : ongoing.length}</p>
-          </div>
+          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : ongoing.length}</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Happening right now</p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600 border border-violet-100">
-            <History size={20} />
+        {/* Attended / Past */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Attended / Past</p>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
+              <History size={18} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">Attended / Past</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? '—' : past.length}</p>
-          </div>
+          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : past.length}</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Completed event history</p>
         </div>
       </div>
 
-      {/* Main 2-Column Content Layout (Identical to Faculty Dashboard) */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.3fr_1fr]">
-        {/* Left Column: Registered Events with Tab Controls & Recommendations */}
-        <div className="space-y-5">
-          <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* 3. Main 2-Column Layout */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_1fr]">
+        {/* Left Column: Registered Events with Ticket-Style Date Blocks */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-100">
               <div>
                 <h2 className="text-base font-bold text-slate-900">My Registered Events</h2>
-                <p className="text-xs text-slate-500">Events you have signed up to participate in</p>
+                <p className="text-xs text-slate-500">Events you have signed up for</p>
               </div>
 
-              {/* Tab Selector */}
-              <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
+              {/* Fluid Sliding Tab Selector */}
+              <div className="flex items-center gap-1 rounded-xl bg-slate-100/90 p-1 border border-slate-200/80">
                 <button
                   onClick={() => setActiveTab('upcoming')}
-                  className={`rounded-lg px-3 py-1 text-xs font-bold transition ${
+                  className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
                     activeTab === 'upcoming'
-                      ? 'bg-white text-primary-800 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-800'
+                      ? 'text-white'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  Upcoming ({loading ? '—' : upcoming.length})
+                  {activeTab === 'upcoming' && (
+                    <motion.div
+                      layoutId="studentDashRegTab"
+                      className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                      transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <span className="relative z-10">Upcoming ({loading ? '—' : upcoming.length})</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('past')}
-                  className={`rounded-lg px-3 py-1 text-xs font-bold transition ${
+                  className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
                     activeTab === 'past'
-                      ? 'bg-white text-primary-800 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-800'
+                      ? 'text-white'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  Past ({loading ? '—' : past.length})
+                  {activeTab === 'past' && (
+                    <motion.div
+                      layoutId="studentDashRegTab"
+                      className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                      transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <span className="relative z-10">Past ({loading ? '—' : past.length})</span>
                 </button>
               </div>
             </div>
 
             {loading ? (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="h-20 animate-pulse rounded-2xl bg-slate-100" />
                 ))}
               </div>
             ) : displayedEvents.length === 0 ? (
-              <div className="py-12 text-center flex flex-col items-center justify-center">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
-                  <Inbox size={24} />
+              <div className="py-12 px-4 text-center flex flex-col items-center justify-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                <div className="w-12 h-12 rounded-2xl bg-primary-50 text-primary-700 flex items-center justify-center mb-3 border border-primary-100/80">
+                  <Inbox size={22} />
                 </div>
-                <h3 className="text-sm font-bold text-slate-800">
-                  {activeTab === 'upcoming' ? 'No Upcoming Events' : 'No Past Events Yet'}
+                <h3 className="text-sm font-bold text-slate-900">
+                  {activeTab === 'upcoming' ? 'No Upcoming Registrations' : 'No Past Event History'}
                 </h3>
-                <p className="text-xs text-slate-400 max-w-xs mt-1">
+                <p className="text-xs text-slate-500 max-w-xs mt-1 leading-relaxed">
                   {activeTab === 'upcoming'
-                    ? 'Explore upcoming campus events and workshops to register.'
-                    : 'Attended events will show up here once concluded.'}
+                    ? 'Explore upcoming campus hackathons, workshops, and competitions to sign up!'
+                    : 'Events you participate in will appear in your history once ended.'}
                 </p>
                 {activeTab === 'upcoming' && (
                   <button
                     onClick={() => navigate('/events')}
-                    className="mt-4 rounded-xl bg-primary-700 px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-600"
+                    className="mt-4 rounded-xl bg-primary-700 hover:bg-primary-800 text-white font-bold text-xs px-4 py-2.5 shadow-xs active:scale-95 transition-all"
                   >
                     Browse Campus Events
                   </button>
                 )}
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {displayedEvents.slice(0, 4).map((ev) => {
+              <div className="space-y-3">
+                {displayedEvents.slice(0, 4).map((ev, idx) => {
                   const style = getCategoryStyle(ev.category);
                   const status = getEventStatus(ev.event_date, ev.event_time);
+                  const dateObj = new Date(ev.event_date);
+                  const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
+                  const dayNum = dateObj.toLocaleDateString('en-US', { day: 'numeric' });
+
                   return (
-                    <div
+                    <motion.div
                       key={ev.registration_id || ev.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: idx * 0.04 }}
                       onClick={() => navigate(`/events/${ev.id}`)}
-                      className="group flex cursor-pointer items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 transition-all duration-150 hover:bg-white hover:border-primary-200 hover:shadow-sm"
+                      className="group flex cursor-pointer items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-xs active:scale-[0.99]"
                     >
-                      <div className="min-w-0 flex-1 pr-3">
-                        <div className="mb-1 flex items-center gap-2">
+                      {/* Ticket-Style Date Block */}
+                      <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-slate-50 border border-slate-200/70 text-slate-800 transition group-hover:bg-primary-50 group-hover:border-primary-200">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider text-primary-700">
+                          {monthName}
+                        </span>
+                        <span className="text-base font-black leading-none text-slate-900">
+                          {dayNum}
+                        </span>
+                      </div>
+
+                      {/* Event Details */}
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex flex-wrap items-center gap-1.5">
                           <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${style.bg} ${style.text}`}>
                             {ev.category}
                           </span>
-                          {ev.team_members ? (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-primary-600 px-1.5 py-0.5 text-[9.5px] font-bold text-white">
+                          {ev.team_members && (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-primary-50 border border-primary-200 px-1.5 py-0.5 text-[9.5px] font-bold text-primary-700">
                               <Users size={9} /> Team
                             </span>
-                          ) : null}
-                          <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold capitalize ${
-                            status === 'ongoing' ? 'bg-emerald-100 text-emerald-800' : status === 'ended' ? 'bg-slate-200 text-slate-700' : 'bg-amber-100 text-amber-800'
+                          )}
+                          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                            status === 'ongoing'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : status === 'ended'
+                              ? 'bg-slate-100 text-slate-700'
+                              : 'bg-amber-100 text-amber-800'
                           }`}>
-                            {status}
+                            {status === 'ongoing' ? '● Live Now' : status}
                           </span>
                         </div>
+
                         <p className="text-sm font-bold text-slate-900 truncate group-hover:text-primary-700 transition">
                           {ev.title}
                         </p>
-                        <p className="mt-0.5 text-[11px] text-slate-500">
-                          {new Date(ev.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}{ev.location ? ` · ${ev.location}` : ''}
-                        </p>
+
+                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+                          {ev.event_time && (
+                            <span className="flex items-center gap-1">
+                              <Clock size={11} className="text-slate-400" />
+                              {formatTime12hr(ev.event_time)}
+                            </span>
+                          )}
+                          {ev.location && (
+                            <span className="flex items-center gap-1 truncate">
+                              <MapPin size={11} className="text-slate-400 shrink-0" />
+                              <span className="truncate">{ev.location}</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-primary-600 group-hover:bg-primary-50 transition border border-slate-200/80 shrink-0">
+
+                      {/* Right Chevron */}
+                      <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-primary-50 flex items-center justify-center text-slate-400 group-hover:text-primary-700 transition border border-slate-200/80 shrink-0">
                         <ChevronRight size={15} />
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -253,16 +347,16 @@ export default function StudentDashboard() {
           <RecommendedEvents />
         </div>
 
-        {/* Right Column: Quick Action Shortcuts (Identical Pattern to Faculty Dashboard) */}
-        <div className="space-y-4">
-          <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        {/* Right Column: Quick Action Shortcuts */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
             <h2 className="text-base font-bold text-slate-900">Quick Actions</h2>
-            <p className="text-xs text-slate-500 mb-4">Fast shortcuts for student activities</p>
+            <p className="text-xs text-slate-500 mb-4">Shortcuts for student campus activities</p>
 
             <div className="space-y-3">
               <button
                 onClick={() => navigate('/events')}
-                className="w-full flex items-center justify-between rounded-2xl bg-[#023433] p-4 text-left text-white shadow-sm transition hover:bg-[#034443] hover:shadow-md active:scale-[0.99]"
+                className="w-full flex items-center justify-between rounded-2xl bg-primary-800 hover:bg-primary-900 p-4 text-left text-white shadow-xs hover:shadow-md active:scale-[0.98] transition-all"
               >
                 <div className="flex items-center gap-3.5">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white">
@@ -278,15 +372,15 @@ export default function StudentDashboard() {
 
               <button
                 onClick={() => navigate('/student/my-registrations')}
-                className="w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-2xs transition hover:border-primary-300 hover:bg-primary-50/30 hover:shadow-xs active:scale-[0.99]"
+                className="w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 p-4 text-left shadow-2xs hover:border-slate-300 active:scale-[0.98] transition-all"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700 border border-violet-100">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
                     <ListChecks size={18} />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-900">Manage My Registrations</p>
-                    <p className="text-[11px] text-slate-500">Track event entries and participation</p>
+                    <p className="text-[11px] text-slate-500">Track event entries and team memberships</p>
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-slate-400 shrink-0" />
@@ -294,31 +388,31 @@ export default function StudentDashboard() {
 
               <button
                 onClick={() => navigate('/student/my-feedback')}
-                className="w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-2xs transition hover:border-primary-300 hover:bg-primary-50/30 hover:shadow-xs active:scale-[0.99]"
+                className="w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 p-4 text-left shadow-2xs hover:border-slate-300 active:scale-[0.98] transition-all"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
                     <MessageSquare size={18} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900">My Feedback & Reviews</p>
-                    <p className="text-[11px] text-slate-500">Review and submit feedback for events</p>
+                    <p className="text-sm font-bold text-slate-900">My Feedback & Ratings</p>
+                    <p className="text-[11px] text-slate-500">Review and submit feedback for completed events</p>
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-slate-400 shrink-0" />
               </button>
 
               <button
-                onClick={() => navigate('/student/gallery')}
-                className="w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-2xs transition hover:border-primary-300 hover:bg-primary-50/30 hover:shadow-xs active:scale-[0.99]"
+                onClick={() => navigate('/gallery')}
+                className="w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 p-4 text-left shadow-2xs hover:border-slate-300 active:scale-[0.98] transition-all"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
                     <Image size={18} />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-900">Campus Photo Gallery</p>
-                    <p className="text-[11px] text-slate-500">Browse photos from past campus events</p>
+                    <p className="text-[11px] text-slate-500">Browse photo highlights from past college events</p>
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-slate-400 shrink-0" />
@@ -338,7 +432,7 @@ function RecommendedEvents() {
 
   useEffect(() => {
     api.get('/events/recommended')
-      .then((res) => setEvents(res.data))
+      .then((res) => setEvents(res.data || []))
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
   }, []);
@@ -346,14 +440,17 @@ function RecommendedEvents() {
   if (!loading && events.length === 0) return null;
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-center gap-2 mb-3.5">
-        <Sparkles size={16} className="text-primary-600" />
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs">
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/80">
+          <Sparkles size={16} />
+        </div>
         <div>
           <h2 className="text-base font-bold text-slate-900">Recommended For You</h2>
-          <p className="text-xs text-slate-500">Personalized events tailored to your course and interests</p>
+          <p className="text-xs text-slate-500">Personalized events tailored to your course and academic interest</p>
         </div>
       </div>
+
       {loading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {[1, 2].map((i) => <div key={i} className="h-20 animate-pulse rounded-2xl bg-slate-100" />)}
@@ -366,11 +463,18 @@ function RecommendedEvents() {
               <button
                 key={ev.id}
                 onClick={() => navigate(`/events/${ev.id}`)}
-                className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 text-left transition hover:bg-white hover:border-primary-200 hover:shadow-sm"
+                className="group rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 text-left transition-all duration-200 hover:bg-white hover:border-primary-300 hover:shadow-xs active:scale-[0.98]"
               >
-                <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${style.bg} ${style.text}`}>{ev.category}</span>
-                <p className="mt-1.5 text-sm font-bold text-slate-900 truncate">{ev.title}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">{new Date(ev.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}{ev.location ? ` · ${ev.location}` : ''}</p>
+                <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${style.bg} ${style.text}`}>
+                  {ev.category}
+                </span>
+                <p className="mt-2 text-sm font-bold text-slate-900 truncate group-hover:text-primary-700 transition">
+                  {ev.title}
+                </p>
+                <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-500">
+                  <span>{new Date(ev.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  {ev.location && <span>· {ev.location}</span>}
+                </div>
               </button>
             );
           })}

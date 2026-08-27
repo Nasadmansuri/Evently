@@ -13,12 +13,14 @@ import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
 import { isEventPast, getEventStatus } from '../../../shared/utils/eventStatus';
 import { showToast } from '../../../shared/utils/toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facultyStructure';
+import { ALL_CATEGORIES } from '../../../shared/utils/categoryColors';
 
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
-const CATEGORIES = ['All', 'Technical', 'Cultural', 'Workshop', 'Competition', 'Seminar', 'Sports', 'Conference'];
+const CATEGORIES = ['All', ...ALL_CATEGORIES];
 const ORGANIZING_DEPARTMENTS = [
   'All',
   ...Object.keys(ACADEMIC_STRUCTURE),
@@ -235,28 +237,42 @@ export default function ManageEvents() {
             </button>
           )}
 
-          <div className="flex rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
+          <div className="flex rounded-xl border border-slate-200/80 bg-slate-100/90 p-1 shadow-2xs">
             <button
               onClick={() => setViewMode('list')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                viewMode === 'list' ? 'bg-primary-700 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                viewMode === 'list' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <List size={14} /> List
+              {viewMode === 'list' && (
+                <motion.div
+                  layoutId="manageEventsViewModePill"
+                  className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1.5"><List size={14} /> List</span>
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                viewMode === 'calendar' ? 'bg-primary-700 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                viewMode === 'calendar' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <CalendarDays size={14} /> Calendar
+              {viewMode === 'calendar' && (
+                <motion.div
+                  layoutId="manageEventsViewModePill"
+                  className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1.5"><CalendarDays size={14} /> Calendar</span>
             </button>
           </div>
 
           <button
             onClick={() => navigate('/admin/create-event')}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-600 active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all"
           >
             <Plus size={15} /> Create Event
           </button>
@@ -368,7 +384,7 @@ export default function ManageEvents() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredSorted.map((ev) => {
+          {filteredSorted.map((ev, idx) => {
             const style = getCategoryStyle(ev.category);
             const isPast = isEventPast(ev.event_date);
             const liveStatus = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
@@ -376,13 +392,16 @@ export default function ManageEvents() {
             const isConfirming = confirmId === ev.id;
 
             return (
-              <div
+              <motion.div
                 key={ev.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: idx * 0.03 }}
                 onClick={() => navigate(`/events/${ev.id}`)}
-                className="group flex flex-col cursor-pointer overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+                className="group flex flex-col cursor-pointer overflow-hidden rounded-[22px] border border-slate-200/85 bg-white p-3.5 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-primary-300 hover:shadow-md"
               >
                 {/* 16:10 Inset Banner Cover */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-100 ring-1 ring-black/5">
                   {ev.banner_image ? (
                     <img
                       src={`${ASSET_BASE_URL}${ev.banner_image}`}
@@ -394,18 +413,20 @@ export default function ManageEvents() {
                       style={{ objectPosition: 'center 30%' }}
                     />
                   ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-primary-950 to-primary-900 p-4 text-center">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-xs mb-1.5 border border-white/10">
-                        <Calendar size={20} className="text-emerald-300" />
+                    <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] p-4 text-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md mb-1.5 border border-white/15">
+                        <Sparkles size={18} className="text-emerald-300" />
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-200/80 line-clamp-1">
+                      <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-emerald-200/90 line-clamp-1">
                         {ev.category || 'Event'}
                       </span>
                     </div>
                   )}
 
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-5" />
+
                   {/* Live Status Badge */}
-                  <span className={`absolute right-3 top-3 z-10 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide shadow-md ${
+                  <span className={`absolute right-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ${
                     ev.status === 'cancelled'
                       ? 'bg-rose-600 text-white'
                       : liveStatus === 'scheduled'
@@ -413,28 +434,28 @@ export default function ManageEvents() {
                       : liveStatus === 'ended'
                       ? 'bg-slate-800/90 text-white'
                       : liveStatus === 'ongoing'
-                      ? 'bg-amber-500/95 text-white'
-                      : 'bg-emerald-500/95 text-white'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-primary-700 text-white'
                   }`}>
-                    {ev.status === 'cancelled' ? 'Cancelled' : liveStatus === 'scheduled' ? 'Scheduled' : liveStatus === 'ongoing' ? 'Ongoing' : isPast ? 'Ended' : 'Upcoming'}
+                    {ev.status === 'cancelled' ? 'Cancelled' : liveStatus === 'scheduled' ? 'Scheduled' : liveStatus === 'ongoing' ? 'Live Now' : isPast ? 'Ended' : 'Upcoming'}
                   </span>
                 </div>
 
                 {/* Card Body */}
-                <div className="flex flex-1 flex-col p-5">
-                  <div className="mb-2.5 flex items-center justify-between gap-2">
+                <div className="flex flex-1 flex-col pt-3.5 px-1">
+                  <div className="mb-2 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
-                      <span className={`rounded-md px-2 py-0.5 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
+                      <span className={`rounded-md px-2.5 py-0.5 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
                         {ev.category}
                       </span>
                       {ev.is_team_event ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-primary-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-primary-50 border border-primary-100 px-2 py-0.5 text-[10px] font-bold text-primary-700">
                           <Users size={10} /> Team
                         </span>
                       ) : null}
                     </div>
 
-                    <span className="text-[11px] font-bold text-primary-700 bg-primary-50 px-2.5 py-0.5 rounded-full border border-primary-100">
+                    <span className="text-[11px] font-bold text-primary-700 bg-primary-50 px-2.5 py-0.5 rounded-md border border-primary-100">
                       {ev.registration_count || 0} {ev.registration_count === 1 ? 'Registration' : 'Registrations'}
                     </span>
                   </div>
@@ -511,19 +532,19 @@ export default function ManageEvents() {
                   </div>
 
                   {/* Admin Action Footers */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="mt-auto pt-3.5 border-t border-slate-100 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => navigate(`/events/${ev.id}`)}
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 active:scale-95"
                       >
                         View Details
                       </button>
                       <button
                         type="button"
                         onClick={() => navigate(`/admin/events/${ev.id}/edit`)}
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-primary-200 bg-primary-50 py-2 text-xs font-bold text-primary-800 shadow-2xs transition hover:bg-primary-100"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-primary-200 bg-primary-50 py-2 text-xs font-bold text-primary-800 shadow-2xs transition hover:bg-primary-100 active:scale-95"
                       >
                         <Edit3 size={13} /> Edit
                       </button>
@@ -552,7 +573,7 @@ export default function ManageEvents() {
                       <button
                         type="button"
                         onClick={() => setConfirmId(ev.id)}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50/70 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-100/80"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50/70 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-100/80 active:scale-95"
                         title="Permanently remove event from database"
                       >
                         <Trash2 size={13} /> Delete Event Permanently
@@ -560,7 +581,7 @@ export default function ManageEvents() {
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

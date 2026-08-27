@@ -20,10 +20,25 @@ export default {
           900: '#012424',
           950: '#011515',
         },
-        // Accent: Sidecar Yellow — used sparingly for highlight badges/recommended sections only
+        // Academic Prestige Warm Gold Accent
+        gold: {
+          50: '#FFFDF5',
+          100: '#FEF9C3',
+          200: '#FEF08A',
+          300: '#FDE047',
+          400: '#FACC15',
+          500: '#EAB308',
+          600: '#CA8A04',
+          700: '#A16207',
+          800: '#854D0E',
+          900: '#713F12',
+        },
+        // Accent: Warm Gold / Amber highlight
         accent: {
-          DEFAULT: '#F3E8BC',
-          text: '#8A6D1D',
+          DEFAULT: '#F59E0B',
+          light: '#FEF3C7',
+          dark: '#B45309',
+          text: '#92400E',
         },
         // Category tag colors — deliberately distinct from primary/accent, never reused as UI chrome
         category: {

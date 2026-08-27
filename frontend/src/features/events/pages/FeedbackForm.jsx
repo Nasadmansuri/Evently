@@ -5,10 +5,12 @@ import {
   Calendar, MapPin, Sparkles, MessageSquare, Send, Award, Clock,
   ChevronRight, Quote, ThumbsUp, Tag
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../../../shared/services/api';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { showToast } from '../../../shared/utils/toast';
+import { fireCelebrationConfetti } from '../../../shared/utils/confetti';
 
 const RATING_DESCRIPTIONS = {
   1: 'Needs Improvement',
@@ -79,6 +81,7 @@ export default function FeedbackForm() {
         starRating,
         answers,
       });
+      fireCelebrationConfetti();
       showToast.success('Feedback submitted successfully! Thank you.');
       navigate(`/events/${id}?tab=feedback`);
     } catch (err) {

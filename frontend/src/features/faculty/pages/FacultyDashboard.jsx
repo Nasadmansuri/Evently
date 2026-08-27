@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CalendarDays, TrendingUp, Plus, CalendarSearch, Images, AlertCircle,
-  Users, CheckCircle2, UserCheck, ArrowRight, Clock, Award, Sparkles
+  Users, CheckCircle2, UserCheck, ArrowRight, Clock, Award, Sparkles,
+  Building2, Landmark, ShieldCheck, FileSpreadsheet, ChevronRight, PlayCircle
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { isEventPast, getEventStatus } from '../../../shared/utils/eventStatus';
@@ -30,8 +32,8 @@ export default function FacultyDashboard() {
         api.get('/events/my-events'),
         api.get('/events/my-stats'),
       ]);
-      setEvents(eventsRes.data);
-      setStats(statsRes.data);
+      setEvents(eventsRes.data || []);
+      setStats(statsRes.data || { totalEvents: 0, upcomingEvents: 0, totalRegistrations: 0, completedEvents: 0 });
     } catch (err) {
       setError(err.response?.data?.message || 'Could not load dashboard');
     } finally {
@@ -44,109 +46,135 @@ export default function FacultyDashboard() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Header Profile & Welcome Banner */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Faculty Dashboard</h1>
-          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-            Welcome back, {user?.full_name || 'Professor'}! Manage your campus events, registrations, and student feedback.
-          </p>
-          <div className="mt-2.5 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-primary-50 border border-primary-100 px-3 py-1 text-[11px] font-semibold text-primary-700">
-              Department: {user?.department || 'Academic Affairs'}
-            </span>
-            {user?.designation && (
-              <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-700">
-                {user.designation}
+    <div className="space-y-6 pb-12">
+      {/* 1. Header Profile & Welcome Banner */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-2xs">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
+                Faculty Portal
               </span>
-            )}
-            <span className="rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
-              Faculty ID: {user?.faculty_id_code || 'FAC-USER'}
-            </span>
-            <span className="rounded-full bg-violet-50 border border-violet-100 px-3 py-1 text-[11px] font-semibold capitalize text-violet-700">
-              Status: {user?.approval_status || 'Approved'}
-            </span>
-          </div>
-        </div>
+              <span className="text-xs font-semibold text-slate-300">·</span>
+              <span className="text-xs font-medium text-slate-500">
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
 
-        <button
-          onClick={() => navigate('/faculty/create-event')}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] shrink-0"
-        >
-          <Plus size={16} /> Create Event
-        </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                Welcome back, {user?.full_name || 'Professor'}! 👋
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-slate-600">
+                Oversee campus activities, monitor student registrations, and manage event feedback forms.
+              </p>
+            </div>
+
+            {/* Clean Academic Badges */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                <Landmark size={13} className="text-slate-500 shrink-0" />
+                {user?.department || 'Academic Department'}
+              </span>
+              {user?.designation && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-50/80 border border-primary-100 px-2.5 py-1 text-xs font-bold text-primary-800">
+                  <Award size={13} className="text-primary-700 shrink-0" />
+                  {user.designation}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-medium text-slate-600">
+                <ShieldCheck size={13} className="text-slate-400 shrink-0" />
+                ID: {user?.faculty_id_code || 'FAC-CAMPUS'}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => navigate('/faculty/create-event')}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-3 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all shrink-0 self-start sm:self-center"
+          >
+            <Plus size={16} /> Create Event
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className="flex items-center justify-between gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-          <span className="flex items-center gap-2">
-            <AlertCircle size={15} className="shrink-0 text-red-500" />
+        <div className="flex items-center justify-between gap-2 text-xs text-rose-700 bg-rose-50 border border-rose-100 rounded-2xl p-4 shadow-xs">
+          <span className="flex items-center gap-2 font-medium">
+            <AlertCircle size={16} className="shrink-0 text-rose-600" />
             {error}
           </span>
-          <button onClick={loadDashboard} className="font-semibold underline shrink-0 hover:text-red-800">
+          <button onClick={loadDashboard} className="font-bold underline shrink-0 hover:text-rose-900">
             Retry
           </button>
         </div>
       )}
 
-      {/* 4-KPI Metric Grid */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex items-center gap-3.5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 border border-primary-100">
-            <CalendarDays size={20} />
+      {/* 2. 4-KPI Metric Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Total Events */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Events</p>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-100/80">
+              <CalendarDays size={18} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">Total Events</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? '—' : stats.totalEvents}</p>
-          </div>
+          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.totalEvents}</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Organized by you</p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
-            <TrendingUp size={20} />
+        {/* Upcoming Events */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Upcoming Events</p>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
+              <TrendingUp size={18} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">Upcoming Events</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? '—' : stats.upcomingEvents}</p>
-          </div>
+          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.upcomingEvents}</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Scheduled & active</p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
-            <UserCheck size={20} />
+        {/* Total Registrations */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Registrations</p>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+              <UserCheck size={18} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">Registrations</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? '—' : stats.totalRegistrations}</p>
-          </div>
+          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.totalRegistrations}</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Student campus entries</p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600 border border-violet-100">
-            <CheckCircle2 size={20} />
+        {/* Completed Events */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Completed Events</p>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
+              <CheckCircle2 size={18} />
+            </div>
           </div>
-          <div>
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-slate-400">Completed Events</p>
-            <p className="text-2xl font-black text-slate-900">{loading ? '—' : stats.completedEvents}</p>
-          </div>
+          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.completedEvents}</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Concluded successfully</p>
         </div>
       </div>
 
-      {/* Main Section: Recent Events & Quick Actions */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Recent Events Card */}
-        <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6 flex flex-col justify-between">
+      {/* 3. Main Split Section: Recent Events & Quick Actions */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Recent Events Card (2 Cols on Desktop) */}
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-2xs flex flex-col justify-between">
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-slate-900">My Recent Events</h2>
-                <p className="text-xs text-slate-400">Events organized by you</p>
+                <p className="text-xs text-slate-500">Live and upcoming campus activities organized by you</p>
               </div>
               {events.length > 0 && (
                 <button
                   onClick={() => navigate('/faculty/my-events')}
-                  className="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1 transition"
+                  className="text-xs font-bold text-primary-700 hover:text-primary-800 flex items-center gap-1 transition"
                 >
                   View All ({events.length}) <ArrowRight size={13} />
                 </button>
@@ -154,76 +182,94 @@ export default function FacultyDashboard() {
             </div>
 
             {loading ? (
-              <div className="space-y-2.5">
-                {[1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />)}
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => <div key={i} className="h-18 animate-pulse rounded-2xl bg-slate-100" />)}
               </div>
             ) : events.length === 0 ? (
-              <div className="py-10 text-center flex flex-col items-center justify-center">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 mb-2 border border-slate-100">
+              <div className="py-12 text-center flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+                <div className="w-12 h-12 rounded-2xl bg-primary-50 flex items-center justify-center text-primary-700 mb-2 border border-primary-100">
                   <CalendarDays size={22} />
                 </div>
-                <p className="text-sm font-semibold text-slate-700">No events yet</p>
-                <p className="text-xs text-slate-400 mt-0.5">Start by organizing your first campus workshop or competition.</p>
+                <p className="text-sm font-bold text-slate-800">No events published yet</p>
+                <p className="text-xs text-slate-500 mt-0.5">Start by organizing your first campus workshop or competition.</p>
                 <button
                   onClick={() => navigate('/faculty/create-event')}
-                  className="mt-3 text-xs font-bold text-primary-600 hover:underline"
+                  className="mt-3 text-xs font-bold text-primary-700 hover:underline"
                 >
                   + Create your first event
                 </button>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {events.slice(0, 4).map((ev) => {
-                  const isPast = isEventPast(ev.event_date);
-                  const liveStatus = getEventStatus(ev.event_date, ev.event_time);
+              <div className="space-y-3">
+                {events.slice(0, 4).map((ev, idx) => {
+                  const isPast = isEventPast(ev.event_date, ev.event_time);
+                  const liveStatus = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
                   const catStyle = getCategoryStyle(ev.category);
+                  const dateObj = new Date(ev.event_date);
+                  const month = dateObj.toLocaleDateString('en-US', { month: 'short' });
+                  const day = dateObj.toLocaleDateString('en-US', { day: 'numeric' });
 
                   return (
-                    <div
+                    <motion.div
                       key={ev.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: idx * 0.04 }}
                       onClick={() => navigate(`/events/${ev.id}`)}
-                      className="group flex cursor-pointer items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 transition-all duration-150 hover:bg-white hover:border-primary-200 hover:shadow-sm"
+                      className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 transition-all duration-150 hover:bg-white hover:border-primary-200 hover:shadow-xs"
                     >
-                      <div className="min-w-0 flex-1 pr-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${catStyle.bg} ${catStyle.text}`}>
-                            {ev.category}
+                      <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-3">
+                        {/* Ticket Date Badge */}
+                        <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-800 shadow-2xs group-hover:border-primary-200 transition">
+                          <span className="text-[9px] font-black uppercase tracking-wider text-primary-700">
+                            {month}
                           </span>
-                          {ev.is_team_event ? (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-primary-600 px-1.5 py-0.5 text-[9.5px] font-bold text-white">
-                              <Users size={9} /> Team
-                            </span>
-                          ) : null}
+                          <span className="text-sm font-black leading-none text-slate-900">
+                            {day}
+                          </span>
                         </div>
-                        <p className="text-sm font-bold text-slate-900 truncate group-hover:text-primary-700 transition">
-                          {ev.title}
-                        </p>
-                        <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2">
-                          <span>{new Date(ev.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                          {ev.registration_count !== undefined && (
-                            <>
-                              <span>•</span>
-                              <span>{ev.registration_count} registered</span>
-                            </>
-                          )}
-                        </p>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className={`rounded-md px-2 py-0.5 text-[9.5px] font-bold ${catStyle.bg} ${catStyle.text}`}>
+                              {ev.category}
+                            </span>
+                            {ev.is_team_event ? (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-primary-50 border border-primary-100 px-1.5 py-0.5 text-[9.5px] font-bold text-primary-700">
+                                <Users size={9} /> Team
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 truncate group-hover:text-primary-700 transition">
+                            {ev.title}
+                          </p>
+                          <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2">
+                            <span>{ev.location || 'Biratnagar International College'}</span>
+                            {ev.registration_count !== undefined && (
+                              <>
+                                <span>•</span>
+                                <span className="font-semibold text-slate-700">{ev.registration_count} registered</span>
+                              </>
+                            )}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="flex shrink-0 items-center gap-2">
-                        <span className={`rounded-full px-2.5 py-0.5 text-[10.5px] font-bold capitalize ${
+                      <div className="flex shrink-0 items-center gap-2.5">
+                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                           liveStatus === 'ended'
-                            ? 'bg-slate-200/80 text-slate-600'
+                            ? 'bg-slate-200 text-slate-700'
                             : liveStatus === 'ongoing'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-primary-100 text-primary-800'
                         }`}>
-                          {liveStatus === 'ongoing' ? 'Ongoing' : isPast ? 'Ended' : 'Upcoming'}
+                          {liveStatus === 'ongoing' ? '● Live' : isPast ? 'Ended' : 'Upcoming'}
                         </span>
-                        <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-slate-400 group-hover:text-primary-600 group-hover:bg-primary-50 transition border border-slate-200/80">
-                          <ArrowRight size={13} />
+                        <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-slate-400 group-hover:text-primary-700 group-hover:bg-primary-50 transition border border-slate-200">
+                          <ChevronRight size={14} />
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -231,11 +277,11 @@ export default function FacultyDashboard() {
           </div>
 
           {events.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
               <span>Showing {Math.min(4, events.length)} of {events.length} events</span>
               <button
                 onClick={() => navigate('/faculty/my-events')}
-                className="font-bold text-primary-600 hover:underline"
+                className="font-bold text-primary-700 hover:underline"
               >
                 Manage All Events →
               </button>
@@ -243,67 +289,69 @@ export default function FacultyDashboard() {
           )}
         </div>
 
-        {/* Quick Actions Card */}
-        <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <h2 className="text-base font-bold text-slate-900">Quick Actions</h2>
-          <p className="text-xs text-slate-400 mb-4">Fast shortcuts for common faculty tasks</p>
+        {/* Quick Actions Card (1 Col on Desktop) */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-2xs flex flex-col justify-between">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Faculty Quick Actions</h2>
+            <p className="text-xs text-slate-500 mb-4">Fast shortcuts for common academic operations</p>
 
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate('/faculty/create-event')}
-              className="flex w-full items-center gap-3.5 rounded-2xl bg-primary-600 p-4 text-left text-white shadow-sm transition hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98]"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white">
-                <Plus size={20} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold">Create New Event</p>
-                <p className="text-[11.5px] text-white/80">Publish workshops, hackathons, seminars, or competitions</p>
-              </div>
-              <ArrowRight size={16} className="text-white/60" />
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate('/faculty/create-event')}
+                className="flex w-full items-center gap-3.5 rounded-xl bg-primary-700 hover:bg-primary-800 p-4 text-left text-white shadow-xs hover:shadow-md transition active:scale-95"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
+                  <Plus size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-white">Create New Event</p>
+                  <p className="text-[11px] text-white/80 truncate">Publish workshops & hackathons</p>
+                </div>
+                <ArrowRight size={15} className="text-white/70 shrink-0" />
+              </button>
 
-            <button
-              onClick={() => navigate('/faculty/my-events')}
-              className="flex w-full items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:bg-slate-50 hover:border-slate-300"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 border border-primary-100">
-                <CalendarDays size={18} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-slate-900">Manage My Events</p>
-                <p className="text-[11.5px] text-slate-500">Edit event details, feedback forms, and download PDF reports</p>
-              </div>
-              <ArrowRight size={16} className="text-slate-400" />
-            </button>
+              <button
+                onClick={() => navigate('/faculty/my-events')}
+                className="flex w-full items-center gap-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white p-3.5 text-left transition hover:border-primary-200 hover:shadow-xs active:scale-95"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700 border border-primary-100">
+                  <CalendarDays size={16} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-slate-900">Manage My Events</p>
+                  <p className="text-[11px] text-slate-500 truncate">Feedback, editing, & PDF reports</p>
+                </div>
+                <ArrowRight size={14} className="text-slate-400 shrink-0" />
+              </button>
 
-            <button
-              onClick={() => navigate('/events')}
-              className="flex w-full items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:bg-slate-50 hover:border-slate-300"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
-                <CalendarSearch size={18} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-slate-900">Browse All Campus Events</p>
-                <p className="text-[11.5px] text-slate-500">Explore college calendar, student festivals, and activities</p>
-              </div>
-              <ArrowRight size={16} className="text-slate-400" />
-            </button>
+              <button
+                onClick={() => navigate('/events')}
+                className="flex w-full items-center gap-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white p-3.5 text-left transition hover:border-primary-200 hover:shadow-xs active:scale-95"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
+                  <CalendarSearch size={16} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-slate-900">All Campus Events</p>
+                  <p className="text-[11px] text-slate-500 truncate">Explore student calendar & feed</p>
+                </div>
+                <ArrowRight size={14} className="text-slate-400 shrink-0" />
+              </button>
 
-            <button
-              onClick={() => navigate('/faculty/gallery')}
-              className="flex w-full items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:bg-slate-50 hover:border-slate-300"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
-                <Images size={18} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-slate-900">Event Photo Gallery</p>
-                <p className="text-[11.5px] text-slate-500">Browse and manage event albums and uploaded pictures</p>
-              </div>
-              <ArrowRight size={16} className="text-slate-400" />
-            </button>
+              <button
+                onClick={() => navigate('/faculty/gallery')}
+                className="flex w-full items-center gap-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white p-3.5 text-left transition hover:border-primary-200 hover:shadow-xs active:scale-95"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  <Images size={16} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-slate-900">Event Photo Gallery</p>
+                  <p className="text-[11px] text-slate-500 truncate">Upload & organize event photos</p>
+                </div>
+                <ArrowRight size={14} className="text-slate-400 shrink-0" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

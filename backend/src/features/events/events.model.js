@@ -293,7 +293,12 @@ async function deleteEventImage(imageId) {
 
 async function getGallerySummary() {
   const [rows] = await pool.query(
-    `SELECT e.id, e.title, e.category, e.event_date,
+    `SELECT e.id, e.title, e.description, e.category, e.location, e.event_date, e.event_time,
+            e.organizing_department, e.organizing_community, e.is_team_event, e.status, e.publish_at,
+            COALESCE(
+              (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1),
+              (SELECT image_url FROM event_images WHERE event_id = e.id ORDER BY id ASC LIMIT 1)
+            ) AS banner_image,
             COALESCE(
               (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1),
               (SELECT image_url FROM event_images WHERE event_id = e.id ORDER BY id ASC LIMIT 1)
