@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Bell, Check } from 'lucide-react';
+import { Bell, Trash2, X, CheckCheck, Inbox, Sparkles } from 'lucide-react';
 import {
   getNotifications,
   getUnreadCount,
   markNotificationRead,
   markAllNotificationsRead,
+  deleteNotification,
+  clearAllNotifications,
 } from '../services/notification.service';
 
 function timeAgo(dateStr) {
@@ -38,7 +40,7 @@ export default function NotificationBell() {
     setLoading(true);
     try {
       const res = await getNotifications();
-      setNotifications(res.data.notifications);
+      setNotifications(res.data.notifications || []);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     } finally {
@@ -48,7 +50,7 @@ export default function NotificationBell() {
 
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 60000); // poll every 60s
+    const interval = setInterval(fetchUnreadCount, 30000); // poll every 30s
     return () => clearInterval(interval);
   }, [fetchUnreadCount]);
 
@@ -68,10 +70,22 @@ export default function NotificationBell() {
     if (next) fetchNotifications();
   };
 
-  const handleMarkRead = async (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: 1 } : n))
-    );
+  const handleDismiss = async (id, isRead, e) => {
+    e?.stopPropagation();
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    if (!isRead) {
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    }
+    try {
+      await deleteNotification(id);
+    } catch (err) {
+      console.error('Failed to dismiss notification:', err);
+    }
+  };
+
+  const handleMarkReadAndClear = async (id, e) => {
+    e?.stopPropagation();
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
     setUnreadCount((prev) => Math.max(0, prev - 1));
     try {
       await markNotificationRead(id);
@@ -80,13 +94,13 @@ export default function NotificationBell() {
     }
   };
 
-  const handleMarkAllRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: 1 })));
+  const handleClearAll = async () => {
+    setNotifications([]);
     setUnreadCount(0);
     try {
-      await markAllNotificationsRead();
+      await clearAllNotifications();
     } catch (err) {
-      console.error('Failed to mark all read:', err);
+      console.error('Failed to clear all:', err);
     }
   };
 
@@ -94,68 +108,95 @@ export default function NotificationBell() {
     <div className="relative" ref={wrapperRef}>
       <button
         onClick={toggleOpen}
-        className="relative text-slate-400 hover:text-slate-600 transition"
+        className="relative flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition active:scale-95 focus:outline-none"
         aria-label={
           unreadCount > 0
             ? `${unreadCount} unread notifications`
             : 'Notifications'
         }
       >
-        <Bell size={20} className="text-slate-600" />
+        <Bell size={19} className="text-slate-600" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-semibold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white shadow-xs animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-            <span className="text-sm font-semibold text-slate-800">
-              Notifications
-            </span>
-            {unreadCount > 0 && (
+        <div className="absolute right-[-40px] sm:right-0 mt-2.5 w-[320px] sm:w-[360px] rounded-[22px] border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/15 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 bg-slate-50/90 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                Notifications
+              </span>
+              {unreadCount > 0 && (
+                <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-extrabold text-primary-700">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+            {notifications.length > 0 && (
               <button
-                onClick={handleMarkAllRead}
-                className="flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-700"
+                onClick={handleClearAll}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-primary-700 transition active:scale-95"
+                title="Clear all notifications"
               >
-                <Check size={12} /> Mark all read
+                <CheckCheck size={13} className="text-primary-600" />
+                <span>Clear all</span>
               </button>
             )}
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          {/* Content */}
+          <div className="max-h-88 overflow-y-auto divide-y divide-slate-100">
             {loading ? (
-              <div className="px-4 py-6 text-center text-sm text-slate-400">
-                Loading...
+              <div className="px-4 py-10 text-center text-xs text-slate-400">
+                Loading notifications...
               </div>
             ) : notifications.length === 0 ? (
-              <div className="px-4 py-6 text-center text-sm text-slate-400">
-                No notifications yet
+              <div className="flex flex-col items-center justify-center px-4 py-9 text-center">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100/60 mb-2.5 shadow-2xs">
+                  <Inbox size={20} className="text-emerald-600" />
+                </div>
+                <p className="text-xs font-bold text-slate-800">All caught up!</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  No new notifications right now
+                </p>
               </div>
             ) : (
               notifications.map((n) => (
-                <button
+                <div
                   key={n.id}
-                  onClick={() => !n.is_read && handleMarkRead(n.id)}
-                  className={`w-full text-left px-4 py-3 border-b border-slate-50 last:border-0 transition-colors ${
-                    n.is_read ? 'bg-white' : 'bg-primary-50/60 hover:bg-primary-50'
-                  }`}
+                  onClick={(e) => handleMarkReadAndClear(n.id, e)}
+                  className="group relative flex items-start justify-between gap-2.5 p-3 text-left transition hover:bg-slate-50/80 cursor-pointer"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-medium text-slate-800">
-                      {n.title}
+                  <div className="flex-1 min-w-0 pr-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary-600 shrink-0" />
+                      <p className="text-xs font-bold text-slate-900 truncate">
+                        {n.title}
+                      </p>
+                    </div>
+                    <p className="mt-1 text-[11.5px] text-slate-600 leading-snug line-clamp-2">
+                      {n.message}
                     </p>
-                    {!n.is_read && (
-                      <span className="w-2 h-2 rounded-full bg-primary-600 mt-1.5 shrink-0" />
-                    )}
+                    <p className="mt-1 text-[10px] font-medium text-slate-400">
+                      {timeAgo(n.created_at)}
+                    </p>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{n.message}</p>
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    {timeAgo(n.created_at)}
-                  </p>
-                </button>
+
+                  {/* Quick Dismiss Button */}
+                  <button
+                    onClick={(e) => handleDismiss(n.id, n.is_read, e)}
+                    className="shrink-0 p-1 text-slate-300 hover:text-slate-600 rounded-md hover:bg-slate-200/60 transition"
+                    title="Dismiss"
+                    aria-label="Dismiss"
+                  >
+                    <X size={13} />
+                  </button>
+                </div>
               ))
             )}
           </div>

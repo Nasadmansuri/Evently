@@ -1,8 +1,28 @@
 const usersModel = require('./users.model');
 
 async function getMe(req, res) {
-  const profile = await usersModel.getProfile(req.user.id);
-  res.json(profile);
+  try {
+    const profile = await usersModel.getProfile(req.user.id);
+    if (!profile) return res.status(404).json({ message: 'User not found' });
+    const stats = await usersModel.getUserStats(req.user.id, profile.role);
+    res.json({ ...profile, stats });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch profile', error: err.message });
+  }
+}
+
+async function updateMe(req, res) {
+  try {
+    const { phone } = req.body;
+    if (phone && !/^9\d{9}$/.test(phone.trim())) {
+      return res.status(400).json({ message: 'Please enter a valid 10-digit phone number (starting with 9)' });
+    }
+    const updated = await usersModel.updateProfile(req.user.id, req.body);
+    const stats = await usersModel.getUserStats(req.user.id, updated.role);
+    res.json({ user: { ...updated, stats }, message: 'Profile updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update profile', error: err.message });
+  }
 }
 
 async function getPendingFaculty(req, res) {
@@ -62,4 +82,4 @@ async function deleteUser(req, res) {
   }
 }
 
-module.exports = { getMe, getPendingFaculty, updateApproval, getAllUsers, deleteUser };
+module.exports = { getMe, updateMe, getPendingFaculty, updateApproval, getAllUsers, deleteUser };

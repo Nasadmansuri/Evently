@@ -4,6 +4,7 @@ const usersController = require('./users.controller');
 const { requireAuth, requireRole } = require('../../shared/middleware/auth.middleware');
 
 router.get('/me', requireAuth, usersController.getMe);
+router.put('/me', requireAuth, usersController.updateMe);
 router.get('/pending-faculty', requireAuth, requireRole('admin'), usersController.getPendingFaculty);
 router.patch('/:id/approval', requireAuth, requireRole('admin'), usersController.updateApproval);
 router.get('/', requireAuth, requireRole('admin'), usersController.getAllUsers);

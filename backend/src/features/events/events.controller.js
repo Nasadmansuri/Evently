@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
+const pool = require('../../shared/config/db');
 const eventsModel = require('./events.model');
 const registrationsModel = require('../registrations/registrations.model');
 const feedbackModel = require('../feedback/feedback.model');
@@ -62,6 +63,12 @@ async function createEvent(req, res) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    const today = new Date().toISOString().split('T')[0];
+    const eventDateOnly = (eventDate || '').slice(0, 10);
+    if (eventDateOnly < today) {
+      return res.status(400).json({ message: 'Event date cannot be in the past' });
+    }
+
     const eventId = await eventsModel.createEvent({
       title, description, category, location, eventDate, eventTime,
       organizingDepartment, organizingCommunity, rulesEligibility,
@@ -70,19 +77,17 @@ async function createEvent(req, res) {
 
     res.status(201).json({ message: 'Event created successfully', eventId });
 
-    // Fire-and-forget: notify all students of the new event. Runs after the
-    // response is sent, so a slow/failed notification insert can never
-    // delay or break event creation itself (same pattern as the
-    // registration confirmation email in registrations.controller.js).
-    usersModel.getAllUsers({ role: 'student' })
-      .then((students) => {
-        const studentIds = students.map((s) => s.id);
-        return notificationsModel.createForUsers(studentIds, {
+    // Fire-and-forget: notify all registered students of the new event,
+    // excluding the event creator themselves and faculty/admin.
+    pool.query('SELECT id FROM users WHERE role = "student" AND id != ?', [req.user.id])
+      .then(([users]) => {
+        const userIds = users.map((u) => u.id);
+        return notificationsModel.createForUsers(userIds, {
           title: `New Event: ${title}`,
           message: `${organizingDepartment} posted a new ${category} event — check it out!`,
         });
       })
-      .catch((err) => console.error('New-event notification failed:', err.message));
+      .catch((err) => console.error('New-event notification broadcast failed:', err.message));
   } catch (err) {
     res.status(500).json({ message: 'Failed to create event', error: err.message });
   }
@@ -174,6 +179,12 @@ async function updateEvent(req, res) {
 
     if (!title || !description || !category || !location || !eventDate || !eventTime || !organizingDepartment) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const eventDateOnly = (eventDate || '').slice(0, 10);
+    if (eventDateOnly < today) {
+      return res.status(400).json({ message: 'Event date cannot be in the past' });
     }
 
     await eventsModel.updateEvent(req.params.id, {

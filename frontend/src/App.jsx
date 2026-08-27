@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './features/auth/pages/Login';
+import ForgotPassword from './features/auth/pages/ForgotPassword';
 import StudentSignup from './features/auth/pages/StudentSignup';
 import FacultySignup from './features/auth/pages/FacultySignup';
 import ProtectedRoute from './shared/components/ProtectedRoute';
@@ -20,6 +21,7 @@ import ManageEvents from './features/admin/pages/ManageEvents';
 import Gallery from './features/events/pages/Gallery';
 import UserManagement from './features/admin/pages/UserManagement';
 import Reports from './features/admin/pages/Reports';
+import Profile from './features/profile/pages/Profile';
 
 
 export default function App() {
@@ -27,6 +29,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/signup/student" element={<StudentSignup />} />
       <Route path="/signup/faculty" element={<FacultySignup />} />
       <Route
@@ -149,6 +152,8 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/admin/create_event" element={<Navigate to="/admin/create-event" replace />} />
+      <Route path="/faculty/create_event" element={<Navigate to="/faculty/create-event" replace />} />
       <Route
         path="/events/:id/register"
         element={
@@ -180,6 +185,26 @@ export default function App() {
         }
       />
       <Route
+        path="/student/registrations"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <MyRegistrations />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/registrations"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <MyRegistrations />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/events/:id/feedback"
         element={
           <ProtectedRoute allowedRoles={['student']}>
@@ -195,6 +220,56 @@ export default function App() {
           <ProtectedRoute allowedRoles={['student']}>
             <Layout>
               <MyFeedback />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/feedback"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <MyFeedback />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/feedback"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <MyFeedback />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/gallery"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Gallery />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/gallery"
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Layout>
+              <Gallery />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/faculty/gallery"
+        element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <Layout>
+              <Gallery />
             </Layout>
           </ProtectedRoute>
         }
@@ -230,45 +305,46 @@ export default function App() {
         }
       />
       <Route
-        path="/admin/users"
+        path="/profile"
         element={
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute>
             <Layout>
-              <UserManagement />
+              <Profile />
             </Layout>
           </ProtectedRoute>
         }
       />
       <Route
-        path="/admin/users"
-        element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <Layout>
-              <UserManagement />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/faculty/gallery"
-        element={
-          <ProtectedRoute allowedRoles={['faculty']}>
-            <Layout>
-              <Gallery />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/student/gallery"
+        path="/student/profile"
         element={
           <ProtectedRoute allowedRoles={['student']}>
             <Layout>
-              <Gallery />
+              <Profile />
             </Layout>
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/faculty/profile"
+        element={
+          <ProtectedRoute allowedRoles={['faculty']}>
+            <Layout>
+              <Profile />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/profile"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Layout>
+              <Profile />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/events" replace />} />
     </Routes>
   );
 }

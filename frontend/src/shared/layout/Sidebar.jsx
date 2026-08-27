@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, PlusSquare, ListChecks, Images, MessageSquare, X, CalendarHeart, Users, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, PlusSquare, ListChecks, Images, MessageSquare, X, CalendarHeart, Users, BarChart3, UserCircle } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, roles: ['admin'] },
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { label: 'My Feedback', to: '/student/my-feedback', icon: MessageSquare, roles: ['student'] },
   { label: 'Gallery', to: '/faculty/gallery', icon: Images, roles: ['faculty'] },
   { label: 'Gallery', to: '/student/gallery', icon: Images, roles: ['student'] },
+  { label: 'My Profile', to: '/profile', icon: UserCircle, roles: ['admin', 'faculty', 'student'] },
 ];
 
 export default function Sidebar({ role, open, onClose }) {
@@ -24,9 +25,9 @@ export default function Sidebar({ role, open, onClose }) {
 
   return (
     <>
-      {open && <div className="fixed inset-0 bg-slate-900/25 z-30 lg:hidden" onClick={onClose} />}
+      {open && <div className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden" onClick={onClose} />}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-slate-200 bg-white/95 backdrop-blur-sm transition-transform duration-200 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r border-slate-200 bg-white/95 backdrop-blur-sm transition-transform duration-200 ${
           open ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >

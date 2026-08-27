@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import {
   User, Mail, Phone, IdCard, Landmark, Briefcase, Users, Lock, ShieldCheck,
   UserPlus, Info, AlertCircle, Loader2, Eye, EyeOff, CalendarHeart, ChevronDown, CheckCircle2,
+  KeyRound, X, RefreshCw,
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
@@ -26,6 +27,14 @@ export default function FacultySignup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // OTP Verification Modal states
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [devOtp, setDevOtp] = useState(null);
+
   const designationOptions = useMemo(
     () => (department ? DEPARTMENT_DESIGNATIONS[department] : null),
     [department]
@@ -41,17 +50,17 @@ export default function FacultySignup() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
-  async function handleSubmit(e) {
+  async function handleInitiateSignup(e) {
     e.preventDefault();
     setError('');
 
     if (!fullName.trim()) return setError('Please enter your full name');
     if (!isValidEmail(email)) return setError('Please enter a valid email address');
     if (!/^9\d{9}$/.test(phone)) {
-      return setError('Please enter a valid 10-digit Nepali phone number (starting with 9)');
+      return setError('Please enter a valid 10-digit phone number (starting with 9)');
     }
-    if (!/^[A-Z]{2,5}-[A-Z]{2,5}-\d{3,5}$/i.test(facultyIdCode.trim())) {
-      return setError('Faculty ID should look like BIC-FAC-0142');
+    if (!facultyIdCode.trim() || facultyIdCode.trim().length < 3) {
+      return setError('Faculty ID should look like BIC-FAC-0142 or HERALD-FAC-001');
     }
     if (!department) return setError('Please select your department');
     if (!designation.trim()) return setError('Please select or enter your designation');
@@ -60,18 +69,60 @@ export default function FacultySignup() {
 
     setLoading(true);
     try {
-      await api.post('/auth/signup/faculty', {
-        fullName, email, phone, facultyIdCode,
-        department, designation,
-        community: community || 'N/A',
-        password,
-      });
-      showToast.success('Registration successful! Your account is pending admin approval.');
-      navigate('/login');
+      const res = await api.post('/auth/signup/send-otp', { email: email.trim().toLowerCase() });
+      if (res.data.devOtp) setDevOtp(res.data.devOtp);
+      setShowOtpModal(true);
+      showToast.success(`Verification code sent to ${email}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Signup failed');
+      setError(err.response?.data?.message || 'Failed to send verification code');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleResendOtp() {
+    setResending(true);
+    setOtpError('');
+    try {
+      const res = await api.post('/auth/signup/send-otp', { email: email.trim().toLowerCase() });
+      if (res.data.devOtp) setDevOtp(res.data.devOtp);
+      showToast.success('New verification code sent to your email');
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'Failed to resend code');
+    } finally {
+      setResending(false);
+    }
+  }
+
+  async function handleVerifyAndCompleteSignup(e) {
+    e.preventDefault();
+    setOtpError('');
+
+    if (!otp || otp.trim().length !== 6) {
+      return setOtpError('Please enter the 6-digit verification code');
+    }
+
+    setOtpLoading(true);
+    try {
+      await api.post('/auth/signup/faculty', {
+        fullName: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
+        facultyIdCode: facultyIdCode.trim().toUpperCase(),
+        department,
+        designation,
+        community: community || 'N/A',
+        password,
+        otp: otp.trim(),
+      });
+
+      showToast.success('Email verified & account registered! Pending admin approval.');
+      setShowOtpModal(false);
+      navigate('/login');
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'Verification failed. Please check the code.');
+    } finally {
+      setOtpLoading(false);
     }
   }
 
@@ -101,7 +152,7 @@ export default function FacultySignup() {
           <button
             type="button"
             onClick={() => navigate('/signup/student')}
-            className="flex-1 py-1.5 rounded-full text-xs font-medium text-slate-500 transition-colors hover:text-slate-700"
+            className="flex-1 py-1.5 rounded-full text-xs font-medium text-slate-500 hover:text-slate-700 transition"
           >
             Student
           </button>
@@ -113,79 +164,92 @@ export default function FacultySignup() {
           </button>
         </div>
 
+        <div className="flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+          <Info size={14} className="shrink-0 text-amber-600" />
+          <span>Faculty accounts require administrator approval before you can create events.</span>
+        </div>
+
         {error && (
-          <div className="mb-3 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
             <AlertCircle size={14} className="shrink-0" />
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-2.5">
+        <form onSubmit={handleInitiateSignup} className="space-y-3">
+          {/* Row: Name & Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Full Name</label>
               <div className="relative">
-                <User className={iconClass} size={16} />
+                <User className={iconClass} size={15} />
                 <input
-                  type="text" required value={fullName}
+                  type="text"
+                  required
+                  value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
+                  placeholder="e.g. Dr. John Doe"
                   className={inputClass}
-                  placeholder="Alex Smith"
-                  autoComplete="name"
                 />
               </div>
             </div>
             <div>
               <label className={labelClass}>Email Address</label>
               <div className="relative">
-                <Mail className={iconClass} size={16} />
+                <Mail className={iconClass} size={15} />
                 <input
-                  type="text" required value={email}
+                  type="email"
+                  required
+                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder="faculty@college.edu.np"
                   className={inputClass}
-                  placeholder="Alex@bic.edu.np"
-                  autoComplete="email"
                 />
               </div>
             </div>
           </div>
 
+          {/* Row: Phone & Faculty ID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Phone Number</label>
               <div className="relative">
-                <Phone className={iconClass} size={16} />
+                <Phone className={iconClass} size={15} />
                 <input
-                  type="text" required value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/[^\d]/g, '').slice(0, 10))}
-                  className={inputClass}
-                  placeholder="98XXXXXXXX"
+                  type="tel"
+                  required
                   maxLength={10}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="98XXXXXXXX"
+                  className={inputClass}
                 />
               </div>
             </div>
             <div>
               <label className={labelClass}>Faculty ID</label>
               <div className="relative">
-                <IdCard className={iconClass} size={16} />
+                <IdCard className={iconClass} size={15} />
                 <input
-                  type="text" required value={facultyIdCode}
+                  type="text"
+                  required
+                  value={facultyIdCode}
                   onChange={(e) => setFacultyIdCode(e.target.value)}
-                  className={inputClass}
                   placeholder="e.g. BIC-FAC-0142"
-                  autoComplete="off"
-                  name="faculty-id-field"
+                  className={inputClass}
                 />
               </div>
             </div>
           </div>
 
+          {/* Department */}
           <div>
             <label className={labelClass}>Department</label>
             <div className="relative">
-              <Landmark className={iconClass} size={16} />
+              <Landmark className={iconClass} size={15} />
               <select
-                required value={department}
+                required
+                value={department}
                 onChange={(e) => handleDepartmentChange(e.target.value)}
                 className={selectClass}
               >
@@ -198,129 +262,227 @@ export default function FacultySignup() {
             </div>
           </div>
 
+          {/* Designation */}
           <div>
             <label className={labelClass}>Designation</label>
-            {isFreeTextDesignation ? (
-              <div className="relative">
-                <Briefcase className={iconClass} size={16} />
+            <div className="relative">
+              <Briefcase className={iconClass} size={15} />
+              {isFreeTextDesignation ? (
                 <input
-                  type="text" required value={designation}
+                  type="text"
+                  required
+                  value={designation}
                   onChange={(e) => setDesignation(e.target.value)}
+                  placeholder="e.g. IT Officer, Lab Assistant..."
                   className={inputClass}
-                  placeholder="Enter your designation"
                 />
-              </div>
-            ) : (
-              <div className="relative">
-                <Briefcase className={iconClass} size={16} />
-                <select
-                  required value={designation} disabled={!department}
-                  onChange={(e) => setDesignation(e.target.value)}
-                  className={selectClass}
-                >
-                  <option value="">{department ? 'Select designation' : 'Select department first'}</option>
-                  {(designationOptions || []).map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-                <ChevronDown className={chevronClass} size={14} />
-              </div>
-            )}
+              ) : (
+                <>
+                  <select
+                    required
+                    value={designation}
+                    onChange={(e) => setDesignation(e.target.value)}
+                    disabled={!department}
+                    className={selectClass}
+                  >
+                    <option value="">{department ? 'Select designation' : 'Select department first'}</option>
+                    {(designationOptions || []).map((des) => (
+                      <option key={des} value={des}>{des}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className={chevronClass} size={14} />
+                </>
+              )}
+            </div>
           </div>
 
+          {/* Community (Optional) */}
           <div>
-            <label className={labelClass}>Community</label>
+            <label className={labelClass}>Associated Community <span className="text-slate-400 font-normal">(optional)</span></label>
             <div className="relative">
-              <Users className={iconClass} size={16} />
+              <Users className={iconClass} size={15} />
               <select
                 value={community}
                 onChange={(e) => setCommunity(e.target.value)}
                 className={selectClass}
               >
-                <option value="">Select community (optional)</option>
+                <option value="">None / Not Applicable</option>
                 {COMMUNITIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
               <ChevronDown className={chevronClass} size={14} />
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              BIC DevCorps communities organize campus events — select yours if applicable.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Row: Password & Confirm */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <div>
               <label className={labelClass}>Password</label>
               <div className="relative">
-                <Lock className={iconClass} size={16} />
+                <Lock className={iconClass} size={15} />
                 <input
-                  type={showPassword ? 'text' : 'password'} required value={password}
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`${inputClass} pr-9`}
-                  placeholder="Enter password"
-                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  className="w-full border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
                 />
-                <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'}>
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((p) => !p)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              <p className={`text-[11px] mt-1 flex items-center gap-1 transition-colors ${password.length >= 8 ? 'text-emerald-600' : 'text-slate-400'}`}>
-                {password.length >= 8 ? <CheckCircle2 size={12} /> : null}
-                At least 8 characters
-              </p>
             </div>
             <div>
               <label className={labelClass}>Confirm Password</label>
               <div className="relative">
-                <ShieldCheck className={iconClass} size={16} />
+                <Lock className={iconClass} size={15} />
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'} required value={confirmPassword}
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`${inputClass} pr-9`}
-                  placeholder="Re-enter password"
-                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  className="w-full border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
                 />
-                <button type="button" onClick={() => setShowConfirmPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" tabIndex={-1} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
-                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((p) => !p)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              {confirmPassword && (
-                <p className={`text-[11px] mt-1 flex items-center gap-1 ${confirmPassword === password ? 'text-emerald-600' : 'text-red-500'}`}>
-                  {confirmPassword === password ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                  {confirmPassword === password ? 'Passwords match' : 'Passwords do not match'}
-                </p>
-              )}
             </div>
           </div>
 
-          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
-            <Info size={15} className="text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-800">
-              Your account will be reviewed by an admin before you can create or manage events.
-            </p>
+          <div className="flex items-center gap-4 text-[11px] text-slate-500">
+            <span className={password.length >= 8 ? 'text-primary-600 font-medium' : ''}>
+              {password.length >= 8 ? '✓' : '○'} At least 8 characters
+            </span>
+            <span
+              className={
+                confirmPassword && password === confirmPassword
+                  ? 'text-primary-600 font-medium'
+                  : ''
+              }
+            >
+              {confirmPassword && password === confirmPassword ? '✓' : '○'} Passwords match
+            </span>
           </div>
 
-          <p className="text-center text-[11px] text-slate-400 leading-snug">
+          <p className="text-[11px] text-slate-400 text-center pt-1">
             By creating an account you agree to our{' '}
-            <Link to="/terms" className="text-primary-600 hover:underline">Terms of Service</Link> and{' '}
-            <Link to="/privacy" className="text-primary-600 hover:underline">Privacy Policy</Link>.
+            <span className="text-slate-600 underline">Terms of Service</span> and{' '}
+            <span className="text-slate-600 underline">Privacy Policy</span>.
           </p>
 
           <button
-            type="submit" disabled={loading}
+            type="submit"
+            disabled={loading}
             className="w-full bg-primary-600 hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] text-white font-medium py-2.5 rounded-lg text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? 'Validating Email...' : 'Create Account'}
           </button>
         </form>
 
         <p className="text-center text-xs text-slate-500 mt-4">
           Already have an account?{' '}
-          <Link to="/login" className="text-primary-600 font-semibold hover:underline">Sign in here</Link>
+          <Link to="/login" className="text-primary-600 font-semibold hover:underline">
+            Sign in here
+          </Link>
         </p>
       </div>
+
+      {/* 6-Digit Email Verification OTP Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 sm:p-7 shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                  <KeyRound size={20} />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900">Verify Your Email Address</h2>
+                  <p className="text-xs text-slate-500">Prove ownership of your faculty mailbox</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowOtpModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="my-4 p-3.5 rounded-xl bg-primary-50/70 border border-primary-100 text-xs text-primary-900">
+              <p>
+                We sent a 6-digit verification code to <span className="font-bold text-slate-900">{email}</span>.
+              </p>
+              <p className="text-[11px] text-primary-700 mt-1">
+                Please check your inbox and enter the code below to complete your registration.
+              </p>
+            </div>
+
+            {otpError && (
+              <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                <AlertCircle size={14} className="shrink-0" />
+                {otpError}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyAndCompleteSignup} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  6-Digit Verification Code
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  required
+                  autoFocus
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  className="w-full text-center tracking-[8px] text-xl font-bold font-mono py-2.5 border border-slate-200 bg-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={resending}
+                  className="text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 disabled:opacity-50"
+                >
+                  <RefreshCw size={12} className={resending ? 'animate-spin' : ''} />
+                  {resending ? 'Resending...' : 'Resend Code'}
+                </button>
+                <span className="text-[11px] text-slate-400">Valid for 15 minutes</span>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={otpLoading || otp.length !== 6}
+                  className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 rounded-xl text-xs transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+                >
+                  {otpLoading ? <Loader2 className="animate-spin" size={15} /> : <CheckCircle2 size={15} />}
+                  {otpLoading ? 'Verifying...' : 'Verify Email & Complete Registration'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

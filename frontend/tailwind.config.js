@@ -7,13 +7,18 @@ export default {
         sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Primary: Teal — the ONLY color that means "primary action" or "active state"
         primary: {
           50: '#E6EFEF',
           100: '#CCDFDE',
+          200: '#99C0BE',
+          300: '#66A09D',
+          400: '#33817D',
           500: '#046C6A',
           600: '#035352',
           700: '#024342',
+          800: '#023433',
+          900: '#012424',
+          950: '#011515',
         },
         // Accent: Sidecar Yellow — used sparingly for highlight badges/recommended sections only
         accent: {

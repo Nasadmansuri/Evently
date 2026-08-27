@@ -60,18 +60,31 @@ async function getAllUsers({ role, search } = {}) {
     WHERE 1=1
   `;
   const params = [];
-  if (role) {
-    query += ' AND u.role = ?';
-    params.push(role);
+  if (role && role !== 'All') {
+    if (role === 'guest') {
+      query += ' AND u.role = "student" AND gp.user_id IS NOT NULL';
+    } else if (role === 'student') {
+      query += ' AND u.role = "student" AND sp.user_id IS NOT NULL';
+    } else {
+      query += ' AND u.role = ?';
+      params.push(role);
+    }
   }
   if (search) {
-    query += ' AND (u.full_name LIKE ? OR u.email LIKE ? OR u.id = ?)';
+    query += ' AND (u.full_name LIKE ? OR u.email LIKE ? OR u.id = ? OR sp.college_name LIKE ? OR gp.college_name LIKE ?)';
     const like = `%${search}%`;
-    params.push(like, like, Number(search) || 0);
+    params.push(like, like, Number(search) || 0, like, like);
   }
   query += ' ORDER BY u.id DESC';
   const [rows] = await pool.query(query, params);
-  return rows;
+  return rows.map((r) => {
+    const isGuest = r.role === 'student' && (r.gp_college_name != null || r.sp_college_name == null);
+    return {
+      ...r,
+      role: isGuest ? 'guest' : r.role,
+      is_guest: isGuest,
+    };
+  });
 }
 
 async function deleteUser(id) {
@@ -79,4 +92,74 @@ async function deleteUser(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { getProfile, getPendingFaculty, setApprovalStatus, getAllUsers, deleteUser };
+async function getUserStats(userId, role) {
+  const stats = { totalRegistrations: 0, totalFeedback: 0, createdEvents: 0 };
+
+  if (role === 'student') {
+    const [[regRow]] = await pool.query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ?', [userId]);
+    const [[feedRow]] = await pool.query('SELECT COUNT(DISTINCT form_id) as count FROM feedback_responses WHERE user_id = ?', [userId]);
+    stats.totalRegistrations = regRow ? regRow.count : 0;
+    stats.totalFeedback = feedRow ? feedRow.count : 0;
+  } else if (role === 'faculty') {
+    const [[eventsRow]] = await pool.query('SELECT COUNT(*) as count FROM events WHERE created_by = ?', [userId]);
+    stats.createdEvents = eventsRow ? eventsRow.count : 0;
+  } else if (role === 'admin') {
+    const [[usersRow]] = await pool.query('SELECT COUNT(*) as count FROM users');
+    const [[eventsRow]] = await pool.query('SELECT COUNT(*) as count FROM events');
+    stats.totalUsers = usersRow ? usersRow.count : 0;
+    stats.totalEvents = eventsRow ? eventsRow.count : 0;
+  }
+
+  return stats;
+}
+
+async function updateProfile(id, data) {
+  const { fullName, phone, avatarUrl, academicSemester, academicGroup, department, designation, community } = data;
+
+  if (fullName || phone !== undefined || avatarUrl !== undefined) {
+    const updates = [];
+    const params = [];
+    if (fullName) { updates.push('full_name = ?'); params.push(fullName); }
+    if (phone !== undefined) { updates.push('phone = ?'); params.push(phone); }
+    if (avatarUrl !== undefined) { updates.push('avatar_url = ?'); params.push(avatarUrl); }
+    if (updates.length) {
+      params.push(id);
+      await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params);
+    }
+  }
+
+  if (academicSemester || academicGroup) {
+    const spUpdates = [];
+    const spParams = [];
+    if (academicSemester) { spUpdates.push('academic_semester = ?'); spParams.push(academicSemester); }
+    if (academicGroup) { spUpdates.push('academic_group = ?'); spParams.push(academicGroup); }
+    if (spUpdates.length) {
+      spParams.push(id);
+      await pool.query(`UPDATE student_profiles SET ${spUpdates.join(', ')} WHERE user_id = ?`, spParams);
+    }
+  }
+
+  if (department || designation || community) {
+    const fpUpdates = [];
+    const fpParams = [];
+    if (department) { fpUpdates.push('department = ?'); fpParams.push(department); }
+    if (designation) { fpUpdates.push('designation = ?'); fpParams.push(designation); }
+    if (community) { fpUpdates.push('community = ?'); fpParams.push(community); }
+    if (fpUpdates.length) {
+      fpParams.push(id);
+      await pool.query(`UPDATE faculty_profiles SET ${fpUpdates.join(', ')} WHERE user_id = ?`, fpParams);
+    }
+  }
+
+  return getProfile(id);
+}
+
+module.exports = {
+  getProfile,
+  getPendingFaculty,
+  setApprovalStatus,
+  getAllUsers,
+  deleteUser,
+  getUserStats,
+  updateProfile,
+};

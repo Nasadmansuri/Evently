@@ -99,10 +99,28 @@ export default function MyFeedback() {
           {[1, 2, 3].map((i) => <div key={i} className="h-72 animate-pulse rounded-[24px] border border-slate-200 bg-slate-100" />)}
         </div>
       ) : pastEvents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-[24px] border border-slate-200 bg-white py-16 text-center">
-          <Inbox className="mb-3 text-slate-300" size={32} />
-          <p className="text-sm font-medium text-slate-700">No past events yet</p>
-          <p className="mt-1 text-xs text-slate-400">Feedback becomes available once an event begins.</p>
+        <div className="flex flex-col items-center justify-center rounded-[24px] border border-slate-200/80 bg-white py-16 px-6 text-center shadow-xs">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 text-primary-600 mb-3.5">
+            <Inbox size={28} />
+          </div>
+          <h3 className="text-base font-bold text-slate-800">No Past Attended Events</h3>
+          <p className="mt-1 max-w-sm text-xs text-slate-500 leading-relaxed">
+            Feedback forms unlock automatically once events you're registered for begin. Browse campus events to get involved!
+          </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => navigate('/events')}
+              className="rounded-xl bg-primary-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-primary-600 active:scale-[0.98]"
+            >
+              Explore Campus Events
+            </button>
+            <button
+              onClick={() => navigate('/student/registrations')}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
+            >
+              My Registrations
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-7">

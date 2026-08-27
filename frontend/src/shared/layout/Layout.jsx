@@ -12,10 +12,8 @@ export default function Layout({ children }) {
       <Sidebar role={user?.role} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <div className="flex min-w-0 flex-col lg:pl-60">
         <TopBar onMenuClick={() => setDrawerOpen(true)} />
-        <main className="mx-auto flex w-full max-w-7xl flex-1 px-4 py-5 sm:px-6 lg:px-8">
-          <div className="w-full rounded-[18px] border border-slate-200 bg-white/80 p-3 shadow-sm sm:p-4 lg:p-5">
-            {children}
-          </div>
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          {children}
         </main>
       </div>
     </div>

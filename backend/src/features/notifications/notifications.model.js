@@ -1,14 +1,14 @@
 const pool = require('../../shared/config/db'); // adjust path if your pool export lives elsewhere
 
-async function getByUser(userId, limit = 20) {
-  const [rows] = await pool.query(
-    `SELECT id, title, message, is_read, created_at
-     FROM notifications
-     WHERE user_id = ?
-     ORDER BY created_at DESC
-     LIMIT ?`,
-    [userId, limit]
-  );
+async function getByUser(userId, { unreadOnly = false, limit = 50 } = {}) {
+  let query = `SELECT id, title, message, is_read, created_at FROM notifications WHERE user_id = ?`;
+  const params = [userId];
+  if (unreadOnly) {
+    query += ` AND is_read = 0`;
+  }
+  query += ` ORDER BY created_at DESC LIMIT ?`;
+  params.push(limit);
+  const [rows] = await pool.query(query, params);
   return rows;
 }
 
@@ -54,4 +54,28 @@ async function createForUsers(userIds, { title, message }) {
   return result.affectedRows;
 }
 
-module.exports = { getByUser, getUnreadCount, markAsRead, markAllAsRead, createForUsers };
+async function deleteNotification(notificationId, userId) {
+  const [result] = await pool.query(
+    `DELETE FROM notifications WHERE id = ? AND user_id = ?`,
+    [notificationId, userId]
+  );
+  return result.affectedRows > 0;
+}
+
+async function clearAll(userId) {
+  const [result] = await pool.query(
+    `DELETE FROM notifications WHERE user_id = ?`,
+    [userId]
+  );
+  return result.affectedRows;
+}
+
+module.exports = {
+  getByUser,
+  getUnreadCount,
+  markAsRead,
+  markAllAsRead,
+  createForUsers,
+  deleteNotification,
+  clearAll,
+};

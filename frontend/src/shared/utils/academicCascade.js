@@ -17,20 +17,30 @@ export const GROUPS = Array.from({ length: 10 }, (_, i) => `G${i + 1}`);
 // but all share ACADEMIC_STRUCTURE above.
 const AFFILIATED_COLLEGES = {
   bic: 'BIC',
+  'bic nepal': 'BIC',
+  bicnepal: 'BIC',
   'biratnagar international college': 'BIC',
+  'biratnagar international': 'BIC',
   herald: 'Herald',
   'herald college': 'Herald',
   'herald college kathmandu': 'Herald',
+  'herald college of kathmandu': 'Herald',
   fishtail: 'Fishtail',
+  'fishtail academy': 'Fishtail',
   'fishtail mountain': 'Fishtail',
   'fishtail mountain college': 'Fishtail',
+  'fishtail college': 'Fishtail',
 };
 
 // Given raw college-name input, returns the matched short name (e.g. "BIC", "Herald"),
 // or null if it doesn't match any affiliated college — falls back to Guest Participant.
 export function matchAffiliatedCollege(collegeNameInput) {
   const normalized = (collegeNameInput || '').trim().toLowerCase();
-  return AFFILIATED_COLLEGES[normalized] || null;
+  if (AFFILIATED_COLLEGES[normalized]) return AFFILIATED_COLLEGES[normalized];
+  if (normalized.includes('biratnagar international') || normalized.includes('bicnepal') || normalized.includes('bic nepal') || normalized === 'bic') return 'BIC';
+  if (normalized.includes('herald college') || normalized === 'herald') return 'Herald';
+  if (normalized.includes('fishtail')) return 'Fishtail';
+  return null;
 }
 // Fishtail only offers Computer Science and Cybersecurity (Faculty of Computing) —
 // no Business faculty. BIC and Herald offer both faculties.

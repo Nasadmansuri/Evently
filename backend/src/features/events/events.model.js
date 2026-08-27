@@ -234,7 +234,10 @@ async function deleteEventImage(imageId) {
 async function getGallerySummary() {
   const [rows] = await pool.query(
     `SELECT e.id, e.title, e.category, e.event_date,
-            (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1) AS cover_image,
+            COALESCE(
+              (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1),
+              (SELECT image_url FROM event_images WHERE event_id = e.id ORDER BY id ASC LIMIT 1)
+            ) AS cover_image,
             (SELECT COUNT(*) FROM event_images WHERE event_id = e.id) AS photo_count
      FROM events e
      WHERE (SELECT COUNT(*) FROM event_images WHERE event_id = e.id) > 0

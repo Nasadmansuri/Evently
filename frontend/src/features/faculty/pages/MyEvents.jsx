@@ -80,16 +80,26 @@ export default function MyEvents() {
                 key={ev.id}
                 className="overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="relative h-40 w-full overflow-hidden">
+                <div className="relative h-40 w-full overflow-hidden bg-slate-100">
                   {ev.banner_image ? (
                     <img
                       src={`${ASSET_BASE_URL}${ev.banner_image}`}
                       alt=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      crossOrigin="anonymous"
                       className="h-full w-full object-cover"
                       style={{ objectPosition: 'center 32%' }}
                     />
                   ) : (
-                    <div className={`h-full w-full ${style.bg}`} />
+                    <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-primary-950 to-primary-900 p-4 text-center">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-xs mb-1 border border-white/10">
+                        <Calendar size={18} className="text-emerald-300" />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-200/80 line-clamp-1">
+                        {ev.category || 'Event'}
+                      </span>
+                    </div>
                   )}
                 </div>
                 <div className="p-5">

@@ -26,8 +26,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   function login(userData, token) {
-    localStorage.setItem('evently_token', token);
+    if (token) {
+      localStorage.setItem('evently_token', token);
+    }
     setUser(userData);
+  }
+
+  function updateUser(userData) {
+    setUser((prev) => ({ ...(prev || {}), ...userData }));
   }
 
   function logout() {
@@ -36,7 +42,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

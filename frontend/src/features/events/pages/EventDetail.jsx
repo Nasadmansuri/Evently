@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2, Loader2, BarChart3 } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2, Loader2, BarChart3, Navigation, Landmark } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
 import { getEventStatus } from '../../../shared/utils/eventStatus';
+import VenueLocationModal from '../../../shared/components/VenueLocationModal';
 
 const TABS = ['Details', 'Gallery', 'Feedback'];
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
@@ -19,6 +20,7 @@ export default function EventDetail() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [activeTab, setActiveTab] = useState(
     searchParams.get('tab') === 'feedback' ? 'Feedback' : searchParams.get('tab') === 'gallery' ? 'Gallery' : 'Details'
   );
@@ -214,10 +216,18 @@ export default function EventDetail() {
                 <Clock size={15} className="text-primary-600 shrink-0" />
                 <span><strong className="text-slate-900">Time:</strong> {formatTime12hr(event.event_time)}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <MapPin size={15} className="text-primary-600 shrink-0" />
-                <span><strong className="text-slate-900">Location:</strong> {event.location}</span>
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowLocationModal(true)}
+                className="group/loc flex items-center gap-2 text-sm text-slate-600 hover:text-primary-700 transition text-left"
+                title="Click to view campus map & venue directions"
+              >
+                <MapPin size={15} className="text-primary-600 shrink-0 group-hover/loc:scale-110 transition" />
+                <span>
+                  <strong className="text-slate-900">Location:</strong>{' '}
+                  <span className="underline decoration-dotted underline-offset-2">{event.location || 'Biratnagar International College'}</span>
+                </span>
+              </button>
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <User size={15} className="text-primary-600 shrink-0" />
                 <span><strong className="text-slate-900">Organizer:</strong> {event.organizing_department}</span>
@@ -293,11 +303,44 @@ export default function EventDetail() {
                       <span className="font-medium text-slate-900">{event.organizing_community}</span>
                     </div>
                   )}
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-slate-500">Venue / Location</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowLocationModal(true)}
+                      className="inline-flex items-center gap-1 font-semibold text-primary-700 hover:underline"
+                    >
+                      <MapPin size={13} />
+                      <span>{event.location || 'Biratnagar International College'}</span>
+                    </button>
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Created By</span>
                     <span className="font-medium text-slate-900">{event.organizer_name}</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Campus Venue Quick Action Card */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-primary-100 bg-primary-50/60 p-4 shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary-700 shadow-xs border border-primary-200">
+                    <Landmark size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Biratnagar International College Campus</h4>
+                    <p className="text-[11px] text-slate-600">Bhrikuti Chowk, Biratnagar • Room: {event.location || 'Main Auditorium'}</p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowLocationModal(true)}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-primary-600 active:scale-95 transition"
+                >
+                  <Navigation size={13} />
+                  <span>View Map & Directions</span>
+                </button>
               </div>
             </div>
           )}
@@ -399,6 +442,14 @@ export default function EventDetail() {
           )}
         </div>
       </div>
+
+      {/* Venue & Map Modal */}
+      <VenueLocationModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        locationName={event.location}
+        eventTitle={event.title}
+      />
     </div>
   );
 }

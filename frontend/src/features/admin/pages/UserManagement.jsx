@@ -4,18 +4,18 @@ import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { useAuth } from '../../../shared/context/AuthContext';
 
-const ROLES = ['All', 'student', 'faculty', 'guest', 'admin'];
-const ROLE_LABELS = { All: 'All Roles', student: 'Student', faculty: 'Faculty', guest: 'Guest', admin: 'Admin' };
+const ROLES = ['All', 'student', 'guest', 'faculty', 'admin'];
+const ROLE_LABELS = { All: 'All Roles', student: 'Student (Affiliated)', guest: 'Guest (External)', faculty: 'Faculty', admin: 'Admin' };
 const ROLE_BADGE = {
-  student: 'bg-primary-50 text-primary-700',
-  faculty: 'bg-violet-50 text-violet-700',
-  guest: 'bg-slate-100 text-slate-600',
-  admin: 'bg-amber-50 text-amber-700',
+  student: 'bg-primary-50 text-primary-700 border border-primary-100',
+  faculty: 'bg-violet-50 text-violet-700 border border-violet-100',
+  guest: 'bg-amber-50 text-amber-800 border border-amber-200',
+  admin: 'bg-purple-50 text-purple-700 border border-purple-100',
 };
 
 function roleDetails(u) {
   if (u.role === 'student') {
-    const parts = [u.sp_college_name, u.faculty_name, u.course_name].filter(Boolean);
+    const parts = [u.sp_college_name || u.college_name, u.faculty_name, u.course_name].filter(Boolean);
     const academic = [u.academic_level && `Level ${u.academic_level}`, u.academic_semester && `Sem ${u.academic_semester}`, u.academic_group]
       .filter(Boolean)
       .join(' · ');
@@ -27,7 +27,7 @@ function roleDetails(u) {
     return [line1, line2].filter(Boolean);
   }
   if (u.role === 'guest') {
-    return [[u.gp_college_name, u.course_major].filter(Boolean).join(' · ')].filter(Boolean);
+    return [[u.gp_college_name || u.college_name || 'External College', u.course_major || 'General Participant'].filter(Boolean).join(' · ')].filter(Boolean);
   }
   return [];
 }
@@ -130,6 +130,7 @@ export default function UserManagement() {
   const totalUsers = users.length;
   const pendingApprovals = users.filter((u) => u.role === 'faculty' && u.approval_status === 'pending').length;
   const activeStudents = users.filter((u) => u.role === 'student').length;
+  const totalGuests = users.filter((u) => u.role === 'guest').length;
 
   return (
     <div>
@@ -138,14 +139,14 @@ export default function UserManagement() {
         <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">Manage all users and approve faculty registrations</p>
       </div>
 
-      <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50">
             <Users className="text-primary-600" size={18} />
           </div>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Total Users</p>
-            <p className="text-xl font-bold text-slate-900">{loading ? '—' : totalUsers}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Users</p>
+            <p className="text-xl font-black text-slate-900">{loading ? '—' : totalUsers}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
@@ -153,17 +154,26 @@ export default function UserManagement() {
             <GraduationCap className="text-emerald-600" size={18} />
           </div>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Active Students</p>
-            <p className="text-xl font-bold text-slate-900">{loading ? '—' : activeStudents}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Affiliated Students</p>
+            <p className="text-xl font-black text-slate-900">{loading ? '—' : activeStudents}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
-            <ShieldCheck className="text-amber-600" size={18} />
+            <Users className="text-amber-600" size={18} />
           </div>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">Pending Approvals</p>
-            <p className="text-xl font-bold text-slate-900">{loading ? '—' : pendingApprovals}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Guest Students</p>
+            <p className="text-xl font-black text-slate-900">{loading ? '—' : totalGuests}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-50">
+            <ShieldCheck className="text-violet-600" size={18} />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Pending Approvals</p>
+            <p className="text-xl font-black text-slate-900">{loading ? '—' : pendingApprovals}</p>
           </div>
         </div>
       </div>

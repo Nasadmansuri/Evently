@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Type, AlignLeft, Tag, MapPin, CalendarDays, Clock, Landmark, Users,
-  ClipboardList, Trophy, UserCheck, Image, AlertCircle, Loader2, ChevronDown, X, Upload, UsersRound
+  ClipboardList, Trophy, UserCheck, Image, AlertCircle, Loader2, ChevronDown, X, Upload, UsersRound, Map, ExternalLink,
+  RotateCcw, FileText, CheckCircle2
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { COMMUNITIES, DEPARTMENT_DESIGNATIONS } from '../../../shared/utils/facultyStructure';
+import VenueLocationModal from '../../../shared/components/VenueLocationModal';
 
 const CATEGORIES = ['Technical', 'Cultural', 'Workshop', 'Competition', 'Seminar', 'Sports', 'Conference'];
 const ORGANIZING_DEPARTMENTS = [
@@ -27,6 +29,7 @@ export default function CreateEvent() {
   const { user } = useAuth();
   const dashboardPath = user?.role === 'admin' ? '/admin/events' : '/faculty/dashboard';
   const [loadingEvent, setLoadingEvent] = useState(isEditMode);
+  const todayString = new Date().toISOString().split('T')[0];
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -50,6 +53,71 @@ export default function CreateEvent() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showLocationPreview, setShowLocationPreview] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+
+  // Restore unsaved draft on mount for new events
+  useEffect(() => {
+    if (isEditMode) return;
+    try {
+      const saved = localStorage.getItem('evently_event_draft');
+      if (saved) {
+        const d = JSON.parse(saved);
+        if (d.title) setTitle(d.title);
+        if (d.description) setDescription(d.description);
+        if (d.category) setCategory(d.category);
+        if (d.location) setLocation(d.location);
+        if (d.eventDate) setEventDate(d.eventDate);
+        if (d.eventTime) setEventTime(d.eventTime);
+        if (d.organizingDepartment) setOrganizingDepartment(d.organizingDepartment);
+        if (d.organizingCommunity) setOrganizingCommunity(d.organizingCommunity);
+        if (d.rulesEligibility) setRulesEligibility(d.rulesEligibility);
+        if (d.prizeInfo) setPrizeInfo(d.prizeInfo);
+        if (d.maxParticipants) setMaxParticipants(d.maxParticipants);
+        if (d.isTeamEvent !== undefined) setIsTeamEvent(d.isTeamEvent);
+        setDraftRestored(true);
+      }
+    } catch (e) {
+      console.error('Failed to restore draft:', e);
+    }
+  }, [isEditMode]);
+
+  // Real-time auto-save draft to localStorage
+  useEffect(() => {
+    if (isEditMode) return;
+    const hasAnyContent =
+      title.trim() || description.trim() || category || location.trim() || eventDate || eventTime || organizingDepartment;
+    if (hasAnyContent) {
+      const draft = {
+        title, description, category, location, eventDate, eventTime,
+        organizingDepartment, organizingCommunity, rulesEligibility,
+        prizeInfo, maxParticipants, isTeamEvent,
+      };
+      localStorage.setItem('evently_event_draft', JSON.stringify(draft));
+    }
+  }, [
+    isEditMode, title, description, category, location, eventDate,
+    eventTime, organizingDepartment, organizingCommunity, rulesEligibility,
+    prizeInfo, maxParticipants, isTeamEvent
+  ]);
+
+  function handleDiscardDraft() {
+    localStorage.removeItem('evently_event_draft');
+    setTitle('');
+    setDescription('');
+    setCategory('');
+    setLocation('');
+    setEventDate('');
+    setEventTime('');
+    setOrganizingDepartment('');
+    setOrganizingCommunity('');
+    setRulesEligibility('');
+    setPrizeInfo('');
+    setMaxParticipants('');
+    setIsTeamEvent(false);
+    setDraftRestored(false);
+    showToast.info('Draft cleared');
+  }
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -181,6 +249,9 @@ export default function CreateEvent() {
     if (!category) return setError('Please select a category');
     if (!location.trim()) return setError('Please enter a location');
     if (!eventDate) return setError('Please select an event date');
+    if (eventDate < todayString) {
+      return setError('Event date cannot be in the past. Please select today or a future date.');
+    }
     if (!eventTime) return setError('Please select an event time');
     if (!organizingDepartment) return setError('Please select the organizing department');
     if (organizingDepartment === 'DevCorps' && !organizingCommunity) {
@@ -206,7 +277,9 @@ export default function CreateEvent() {
       } else {
         const res = await api.post('/events', payload);
         targetEventId = res.data.eventId;
-        showToast.success('Event created successfully');
+        localStorage.removeItem('evently_event_draft');
+        setDraftRestored(false);
+        showToast.success('Event created successfully!');
       }
 
       if (newImages.length > 0) {
@@ -249,10 +322,51 @@ export default function CreateEvent() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h1 className="mb-0.5 text-xl font-bold text-slate-900">{isEditMode ? 'Edit Event' : 'Create New Event'}</h1>
-        <p className="mb-5 text-xs text-slate-500">
-          {isEditMode ? 'Update the event details below' : 'Fill in the details below to create an event'}
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="mb-0.5 text-xl font-bold text-slate-900">{isEditMode ? 'Edit Event' : 'Create New Event'}</h1>
+            <p className="mb-5 text-xs text-slate-500">
+              {isEditMode ? 'Update the event details below' : 'Fill in the details below to create an event'}
+            </p>
+          </div>
+          {!isEditMode && (title || description || location) && (
+            <button
+              type="button"
+              onClick={handleDiscardDraft}
+              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              title="Clear all fields"
+            >
+              <RotateCcw size={12} /> Clear Form
+            </button>
+          )}
+        </div>
+
+        {draftRestored && !isEditMode && (
+          <div className="mb-4 flex items-center justify-between gap-2 rounded-xl border border-emerald-100 bg-emerald-50/80 p-3 text-xs text-emerald-900 animate-in fade-in duration-200">
+            <div className="flex items-center gap-2 font-medium">
+              <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+              <span>Restored unsaved draft automatically</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleDiscardDraft}
+                className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline"
+              >
+                Clear Inputs
+              </button>
+              <button
+                type="button"
+                onClick={() => setDraftRestored(false)}
+                className="rounded-md p-1 text-emerald-700 hover:bg-emerald-100 transition"
+                title="Dismiss message"
+                aria-label="Dismiss message"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {loadingEvent && (
           <div className="mb-4 h-40 animate-pulse rounded-xl bg-slate-100" />
@@ -286,24 +400,46 @@ export default function CreateEvent() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass}>Category *</label>
-                <div className="relative">
-                  <Tag className={iconClass} size={16} />
-                  <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectClass}>
-                    <option value="">Select category</option>
-                    {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <ChevronDown className={chevronClass} size={14} />
-                </div>
+            <div>
+              <label className={labelClass}>Category *</label>
+              <div className="relative">
+                <Tag className={iconClass} size={16} />
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectClass}>
+                  <option value="">Select category</option>
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <ChevronDown className={chevronClass} size={14} />
               </div>
+            </div>
+          </div>
+
+          {/* Campus Location & Venue Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
               <div>
-                <label className={labelClass}>Location *</label>
-                <div className="relative">
-                  <MapPin className={iconClass} size={16} />
-                  <input value={location} onChange={(e) => setLocation(e.target.value)} className={inputClass} placeholder="Venue address" />
-                </div>
+                <h2 className="text-sm font-semibold text-slate-900">Campus Venue & Location</h2>
+                <p className="text-[11px] text-slate-500">Biratnagar International College (Bhrikuti Chowk, Biratnagar)</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLocationPreview(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-700 hover:text-primary-800 transition"
+              >
+                <Map size={13} />
+                <span>Preview Map</span>
+              </button>
+            </div>
+
+            <div>
+              <label className={labelClass}>Venue / Hall / Room Name *</label>
+              <div className="relative">
+                <MapPin className={iconClass} size={16} />
+                <input
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Wulfruna, SR-Wolves, SR-Compton"
+                />
               </div>
             </div>
           </div>
@@ -315,7 +451,13 @@ export default function CreateEvent() {
                 <label className={labelClass}>Event Date *</label>
                 <div className="relative">
                   <CalendarDays className={iconClass} size={16} />
-                  <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className={inputClass} />
+                  <input
+                    type="date"
+                    min={todayString}
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    className={inputClass}
+                  />
                 </div>
               </div>
               <div>
@@ -543,6 +685,14 @@ export default function CreateEvent() {
           </div>
         </form>
       </div>
+
+      {/* Venue Location Preview Modal */}
+      <VenueLocationModal
+        isOpen={showLocationPreview}
+        onClose={() => setShowLocationPreview(false)}
+        locationName={location || 'BIC Main Auditorium'}
+        eventTitle={title || 'New Event'}
+      />
     </div>
   );
 }
