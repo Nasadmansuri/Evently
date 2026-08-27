@@ -8,6 +8,7 @@ import {
 import api from '../../../shared/services/api';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
+import { showToast } from '../../../shared/utils/toast';
 
 const RATING_DESCRIPTIONS = {
   1: 'Needs Improvement',
@@ -78,6 +79,7 @@ export default function FeedbackForm() {
         starRating,
         answers,
       });
+      showToast.success('Feedback submitted successfully! Thank you.');
       navigate(`/events/${id}?tab=feedback`);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit feedback');

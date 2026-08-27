@@ -46,9 +46,42 @@ async function setApprovalStatus(id, status) {
   return result.affectedRows > 0;
 }
 
+async function updateUserStatus(id, { isActive, reason }) {
+  const activeValue = isActive ? 1 : 0;
+  const reasonValue = activeValue === 0 ? (reason || 'Administrative review and policy compliance').trim() : null;
+  const [result] = await pool.query(
+    `UPDATE users SET is_active = ?, deactivation_reason = ? WHERE id = ?`,
+    [activeValue, reasonValue, id]
+  );
+
+  if (result.affectedRows > 0) {
+    if (activeValue === 0) {
+      await pool.query(
+        `INSERT INTO notifications (user_id, title, message) VALUES (?, ?, ?)`,
+        [
+          id,
+          'Account Deactivated',
+          `Your account has been temporarily deactivated by campus administration. Reason: ${reasonValue}`,
+        ]
+      );
+    } else {
+      await pool.query(
+        `INSERT INTO notifications (user_id, title, message) VALUES (?, ?, ?)`,
+        [
+          id,
+          'Account Reactivated',
+          'Your account has been reactivated by campus administration. You can now log in and access campus events.',
+        ]
+      );
+    }
+  }
+
+  return result.affectedRows > 0;
+}
+
 async function getAllUsers({ role, search } = {}) {
   let query = `
-    SELECT u.id, u.full_name, u.email, u.phone, u.role, u.created_at,
+    SELECT u.id, u.full_name, u.email, u.phone, u.role, u.is_active, u.deactivation_reason, u.created_at,
            sp.college_name AS sp_college_name, sp.faculty_name, sp.course_name,
            sp.academic_level, sp.academic_semester, sp.academic_group,
            gp.college_name AS gp_college_name, gp.course_major,
@@ -93,7 +126,7 @@ async function deleteUser(id) {
 }
 
 async function getUserStats(userId, role) {
-  const stats = { totalRegistrations: 0, totalFeedback: 0, createdEvents: 0 };
+  const stats = { totalRegistrations: 0, totalFeedback: 0, createdEvents: 0, feedbackReceived: 0 };
 
   if (role === 'student') {
     const [[regRow]] = await pool.query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ?', [userId]);
@@ -102,7 +135,11 @@ async function getUserStats(userId, role) {
     stats.totalFeedback = feedRow ? feedRow.count : 0;
   } else if (role === 'faculty') {
     const [[eventsRow]] = await pool.query('SELECT COUNT(*) as count FROM events WHERE created_by = ?', [userId]);
+    const [[regRow]] = await pool.query('SELECT COUNT(r.id) as count FROM registrations r JOIN events e ON e.id = r.event_id WHERE e.created_by = ?', [userId]);
+    const [[feedRow]] = await pool.query('SELECT COUNT(fr.id) as count FROM feedback_responses fr JOIN events e ON e.id = fr.event_id WHERE e.created_by = ?', [userId]);
     stats.createdEvents = eventsRow ? eventsRow.count : 0;
+    stats.totalRegistrations = regRow ? regRow.count : 0;
+    stats.feedbackReceived = feedRow ? feedRow.count : 0;
   } else if (role === 'admin') {
     const [[usersRow]] = await pool.query('SELECT COUNT(*) as count FROM users');
     const [[eventsRow]] = await pool.query('SELECT COUNT(*) as count FROM events');
@@ -158,6 +195,7 @@ module.exports = {
   getProfile,
   getPendingFaculty,
   setApprovalStatus,
+  updateUserStatus,
   getAllUsers,
   deleteUser,
   getUserStats,

@@ -43,12 +43,16 @@ async function getFormByEvent(req, res) {
 
     let alreadySubmitted = false;
     let myResponse = null;
-    if (req.user.role === 'student') {
+    let responses = [];
+
+    if (req.user?.role === 'student') {
       myResponse = await feedbackModel.getMyResponse(form.id, req.user.id);
       alreadySubmitted = !!myResponse;
+    } else {
+      responses = await feedbackModel.getResponsesForForm(form.id);
     }
 
-    res.json({ form, alreadySubmitted, myResponse });
+    res.json({ form, alreadySubmitted, myResponse, responses });
   } catch (err) {
     console.error('getFormByEvent error:', err);
     res.status(500).json({ message: 'Failed to load feedback form', error: err.message });

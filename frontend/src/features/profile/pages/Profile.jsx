@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   User, Mail, Phone, Landmark, GraduationCap, Layers, BarChart3, CalendarDays,
   Users, ShieldCheck, CheckCircle2, Award, Sparkles, Edit3, Save, X, Loader2,
@@ -113,7 +114,7 @@ export default function Profile() {
     (/^np\d{2}/i.test(profile.full_name) || profile.full_name === profile.email?.split('@')[0]);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-10">
+    <div className="space-y-6 pb-10">
       {/* Name Prompt Banner if student name is set to email username / ID */}
       {isDefaultIdName && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-900 animate-in fade-in">
@@ -124,7 +125,7 @@ export default function Profile() {
             <div>
               <p className="text-xs font-bold">Your display name is currently set to your student ID ({profile.full_name})</p>
               <p className="text-[11px] text-amber-700 mt-0.5">
-                Set your full legal name so it displays properly on event certificates and attendance lists.
+                Set your full legal name so it displays accurately across event registrations and participant lists.
               </p>
             </div>
           </div>
@@ -344,10 +345,10 @@ export default function Profile() {
                   </span>
                 </div>
 
-                {profile.community && (
+                {profile.community && profile.community !== 'N/A' && profile.community !== 'None' && (
                   <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 sm:col-span-2">
                     <span className="text-slate-500 font-semibold uppercase tracking-wider block text-[10px] mb-1">
-                      Community / Club
+                      DevCorps Community
                     </span>
                     <span className="font-bold text-slate-900 flex items-center gap-1.5">
                       <Users size={15} className="text-primary-600 shrink-0" />
@@ -425,33 +426,97 @@ export default function Profile() {
             </h3>
 
             <div className="space-y-3">
-              <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-primary-900 font-semibold block">
-                    {profile?.role === 'faculty' ? 'Events Organized' : 'Events Registered'}
-                  </span>
-                  <span className="text-2xl font-black text-primary-950">
-                    {profile?.role === 'faculty'
-                      ? profile?.stats?.createdEvents || 0
-                      : profile?.stats?.totalRegistrations || 0}
-                  </span>
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
-                  <Calendar size={18} />
-                </div>
-              </div>
+              {profile?.role === 'faculty' ? (
+                <>
+                  <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-primary-900 font-semibold block">Events Organized</span>
+                      <span className="text-2xl font-black text-primary-950">
+                        {profile?.stats?.createdEvents || 0}
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
+                      <Calendar size={18} />
+                    </div>
+                  </div>
 
-              <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-amber-900 font-semibold block">Feedback Submitted</span>
-                  <span className="text-2xl font-black text-amber-950">
-                    {profile?.stats?.totalFeedback || 0}
-                  </span>
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-sm">
-                  <MessageSquare size={18} />
-                </div>
-              </div>
+                  <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-emerald-900 font-semibold block">Total Registrations</span>
+                      <span className="text-2xl font-black text-emerald-950">
+                        {profile?.stats?.totalRegistrations || 0}
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm">
+                      <Users size={18} />
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-amber-900 font-semibold block">Feedback Received</span>
+                      <span className="text-2xl font-black text-amber-950">
+                        {profile?.stats?.feedbackReceived || 0}
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-sm">
+                      <MessageSquare size={18} />
+                    </div>
+                  </div>
+                </>
+              ) : profile?.role === 'admin' ? (
+                <>
+                  <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-primary-900 font-semibold block">Total Events</span>
+                      <span className="text-2xl font-black text-primary-950">
+                        {profile?.stats?.totalEvents || 0}
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
+                      <Calendar size={18} />
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-violet-50/70 border border-violet-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-violet-900 font-semibold block">Total Users</span>
+                      <span className="text-2xl font-black text-violet-950">
+                        {profile?.stats?.totalUsers || 0}
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shadow-sm">
+                      <Users size={18} />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-primary-900 font-semibold block">Events Registered</span>
+                      <span className="text-2xl font-black text-primary-950">
+                        {profile?.stats?.totalRegistrations || 0}
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
+                      <Calendar size={18} />
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-amber-900 font-semibold block">Feedback Submitted</span>
+                      <span className="text-2xl font-black text-amber-950">
+                        {profile?.stats?.totalFeedback || 0}
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-sm">
+                      <MessageSquare size={18} />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -461,124 +526,132 @@ export default function Profile() {
               <Award size={24} />
             </div>
             <h4 className="text-xs font-bold text-slate-900 mb-1">
-              {isAffiliated
-                ? 'Wolverhampton Partner College'
+              {profile?.role === 'admin'
+                ? 'System Administrator'
                 : profile?.role === 'faculty'
                 ? 'Faculty Event Organizer'
+                : isAffiliated
+                ? 'Wolverhampton Partner College'
                 : 'Campus Event Explorer'}
             </h4>
             <p className="text-[11px] text-slate-600 leading-relaxed">
-              {isAffiliated
-                ? 'Your student profile is synchronized with Wolverhampton academic cohorts for event attendance and certificates.'
-                : 'Participate in campus hackathons, workshops, and student festivals on Evently.'}
+              {profile?.role === 'admin'
+                ? 'Oversee campus event governance, review faculty approvals, and monitor platform analytics.'
+                : profile?.role === 'faculty'
+                ? 'Publish academic workshops, hackathons, seminars, and gather student feedback on Evently.'
+                : isAffiliated
+                ? 'Your student profile is synchronized with Wolverhampton academic cohorts for event participation and feedback.'
+                : 'Explore upcoming campus events, participate in activities, and share feedback on Evently.'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Edit Profile Modal */}
-      {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Edit3 size={16} className="text-primary-600" />
-                Edit Profile Details
-              </h2>
-              <button
-                onClick={() => { setEditing(false); setEditError(''); }}
-                className="text-slate-400 hover:text-slate-600 p-1"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {editError && (
-              <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-                <AlertCircle size={14} className="shrink-0" />
-                {editError}
-              </div>
-            )}
-
-            <form onSubmit={handleSaveProfile} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Nasad Mansuri"
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium"
-                />
+      {/* Edit Profile Modal rendered at body level so it fully blurs header & sidebar */}
+      {editing &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Edit3 size={16} className="text-primary-600" />
+                  Edit Profile Details
+                </h2>
+                <button
+                  onClick={() => { setEditing(false); setEditError(''); }}
+                  className="text-slate-400 hover:text-slate-600 p-1"
+                >
+                  <X size={18} />
+                </button>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Phone Number (10 Digits)
-                </label>
-                <input
-                  type="tel"
-                  maxLength={10}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="98XXXXXXXX"
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-
-              {isAffiliated && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Semester</label>
-                    <select
-                      value={academicSemester}
-                      onChange={(e) => setAcademicSemester(e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      <option value="1">Semester 1</option>
-                      <option value="2">Semester 2</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Group</label>
-                    <select
-                      value={academicGroup}
-                      onChange={(e) => setAcademicGroup(e.target.value)}
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      {GROUPS.map((g) => (
-                        <option key={g} value={g}>{g}</option>
-                      ))}
-                    </select>
-                  </div>
+              {editError && (
+                <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                  <AlertCircle size={14} className="shrink-0" />
+                  {editError}
                 </div>
               )}
 
-              <div className="pt-3 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setEditing(false); setEditError(''); }}
-                  className="text-xs text-slate-500 hover:text-slate-800 font-medium px-3 py-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="bg-primary-600 hover:bg-primary-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
-                >
-                  {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+              <form onSubmit={handleSaveProfile} className="space-y-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Nasad Mansuri"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Phone Number (10 Digits)
+                  </label>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="98XXXXXXXX"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+
+                {isAffiliated && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Semester</label>
+                      <select
+                        value={academicSemester}
+                        onChange={(e) => setAcademicSemester(e.target.value)}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      >
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Group</label>
+                      <select
+                        value={academicGroup}
+                        onChange={(e) => setAcademicGroup(e.target.value)}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      >
+                        {GROUPS.map((g) => (
+                          <option key={g} value={g}>{g}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-3 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setEditing(false); setEditError(''); }}
+                    className="text-xs text-slate-500 hover:text-slate-800 font-medium px-3 py-2"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="bg-primary-600 hover:bg-primary-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+                  >
+                    {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

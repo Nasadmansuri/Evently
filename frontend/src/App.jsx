@@ -1,8 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import ErrorBoundary from './shared/components/ErrorBoundary';
 import Login from './features/auth/pages/Login';
 import ForgotPassword from './features/auth/pages/ForgotPassword';
 import StudentSignup from './features/auth/pages/StudentSignup';
 import FacultySignup from './features/auth/pages/FacultySignup';
+import TermsAndConditions from './features/legal/pages/TermsAndConditions';
+import PrivacyPolicy from './features/legal/pages/PrivacyPolicy';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import Layout from './shared/layout/Layout';
 import AdminDashboard from './features/admin/pages/AdminDashboard';
@@ -26,12 +29,17 @@ import Profile from './features/profile/pages/Profile';
 
 export default function App() {
   return (
-    <Routes>
+    <ErrorBoundary>
+      <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/signup/student" element={<StudentSignup />} />
       <Route path="/signup/faculty" element={<FacultySignup />} />
+      <Route path="/terms" element={<TermsAndConditions />} />
+      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route
         path="/admin/dashboard"
         element={
@@ -345,6 +353,7 @@ export default function App() {
         }
       />
       <Route path="*" element={<Navigate to="/events" replace />} />
-    </Routes>
+      </Routes>
+    </ErrorBoundary>
   );
 }

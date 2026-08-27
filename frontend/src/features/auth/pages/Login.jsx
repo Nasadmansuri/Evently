@@ -3,12 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import {
   Mail, Lock, Eye, EyeOff, ArrowRight, CalendarHeart, AlertCircle, Loader2,
   Phone, Landmark, GraduationCap, Layers, BarChart3, CalendarDays, Users,
-  CheckCircle2, ChevronDown, X, User,
+  CheckCircle2, ChevronDown, X, User, Ban, ShieldAlert
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { showToast } from '../../../shared/utils/toast';
 import { suggestEmailCorrection } from '../../../shared/utils/emailTypo';
+import { getDashboardPath } from '../../../shared/utils/navigation';
 import {
   ACADEMIC_STRUCTURE,
   GROUPS,
@@ -18,14 +19,16 @@ import {
 } from '../../../shared/utils/academicCascade';
 
 export default function Login() {
+  const { user, login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [deactivatedInfo, setDeactivatedInfo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
   const [emailSuggestion, setEmailSuggestion] = useState(null);
+  const [googleReady, setGoogleReady] = useState(false);
 
   // Google authentication states
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -104,13 +107,23 @@ export default function Login() {
     }
 
     setLoading(true);
+    setDeactivatedInfo(null);
     try {
       const res = await api.post('/auth/login', { email, password });
       login(res.data.user, res.data.token);
       showToast.success(`Welcome back, ${res.data.user.full_name}`);
       navigate(`/${res.data.user.role}/dashboard`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      if (err.response?.data?.isDeactivated || err.response?.status === 403) {
+        setDeactivatedInfo({
+          message: err.response?.data?.message || 'Your account has been deactivated by campus administration.',
+          reason: err.response?.data?.reason,
+        });
+        setError('');
+      } else {
+        setError(err.response?.data?.message || 'Login failed');
+        setDeactivatedInfo(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -129,7 +142,6 @@ export default function Login() {
         });
 
         const btnDiv = document.getElementById('google-btn-container');
-        const customBtn = document.getElementById('google-custom-btn');
         if (btnDiv) {
           btnDiv.innerHTML = '';
           window.google.accounts.id.renderButton(btnDiv, {
@@ -141,9 +153,6 @@ export default function Login() {
             width: 320,
             logo_alignment: 'left',
           });
-          if (customBtn) {
-            customBtn.style.display = 'none';
-          }
         }
       }
     }
@@ -156,7 +165,7 @@ export default function Login() {
           clearInterval(interval);
           renderGoogleButton();
         }
-      }, 200);
+      }, 100);
       return () => clearInterval(interval);
     }
   }, []);
@@ -168,6 +177,7 @@ export default function Login() {
     }
     setGoogleLoading(true);
     setError('');
+    setDeactivatedInfo(null);
     try {
       const res = await api.post('/auth/google', { credential: response.credential });
       if (res.data.isNewUser) {
@@ -178,7 +188,16 @@ export default function Login() {
         navigate(`/${res.data.user.role}/dashboard`);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Google sign-in failed');
+      if (err.response?.data?.isDeactivated || err.response?.status === 403) {
+        setDeactivatedInfo({
+          message: err.response?.data?.message || 'Your account has been deactivated by campus administration.',
+          reason: err.response?.data?.reason,
+        });
+        setError('');
+      } else {
+        setError(err.response?.data?.message || 'Google sign-in failed');
+        setDeactivatedInfo(null);
+      }
     } finally {
       setGoogleLoading(false);
     }
@@ -209,6 +228,7 @@ export default function Login() {
 
     setGoogleLoading(true);
     setError('');
+    setDeactivatedInfo(null);
     try {
       const res = await api.post('/auth/google', {
         demoUser: {
@@ -226,7 +246,16 @@ export default function Login() {
         navigate(`/${res.data.user.role}/dashboard`);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Google sign-in failed');
+      if (err.response?.data?.isDeactivated || err.response?.status === 403) {
+        setDeactivatedInfo({
+          message: err.response?.data?.message || 'Your account has been deactivated by campus administration.',
+          reason: err.response?.data?.reason,
+        });
+        setError('');
+      } else {
+        setError(err.response?.data?.message || 'Google sign-in failed');
+        setDeactivatedInfo(null);
+      }
       setShowGooglePromptModal(false);
     } finally {
       setGoogleLoading(false);
@@ -237,11 +266,6 @@ export default function Login() {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
     if (clientId && window.google?.accounts?.id) {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleResponse,
-      });
-
       window.google.accounts.id.prompt((notification) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
           const renderedBtn = document.querySelector('#google-btn-container div[role="button"]');
@@ -346,15 +370,43 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-3 py-6">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-8">
-        <div className="flex items-center gap-2 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
+        <Link to={getDashboardPath(user)} className="inline-flex items-center gap-2 mb-5 hover:opacity-90 transition group">
+          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
             <CalendarHeart className="text-white" size={18} />
           </div>
-          <span className="text-lg font-bold text-slate-900">Evently</span>
-        </div>
+          <span className="text-lg font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Evently</span>
+        </Link>
 
         <h1 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h1>
         <p className="text-sm text-slate-500 mb-5">Login to your account</p>
+
+        {deactivatedInfo && (
+          <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50/95 p-4 text-xs text-rose-950 shadow-xs space-y-2.5 animate-in fade-in duration-200">
+            <div className="flex items-start gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700 mt-0.5">
+                <Ban size={16} />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-rose-900 text-sm">Account Deactivated</h4>
+                <p className="text-xs text-rose-800 leading-relaxed font-medium">
+                  {deactivatedInfo.message || 'Your account has been deactivated by campus administration.'}
+                </p>
+              </div>
+            </div>
+            {deactivatedInfo.reason && (
+              <div className="rounded-xl bg-white/90 p-2.5 border border-rose-200/80 text-xs">
+                <strong className="text-rose-900 block mb-0.5">Reason for Deactivation:</strong>
+                <span className="text-rose-700 font-medium">{deactivatedInfo.reason}</span>
+              </div>
+            )}
+            <p className="text-[11px] text-rose-600/90 pt-0.5">
+              If you believe this is an error, please contact campus administration at{' '}
+              <a href="mailto:evently.nexora@gmail.com" className="font-semibold underline hover:text-rose-900">
+                evently.nexora@gmail.com
+              </a>.
+            </p>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
@@ -424,33 +476,49 @@ export default function Login() {
           <div className="flex-1 h-px bg-slate-200" />
         </div>
 
-        <div className="relative">
-          <div id="google-btn-container" className="w-full flex justify-center min-h-[40px]" />
+        <div className="relative h-[42px] w-full">
+          {/* Permanent visible custom button that never jumps or shifts */}
           <button
             id="google-custom-btn"
             type="button"
             onClick={handleGoogleClick}
             disabled={googleLoading || loading}
-            className="w-full flex items-center justify-center gap-2 border border-slate-200 rounded-lg py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition active:scale-[0.99] disabled:opacity-50"
+            className="w-full h-full flex items-center justify-center gap-2 border border-slate-200 bg-white rounded-lg py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition active:scale-[0.99] disabled:opacity-50"
           >
             {googleLoading ? (
               <Loader2 className="animate-spin text-slate-500" size={16} />
             ) : (
-              <svg width="16" height="16" viewBox="0 0 48 48">
+              <svg width="18" height="18" viewBox="0 0 48 48" className="shrink-0">
                 <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.9 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3.5 24 3.5 12.7 3.5 3.5 12.7 3.5 24S12.7 44.5 24 44.5 44.5 35.3 44.5 24c0-1.2-.1-2.4-.3-3.5z"/>
                 <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3.5 24 3.5c-8 0-14.9 4.6-18.3 11.2z"/>
                 <path fill="#4CAF50" d="M24 44.5c5.4 0 10.3-1.8 14.1-4.9l-6.5-5.5c-2 1.5-4.7 2.4-7.6 2.4-5.4 0-9.9-3.1-11.4-7.6l-6.6 5.1C9 40 16 44.5 24 44.5z"/>
                 <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C41.5 36.6 44.5 30.8 44.5 24c0-1.2-.1-2.4-.3-3.5z"/>
               </svg>
             )}
-            {googleLoading ? 'Connecting to Google...' : 'Continue with Google'}
+            <span>{googleLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
           </button>
+
+          {/* Invisible Google official button on top to trigger native auth */}
+          <div
+            id="google-btn-container"
+            className="absolute inset-0 w-full h-full opacity-[0.001] overflow-hidden pointer-events-auto flex items-center justify-center z-10 cursor-pointer"
+          />
         </div>
 
         <p className="text-center text-xs text-slate-500 mt-5">
           Don't have an account?{' '}
           <Link to="/signup/student" className="text-primary-600 font-semibold hover:underline">Sign up here</Link>
         </p>
+
+        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center gap-3 text-[11px] text-slate-400">
+          <Link to="/terms" className="hover:text-slate-600 transition hover:underline">
+            Terms & Conditions
+          </Link>
+          <span>·</span>
+          <Link to="/privacy" className="hover:text-slate-600 transition hover:underline">
+            Privacy Policy
+          </Link>
+        </div>
       </div>
 
       {/* Google Account Authentication Prompt Modal (when testing directly or without GIS client ID) */}

@@ -82,4 +82,27 @@ async function deleteUser(req, res) {
   }
 }
 
-module.exports = { getMe, updateMe, getPendingFaculty, updateApproval, getAllUsers, deleteUser };
+async function updateUserStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { isActive, reason } = req.body;
+    if (Number(id) === req.user.id) {
+      return res.status(400).json({ message: 'You cannot deactivate your own administrative account' });
+    }
+    if (typeof isActive !== 'boolean') {
+      return res.status(400).json({ message: 'isActive must be a boolean (true/false)' });
+    }
+    const updated = await usersModel.updateUserStatus(id, { isActive, reason });
+    if (!updated) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({
+      message: isActive ? 'User account has been activated' : 'User account has been deactivated and notified',
+      isActive,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update user status', error: err.message });
+  }
+}
+
+module.exports = { getMe, updateMe, getPendingFaculty, updateApproval, updateUserStatus, getAllUsers, deleteUser };

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, AlertCircle, Loader2, FileX, Users } from 'lucide-react';
+import { Calendar, Clock, MapPin, AlertCircle, Loader2, FileX, Users, CheckCircle2, Download, ExternalLink } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { showToast } from '../../../shared/utils/toast';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
+import { getGoogleCalendarUrl, downloadIcsFile } from '../../../shared/utils/calendarIntegration';
 
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
@@ -17,6 +18,7 @@ export default function Registration() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [registeredSuccess, setRegisteredSuccess] = useState(false);
 
   const [teamMembers, setTeamMembers] = useState('');
   const [teamChoice, setTeamChoice] = useState(null); // null | 'individual' | 'team'
@@ -25,25 +27,24 @@ export default function Registration() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    async function loadEvent() {
-      setLoading(true);
+    async function load() {
       try {
-        const res = await api.get(`/events/${id}`);
-        setEvent(res.data);
+        const { data } = await api.get(`/events/${id}`);
+        setEvent(data.event || data);
       } catch (err) {
-        setNotFound(true);
+        if (err.response?.status === 404) setNotFound(true);
       } finally {
         setLoading(false);
       }
     }
-    loadEvent();
+    load();
   }, [id]);
 
-async function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     
-    if (event.is_team_event) {
+    if (event?.is_team_event) {
       if (!teamChoice) {
         return setError("Please choose whether you're registering individually or as a team.");
       }
@@ -60,10 +61,10 @@ async function handleSubmit(e) {
     try {
       await api.post('/registrations', {
         eventId: id,
-        teamMembers: event.is_team_event && teamChoice === 'team' ? teamMembers : undefined,
+        teamMembers: event?.is_team_event && teamChoice === 'team' ? teamMembers : undefined,
       });
       showToast.success("You're registered!");
-      navigate(`/events/${id}`);
+      setRegisteredSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed, please try again');
     } finally {
@@ -80,7 +81,7 @@ async function handleSubmit(e) {
     );
   }
 
-  if (notFound) {
+  if (notFound || !event) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <FileX className="mb-4 text-slate-300" size={40} />
@@ -90,7 +91,83 @@ async function handleSubmit(e) {
     );
   }
 
-  const style = getCategoryStyle(event.category);
+  if (registeredSuccess && event) {
+    return (
+      <div className="mx-auto max-w-lg text-center space-y-6 py-6 animate-in fade-in zoom-in-95 duration-200">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 sm:p-8 shadow-xl space-y-5">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 shadow-xs">
+            <CheckCircle2 size={36} />
+          </div>
+          
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">Registration Confirmed! 🎉</h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              You're officially registered for <strong className="text-slate-800">{event.title}</strong>.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-left space-y-2 text-xs text-slate-600">
+            <div className="flex items-center gap-2">
+              <Calendar size={14} className="text-primary-600 shrink-0" />
+              <span><strong>Date:</strong> {new Date(event.event_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock size={14} className="text-primary-600 shrink-0" />
+              <span><strong>Time:</strong> {formatTime12hr(event.event_time)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin size={14} className="text-primary-600 shrink-0" />
+              <span><strong>Venue:</strong> {event.location || 'Biratnagar International College'}</span>
+            </div>
+          </div>
+
+          {/* Big Google Calendar & iCal Button */}
+          <div className="pt-2">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Sync with Your Schedule</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+              <a
+                href={getGoogleCalendarUrl(event)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 text-xs font-bold shadow-sm transition active:scale-95"
+              >
+                <Calendar size={15} />
+                <span>Add to Google Calendar</span>
+                <ExternalLink size={12} className="opacity-80" />
+              </a>
+              <button
+                type="button"
+                onClick={() => downloadIcsFile(event)}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2.5 text-xs font-bold shadow-2xs transition active:scale-95"
+              >
+                <Download size={14} />
+                <span>Apple / Outlook (.ics)</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 pt-3 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => navigate(`/events/${id}`)}
+              className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+            >
+              View Event Details
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/student/registrations')}
+              className="rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-600 transition"
+            >
+              My Registrations →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const style = getCategoryStyle(event?.category);
   const isBic = event ? user?.is_bic_student : false;
 
   return (

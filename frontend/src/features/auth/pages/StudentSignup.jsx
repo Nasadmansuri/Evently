@@ -9,10 +9,11 @@ import api from '../../../shared/services/api';
 import { ACADEMIC_STRUCTURE, GROUPS, matchAffiliatedCollege, getFacultiesForCollege, getSemestersForLevel } from '../../../shared/utils/academicCascade';
 import { showToast } from '../../../shared/utils/toast';
 import { useAuth } from '../../../shared/context/AuthContext';
+import { getDashboardPath } from '../../../shared/utils/navigation';
 
 export default function StudentSignup() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -113,7 +114,9 @@ export default function StudentSignup() {
       setShowOtpModal(true);
       showToast.success(`Verification code sent to ${email}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send verification code');
+      const msg = err.response?.data?.message || 'Failed to send verification code';
+      const reason = err.response?.data?.reason ? ` Reason: ${err.response.data.reason}` : '';
+      setError(`${msg}${reason}`);
     } finally {
       setLoading(false);
     }
@@ -184,12 +187,12 @@ export default function StudentSignup() {
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-5 sm:p-7">
         {/* Logo */}
         <div className="flex flex-col items-center text-center mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
+          <Link to={getDashboardPath(user)} className="inline-flex items-center gap-2 mb-3 hover:opacity-90 transition group">
+            <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
               <CalendarHeart className="w-4.5 h-4.5 text-white" size={18} />
             </div>
-            <span className="text-lg font-bold text-slate-900">Evently</span>
-          </div>
+            <span className="text-lg font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Evently</span>
+          </Link>
           <h1 className="text-xl font-bold text-slate-900 mb-0.5">Create your account</h1>
           <p className="text-xs text-slate-500">Join Evently and never miss a campus event.</p>
         </div>
@@ -499,8 +502,13 @@ export default function StudentSignup() {
 
           <p className="text-[11px] text-slate-400 text-center pt-1">
             By creating an account you agree to our{' '}
-            <span className="text-slate-600 underline">Terms of Service</span> and{' '}
-            <span className="text-slate-600 underline">Privacy Policy</span>.
+            <Link to="/terms" target="_blank" className="text-primary-700 font-medium underline hover:text-primary-800">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" target="_blank" className="text-primary-700 font-medium underline hover:text-primary-800">
+              Privacy Policy
+            </Link>.
           </p>
 
           <button

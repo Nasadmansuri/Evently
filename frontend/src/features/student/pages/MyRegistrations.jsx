@@ -71,12 +71,12 @@ export default function MyRegistrations() {
   const items = activeTab === 'upcoming' ? upcoming : past;
 
   return (
-    <div className="pb-10">
+    <div className="space-y-6 pb-10">
       {/* Page Header */}
-      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">My Registrations</h1>
-          <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
             Track and manage your registered campus events and participation history
           </p>
         </div>

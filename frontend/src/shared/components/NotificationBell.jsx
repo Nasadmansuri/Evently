@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Bell, Trash2, X, CheckCheck, Inbox, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Bell, Trash2, X, CheckCheck, Inbox, Sparkles, ChevronRight,
+  ShieldAlert, AlertTriangle, Calendar, CheckCircle2, Ticket
+} from 'lucide-react';
 import {
   getNotifications,
   getUnreadCount,
@@ -8,6 +12,8 @@ import {
   deleteNotification,
   clearAllNotifications,
 } from '../services/notification.service';
+import { useAuth } from '../context/AuthContext';
+import { getDashboardPath } from '../utils/navigation';
 
 function timeAgo(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -20,7 +26,26 @@ function timeAgo(dateStr) {
   return `${days}d ago`;
 }
 
+function getNotificationIcon(title = '', message = '') {
+  const t = (title + ' ' + message).toLowerCase();
+  if (t.includes('deletion request') || t.includes('deletion')) {
+    return <ShieldAlert size={14} className="text-rose-600 shrink-0" />;
+  }
+  if (t.includes('cancel') || t.includes('suspend') || t.includes('reject')) {
+    return <AlertTriangle size={14} className="text-amber-600 shrink-0" />;
+  }
+  if (t.includes('registration') || t.includes('ticket') || t.includes('confirmed')) {
+    return <Ticket size={14} className="text-emerald-600 shrink-0" />;
+  }
+  if (t.includes('event') || t.includes('published') || t.includes('scheduled')) {
+    return <Calendar size={14} className="text-primary-600 shrink-0" />;
+  }
+  return <Sparkles size={14} className="text-primary-600 shrink-0" />;
+}
+
 export default function NotificationBell() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -83,14 +108,63 @@ export default function NotificationBell() {
     }
   };
 
-  const handleMarkReadAndClear = async (id, e) => {
-    e?.stopPropagation();
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    setUnreadCount((prev) => Math.max(0, prev - 1));
+  const handleNotificationClick = async (n) => {
+    // 1. Mark as read in local state
+    setNotifications((prev) => prev.filter((item) => item.id !== n.id));
+    if (!n.is_read) {
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    }
+    setOpen(false);
+
+    // 2. Mark as read on backend
     try {
-      await markNotificationRead(id);
+      await markNotificationRead(n.id);
     } catch (err) {
       console.error('Failed to mark notification read:', err);
+    }
+
+    // 3. Smart routing based on notification content and user role
+    const title = (n.title || '').toLowerCase();
+    const message = (n.message || '').toLowerCase();
+
+    if (title.includes('deletion request') || message.includes('deletion request')) {
+      if (user?.role === 'admin') {
+        navigate('/admin/events?filter=deletion-requests');
+      } else {
+        navigate('/faculty/my-events');
+      }
+    } else if (title.includes('deletion') || title.includes('cancelled')) {
+      if (user?.role === 'faculty') {
+        navigate('/faculty/my-events');
+      } else if (user?.role === 'admin') {
+        navigate('/admin/events');
+      } else {
+        navigate('/events');
+      }
+    } else if (title.includes('registration') || title.includes('registered') || title.includes('ticket')) {
+      if (user?.role === 'student' || user?.role === 'guest') {
+        navigate('/my-tickets');
+      } else if (user?.role === 'faculty') {
+        navigate('/faculty/my-events');
+      } else {
+        navigate('/admin/events');
+      }
+    } else if (title.includes('faculty') && (title.includes('approval') || title.includes('approved'))) {
+      if (user?.role === 'admin') {
+        navigate('/admin/users');
+      } else {
+        navigate('/faculty/dashboard');
+      }
+    } else if (title.includes('event') || message.includes('event')) {
+      if (user?.role === 'admin') {
+        navigate('/admin/events');
+      } else if (user?.role === 'faculty') {
+        navigate('/faculty/my-events');
+      } else {
+        navigate('/events');
+      }
+    } else {
+      navigate(getDashboardPath(user));
     }
   };
 
@@ -124,7 +198,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-[-40px] sm:right-0 mt-2.5 w-[320px] sm:w-[360px] rounded-[22px] border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/15 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-[-40px] sm:right-0 mt-2.5 w-[320px] sm:w-[380px] rounded-[22px] border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/15 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-slate-50/90 border-b border-slate-100">
             <div className="flex items-center gap-2">
@@ -133,7 +207,7 @@ export default function NotificationBell() {
               </span>
               {unreadCount > 0 && (
                 <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-extrabold text-primary-700">
-                  {unreadCount}
+                  {unreadCount} new
                 </span>
               )}
             </div>
@@ -150,7 +224,7 @@ export default function NotificationBell() {
           </div>
 
           {/* Content */}
-          <div className="max-h-88 overflow-y-auto divide-y divide-slate-100">
+          <div className="max-h-96 overflow-y-auto divide-y divide-slate-100">
             {loading ? (
               <div className="px-4 py-10 text-center text-xs text-slate-400">
                 Loading notifications...
@@ -169,22 +243,31 @@ export default function NotificationBell() {
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  onClick={(e) => handleMarkReadAndClear(n.id, e)}
-                  className="group relative flex items-start justify-between gap-2.5 p-3 text-left transition hover:bg-slate-50/80 cursor-pointer"
+                  onClick={() => handleNotificationClick(n)}
+                  className="group relative flex items-start justify-between gap-2.5 p-3.5 text-left transition hover:bg-slate-50/90 cursor-pointer"
                 >
-                  <div className="flex-1 min-w-0 pr-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary-600 shrink-0" />
-                      <p className="text-xs font-bold text-slate-900 truncate">
-                        {n.title}
-                      </p>
+                  <div className="flex items-start gap-2.5 flex-1 min-w-0 pr-1">
+                    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-white group-hover:shadow-xs transition">
+                      {getNotificationIcon(n.title, n.message)}
                     </div>
-                    <p className="mt-1 text-[11.5px] text-slate-600 leading-snug line-clamp-2">
-                      {n.message}
-                    </p>
-                    <p className="mt-1 text-[10px] font-medium text-slate-400">
-                      {timeAgo(n.created_at)}
-                    </p>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <p className="text-xs font-bold text-slate-900 truncate">
+                          {n.title}
+                        </p>
+                        <span className="text-[10px] font-medium text-slate-400 shrink-0">
+                          {timeAgo(n.created_at)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[11.5px] text-slate-600 leading-snug line-clamp-2">
+                        {n.message}
+                      </p>
+                      <div className="mt-1.5 flex items-center gap-1 text-[10.5px] font-semibold text-primary-600 group-hover:text-primary-700">
+                        <span>Click to view details</span>
+                        <ChevronRight size={11} className="transition-transform group-hover:translate-x-0.5" />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Quick Dismiss Button */}

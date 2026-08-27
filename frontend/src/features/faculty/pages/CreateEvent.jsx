@@ -3,13 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Type, AlignLeft, Tag, MapPin, CalendarDays, Clock, Landmark, Users,
   ClipboardList, Trophy, UserCheck, Image, AlertCircle, Loader2, ChevronDown, X, Upload, UsersRound, Map, ExternalLink,
-  RotateCcw, FileText, CheckCircle2
+  RotateCcw, FileText, CheckCircle2, Info, Lock, CalendarClock
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { COMMUNITIES, DEPARTMENT_DESIGNATIONS } from '../../../shared/utils/facultyStructure';
+import { isEventPast } from '../../../shared/utils/eventStatus';
 import VenueLocationModal from '../../../shared/components/VenueLocationModal';
 
 const CATEGORIES = ['Technical', 'Cultural', 'Workshop', 'Competition', 'Seminar', 'Sports', 'Conference'];
@@ -29,6 +30,7 @@ export default function CreateEvent() {
   const { user } = useAuth();
   const dashboardPath = user?.role === 'admin' ? '/admin/events' : '/faculty/dashboard';
   const [loadingEvent, setLoadingEvent] = useState(isEditMode);
+  const [isConcludedEvent, setIsConcludedEvent] = useState(false);
   const todayString = new Date().toISOString().split('T')[0];
 
   const [title, setTitle] = useState('');
@@ -43,6 +45,10 @@ export default function CreateEvent() {
   const [prizeInfo, setPrizeInfo] = useState('');
   const [maxParticipants, setMaxParticipants] = useState('');
   const [isTeamEvent, setIsTeamEvent] = useState(false);
+
+  const [publishType, setPublishType] = useState('now'); // 'now' | 'scheduled'
+  const [publishDate, setPublishDate] = useState('');
+  const [publishTime, setPublishTime] = useState('');
 
   const [existingImages, setExistingImages] = useState([]);
   const [newImages, setNewImages] = useState([]); // [{ file, previewUrl }]
@@ -137,6 +143,11 @@ export default function CreateEvent() {
         setPrizeInfo(ev.prize_info || '');
         setMaxParticipants(ev.max_participants || '');
         setIsTeamEvent(!!ev.is_team_event);
+        if (ev.status === 'cancelled') {
+          setError('This event was cancelled by administration and cannot be modified.');
+        }
+        const concluded = isEventPast(ev.event_date, ev.event_time) || ev.status === 'ended';
+        setIsConcludedEvent(concluded);
       } catch (err) {
         setError('Failed to load event for editing');
       } finally {
@@ -249,13 +260,26 @@ export default function CreateEvent() {
     if (!category) return setError('Please select a category');
     if (!location.trim()) return setError('Please enter a location');
     if (!eventDate) return setError('Please select an event date');
-    if (eventDate < todayString) {
+    if (!isEditMode && eventDate < todayString) {
       return setError('Event date cannot be in the past. Please select today or a future date.');
     }
     if (!eventTime) return setError('Please select an event time');
     if (!organizingDepartment) return setError('Please select the organizing department');
     if (organizingDepartment === 'DevCorps' && !organizingCommunity) {
       return setError('Please select the DevCorps community organizing this event');
+    }
+
+    if (!isEditMode && publishType === 'scheduled') {
+      if (!publishDate) return setError('Please select a scheduled publish date');
+      if (!publishTime) return setError('Please select a scheduled publish time');
+      const schedTime = new Date(`${publishDate}T${publishTime}`);
+      const evStart = new Date(`${eventDate}T${eventTime}`);
+      if (schedTime <= new Date()) {
+        return setError('Scheduled publish time must be in the future.');
+      }
+      if (schedTime > evStart) {
+        return setError(`Scheduled publish date (${publishDate}) cannot be after the event takes place (${eventDate}). Please update your Event Date or choose an earlier publish date.`);
+      }
     }
 
     setLoading(true);
@@ -267,19 +291,25 @@ export default function CreateEvent() {
         rulesEligibility: rulesEligibility || undefined,
         prizeInfo: prizeInfo || undefined,
         maxParticipants: maxParticipants || undefined,
-        isTeamEvent: isTeamEvent, // <-- This sends it to the backend
+        isTeamEvent: isTeamEvent,
+        publishType,
+        publishDate: publishType === 'scheduled' ? publishDate : undefined,
+        publishTime: publishType === 'scheduled' ? publishTime : undefined,
       };
 
       let targetEventId = eventId;
       if (isEditMode) {
         await api.patch(`/events/${eventId}`, payload);
-        showToast.success('Event updated successfully');
       } else {
         const res = await api.post('/events', payload);
         targetEventId = res.data.eventId;
         localStorage.removeItem('evently_event_draft');
         setDraftRestored(false);
-        showToast.success('Event created successfully!');
+        if (res.data.isScheduled) {
+          showToast.success('Event scheduled for automatic release!');
+        } else {
+          showToast.success('Event created and published successfully!');
+        }
       }
 
       if (newImages.length > 0) {
@@ -303,7 +333,12 @@ export default function CreateEvent() {
         }
       }
 
-      navigate(dashboardPath);
+      if (isEditMode) {
+        showToast.success('Event updated successfully');
+        navigate(`/events/${eventId}`);
+      } else {
+        navigate(`/events/${targetEventId}`);
+      }
     } catch (err) {
       setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} event`);
     } finally {
@@ -365,6 +400,15 @@ export default function CreateEvent() {
                 <X size={14} />
               </button>
             </div>
+          </div>
+        )}
+
+        {isEditMode && isConcludedEvent && (
+          <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs font-medium text-amber-900 animate-in fade-in duration-200">
+            <Lock size={16} className="text-amber-600 shrink-0" />
+            <span>
+              This is a concluded event record. Date and time are locked to preserve historical accuracy. You can update the title, description, rules, prizes, and gallery photos.
+            </span>
           </div>
         )}
 
@@ -445,7 +489,14 @@ export default function CreateEvent() {
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900">Date & Time</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-slate-900">Date & Time</h2>
+              {isConcludedEvent && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10.5px] font-bold text-slate-600 border border-slate-200">
+                  <Lock size={11} /> Locked (Concluded Event)
+                </span>
+              )}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>Event Date *</label>
@@ -453,10 +504,11 @@ export default function CreateEvent() {
                   <CalendarDays className={iconClass} size={16} />
                   <input
                     type="date"
+                    disabled={isConcludedEvent}
                     min={todayString}
                     value={eventDate}
                     onChange={(e) => setEventDate(e.target.value)}
-                    className={inputClass}
+                    className={`${inputClass} ${isConcludedEvent ? 'bg-slate-100/90 text-slate-500 cursor-not-allowed border-slate-200 opacity-90' : ''}`}
                   />
                 </div>
               </div>
@@ -464,7 +516,13 @@ export default function CreateEvent() {
                 <label className={labelClass}>Event Time *</label>
                 <div className="relative">
                   <Clock className={iconClass} size={16} />
-                  <input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)} className={inputClass} />
+                  <input
+                    type="time"
+                    disabled={isConcludedEvent}
+                    value={eventTime}
+                    onChange={(e) => setEventTime(e.target.value)}
+                    className={`${inputClass} ${isConcludedEvent ? 'bg-slate-100/90 text-slate-500 cursor-not-allowed border-slate-200 opacity-90' : ''}`}
+                  />
                 </div>
               </div>
             </div>
@@ -664,23 +722,157 @@ export default function CreateEvent() {
             )}
           </div>
 
+          {/* Publishing Schedule Card (Only on Create Event) */}
+          {!isEditMode && (
+            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 sm:p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                    <CalendarClock size={16} className="text-primary-600" />
+                    Publishing Options
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Decide when this event should become visible to campus students
+                  </p>
+                </div>
+                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                  publishType === 'scheduled' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                }`}>
+                  {publishType === 'scheduled' ? '🕒 Scheduled Release' : '⚡ Instant Publish'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPublishType('now')}
+                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${
+                    publishType === 'now'
+                      ? 'border-primary-500 bg-white shadow-xs ring-2 ring-primary-100'
+                      : 'border-slate-200 bg-white/70 hover:bg-white'
+                  }`}
+                >
+                  <div className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                    publishType === 'now' ? 'border-primary-600 bg-primary-600 text-white' : 'border-slate-300'
+                  }`}>
+                    {publishType === 'now' && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">Publish Immediately</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Visible right now to all students</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPublishType('scheduled')}
+                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${
+                    publishType === 'scheduled'
+                      ? 'border-amber-500 bg-white shadow-xs ring-2 ring-amber-100'
+                      : 'border-slate-200 bg-white/70 hover:bg-white'
+                  }`}
+                >
+                  <div className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                    publishType === 'scheduled' ? 'border-amber-600 bg-amber-600 text-white' : 'border-slate-300'
+                  }`}>
+                    {publishType === 'scheduled' && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">Schedule for Later</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Automatically goes live at scheduled time</p>
+                  </div>
+                </button>
+              </div>
+
+              {publishType === 'scheduled' && (
+                <div className="rounded-xl border border-amber-200/80 bg-amber-50/60 p-3.5 space-y-3 animate-in fade-in duration-150">
+                  <p className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                    <Clock size={14} className="text-amber-600" />
+                    Set Scheduled Release Date & Time
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={labelClass}>Publish Date *</label>
+                      <div className="relative">
+                        <CalendarDays className={iconClass} size={15} />
+                        <input
+                          type="date"
+                          min={todayString}
+                          value={publishDate}
+                          onChange={(e) => setPublishDate(e.target.value)}
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Publish Time *</label>
+                      <div className="relative">
+                        <Clock className={iconClass} size={15} />
+                        <input
+                          type="time"
+                          value={publishTime}
+                          onChange={(e) => setPublishTime(e.target.value)}
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {publishDate && publishTime && (
+                    publishDate > eventDate ? (
+                      <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-[11.5px] font-medium text-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle size={15} className="text-rose-600 shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="font-bold text-rose-950">Publish Date is after Event Date:</strong>
+                            <p className="mt-0.5 text-rose-800">
+                              Event occurs on <strong>{eventDate}</strong>, but scheduled release is set to <strong>{publishDate}</strong>.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEventDate(publishDate)}
+                          className="shrink-0 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 active:scale-95 transition text-center"
+                        >
+                          Sync Event Date to {publishDate}
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] font-semibold text-amber-800">
+                        ✓ This event will be automatically published on {new Date(`${publishDate}T${publishTime}`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {publishTime}.
+                      </p>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center gap-3 pt-2">
             <button
-              type="button" onClick={() => navigate(dashboardPath)}
-              className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium py-2.5 rounded-lg text-sm transition"
+              type="button"
+              onClick={() => navigate(isEditMode ? `/events/${eventId}` : dashboardPath)}
+              className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold py-2.5 rounded-xl text-xs transition"
             >
-              Cancel
+              {isEditMode ? 'Back to Event Page' : 'Cancel'}
             </button>
             <button
-              type="submit" disabled={loading || uploadingImages}
-              className="flex-1 bg-primary-600 hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] text-white font-medium py-2.5 rounded-lg text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              type="submit"
+              disabled={loading || uploadingImages}
+              className={`flex-1 ${
+                publishType === 'scheduled' && !isEditMode
+                  ? 'bg-amber-600 hover:bg-amber-700 hover:shadow-lg hover:shadow-amber-200'
+                  : 'bg-primary-700 hover:bg-primary-800 hover:shadow-lg hover:shadow-primary-200'
+              } active:scale-[0.98] text-white font-bold py-2.5 rounded-xl text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2`}
             >
-              {(loading || uploadingImages) ? <Loader2 className="animate-spin" size={16} /> : null}
+              {(loading || uploadingImages) ? <Loader2 className="animate-spin" size={15} /> : null}
               {uploadingImages
                 ? 'Uploading photos...'
                 : loading
-                ? (isEditMode ? 'Saving...' : 'Creating...')
-                : (isEditMode ? 'Save Changes' : 'Create Event')}
+                ? (isEditMode ? 'Saving...' : publishType === 'scheduled' ? 'Scheduling...' : 'Creating...')
+                : (isEditMode ? 'Save Changes' : publishType === 'scheduled' ? 'Schedule Event' : 'Create & Publish Event')}
             </button>
           </div>
         </form>

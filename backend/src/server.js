@@ -37,4 +37,29 @@ app.get('/api/health', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+
+  // Background auto-publisher for scheduled events (runs every 30 seconds)
+  const { autoPublishScheduledEvents } = require('./features/events/events.model');
+  const notificationsModel = require('./features/notifications/notifications.model');
+
+  setInterval(async () => {
+    try {
+      const newlyPublished = await autoPublishScheduledEvents();
+      if (newlyPublished && newlyPublished.length > 0) {
+        console.log(`Auto-published ${newlyPublished.length} scheduled event(s)`);
+        for (const ev of newlyPublished) {
+          const [users] = await pool.query('SELECT id FROM users WHERE role = "student" AND id != ?', [ev.created_by]);
+          const userIds = users.map((u) => u.id);
+          if (userIds.length > 0) {
+            await notificationsModel.createForUsers(userIds, {
+              title: `Event Live: ${ev.title}`,
+              message: `${ev.organizing_department || 'DevCorps'} just published a new ${ev.category} event — check it out!`,
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Auto-publisher background job error:', err.message);
+    }
+  }, 30000);
 });

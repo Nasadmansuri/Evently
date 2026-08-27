@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight, CalendarX2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarX2, CalendarPlus } from 'lucide-react';
+import { getGoogleCalendarUrl } from '../utils/calendarIntegration';
 
 const CATEGORY_STYLE = {
   Technical: { dot: 'bg-primary-600', chip: 'bg-primary-50 text-primary-700' },
@@ -231,14 +232,29 @@ export default function EventCalendar({ events, onDayClick, onEventClick }) {
                       {dayEvents.map((ev) => {
                         const style = CATEGORY_STYLE[ev.category] || DEFAULT_STYLE;
                         return (
-                          <button
+                          <div
                             key={ev.id}
-                            onClick={() => { setExpandedDay(null); onEventClick(ev.id); }}
-                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                            className="group/item flex items-center justify-between gap-1 rounded-lg px-2 py-1.5 transition hover:bg-slate-50"
                           >
-                            <span className={`h-2 w-2 shrink-0 rounded-full ${style.dot}`} />
-                            <span className="truncate">{ev.title}</span>
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => { setExpandedDay(null); onEventClick(ev.id); }}
+                              className="flex min-w-0 flex-1 items-center gap-2 text-left text-xs font-medium text-slate-700"
+                            >
+                              <span className={`h-2 w-2 shrink-0 rounded-full ${style.dot}`} />
+                              <span className="truncate">{ev.title}</span>
+                            </button>
+                            <a
+                              href={getGoogleCalendarUrl(ev)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              title="Add to Google Calendar"
+                              className="opacity-0 group-hover/item:opacity-100 p-1 text-slate-400 hover:text-blue-600 transition shrink-0"
+                            >
+                              <CalendarPlus size={13} />
+                            </a>
+                          </div>
                         );
                       })}
                     </div>

@@ -1,5 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, ShieldCheck, Check, X, Loader2, AlertCircle, Users, UserCheck, GraduationCap, Trash2, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import {
+  Search, ShieldCheck, Check, X, Loader2, AlertCircle, Users, UserCheck, GraduationCap,
+  Trash2, ChevronLeft, ChevronRight, ArrowUpDown, UserX, Ban, ShieldAlert, AlertTriangle,
+  Mail, Phone, Calendar, Landmark, BookOpen, Layers, Award, Sparkles, ExternalLink, Eye
+} from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { useAuth } from '../../../shared/context/AuthContext';
@@ -13,23 +18,22 @@ const ROLE_BADGE = {
   admin: 'bg-purple-50 text-purple-700 border border-purple-100',
 };
 
-function roleDetails(u) {
+function getAffiliationSummary(u) {
   if (u.role === 'student') {
-    const parts = [u.sp_college_name || u.college_name, u.faculty_name, u.course_name].filter(Boolean);
-    const academic = [u.academic_level && `Level ${u.academic_level}`, u.academic_semester && `Sem ${u.academic_semester}`, u.academic_group]
-      .filter(Boolean)
-      .join(' · ');
-    return [parts.join(' · '), academic].filter(Boolean);
+    const college = u.sp_college_name || u.college_name || 'Affiliated Campus';
+    const tag = u.academic_level && u.academic_group ? `L${u.academic_level} · ${u.academic_group}` : null;
+    return tag ? `${college} (${tag})` : college;
   }
   if (u.role === 'faculty') {
-    const line1 = [u.faculty_id_code, u.department, u.designation].filter(Boolean).join(' · ');
-    const line2 = u.community && u.community !== 'N/A' ? u.community : null;
-    return [line1, line2].filter(Boolean);
+    return [u.department, u.designation].filter(Boolean).join(' · ') || u.faculty_id_code || 'Faculty Member';
   }
   if (u.role === 'guest') {
-    return [[u.gp_college_name || u.college_name || 'External College', u.course_major || 'General Participant'].filter(Boolean).join(' · ')].filter(Boolean);
+    return [u.gp_college_name || u.college_name || 'External College', u.course_major].filter(Boolean).join(' · ') || 'Guest Participant';
   }
-  return [];
+  if (u.role === 'admin') {
+    return 'Campus Administration';
+  }
+  return '—';
 }
 
 export default function UserManagement() {
@@ -41,6 +45,10 @@ export default function UserManagement() {
   const [activeRole, setActiveRole] = useState('All');
   const [actioningId, setActioningId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [deactivateModalUser, setDeactivateModalUser] = useState(null);
+  const [deactivateReason, setDeactivateReason] = useState('');
+  const [submittingStatus, setSubmittingStatus] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
@@ -113,6 +121,25 @@ export default function UserManagement() {
     }
   }
 
+  async function handleToggleStatus(targetUser, isActive, reason = '') {
+    setActioningId(targetUser.id);
+    setSubmittingStatus(true);
+    try {
+      await api.patch(`/users/${targetUser.id}/status`, { isActive, reason });
+      setUsers((prev) =>
+        prev.map((u) => (u.id === targetUser.id ? { ...u, is_active: isActive ? 1 : 0 } : u))
+      );
+      showToast.success(isActive ? 'User account activated' : 'User account deactivated & notified');
+      setDeactivateModalUser(null);
+      setDeactivateReason('');
+    } catch (err) {
+      showToast.error(err.response?.data?.message || 'Failed to update account status');
+    } finally {
+      setActioningId(null);
+      setSubmittingStatus(false);
+    }
+  }
+
   async function handleDelete(id) {
     setActioningId(id);
     try {
@@ -128,18 +155,21 @@ export default function UserManagement() {
   }
 
   const totalUsers = users.length;
+  const disabledUsers = users.filter((u) => u.is_active === 0).length;
   const pendingApprovals = users.filter((u) => u.role === 'faculty' && u.approval_status === 'pending').length;
-  const activeStudents = users.filter((u) => u.role === 'student').length;
+  const activeStudents = users.filter((u) => u.role === 'student' && u.is_active !== 0).length;
   const totalGuests = users.filter((u) => u.role === 'guest').length;
 
   return (
-    <div>
-      <div className="mb-5">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">User Management</h1>
-        <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">Manage all users and approve faculty registrations</p>
+    <div className="space-y-6 pb-10">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">User Management</h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Manage student and faculty directories and review registrations</p>
+        </div>
       </div>
 
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50">
             <Users className="text-primary-600" size={18} />
@@ -250,55 +280,71 @@ export default function UserManagement() {
           </div>
         ) : (
           <>
-            <div className="hidden grid-cols-[2fr_2fr_1fr_1fr] gap-3 border-b border-slate-100 bg-slate-50/80 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 sm:grid">
+            <div className="hidden grid-cols-[2fr_1.8fr_1fr_1fr_auto] items-center gap-4 border-b border-slate-100 bg-slate-50/80 px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 sm:grid">
               <span>User</span>
-              <span>Role & Details</span>
+              <span>Role & Affiliation</span>
               <span>Status</span>
+              <span>Registered</span>
               <span className="text-right">Actions</span>
             </div>
             <div className="divide-y divide-slate-100">
               {paginated.map((u) => {
-                const details = roleDetails(u);
+                const affiliation = getAffiliationSummary(u);
                 const isPending = u.role === 'faculty' && u.approval_status === 'pending';
                 const isSelf = u.id === currentUser?.id;
                 return (
-                  <div key={u.id} className="grid grid-cols-1 gap-3 px-5 py-4 sm:grid-cols-[2fr_2fr_1fr_1fr] sm:items-center">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
+                  <div
+                    key={u.id}
+                    onClick={() => setSelectedUser(u)}
+                    className="grid grid-cols-1 gap-3 px-5 py-3.5 sm:grid-cols-[2fr_1.8fr_1fr_1fr_auto] sm:items-center hover:bg-slate-50/90 cursor-pointer transition-colors duration-150 group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-black text-slate-700 ring-2 ring-slate-100 group-hover:ring-primary-400 group-hover:bg-primary-50 group-hover:text-primary-700 transition-all">
                         {u.full_name?.[0]?.toUpperCase() || '?'}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-900">{u.full_name}</p>
+                        <p className="truncate text-sm font-bold text-slate-900 group-hover:text-primary-700 transition-colors flex items-center gap-1.5">
+                          <span className="truncate">{u.full_name}</span>
+                          <Eye size={12} className="opacity-0 group-hover:opacity-100 text-primary-600 transition-opacity shrink-0" />
+                        </p>
                         <p className="truncate text-xs text-slate-500">{u.email}</p>
                       </div>
                     </div>
 
-                    <div>
-                      <span className={`mb-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${ROLE_BADGE[u.role] || 'bg-slate-100 text-slate-600'}`}>
+                    <div className="min-w-0">
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-0.5 ${ROLE_BADGE[u.role] || 'bg-slate-100 text-slate-600'}`}>
                         {u.role}
                       </span>
-                      {details.map((line, i) => (
-                        <p key={i} className="text-[11px] text-slate-500">{line}</p>
-                      ))}
+                      <p className="truncate text-xs text-slate-600 font-medium">{affiliation}</p>
                     </div>
 
                     <div>
-                      {isPending ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                      {u.is_active === 0 ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-bold text-rose-700 border border-rose-200">
+                          <UserX size={11} /> Disabled
+                        </span>
+                      ) : isPending ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
                           <ShieldCheck size={11} /> Pending
                         </span>
                       ) : u.role === 'faculty' ? (
-                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 capitalize">
-                          {u.approval_status}
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 capitalize">
+                          <Check size={11} /> {u.approval_status}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                          Active
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                          <Check size={11} /> Active
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-start gap-2 sm:justify-end">
+                    <div className="hidden sm:block">
+                      <p className="text-xs text-slate-500 font-medium">
+                        {u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-start gap-2 sm:justify-end" onClick={(e) => e.stopPropagation()}>
                       {isPending ? (
                         <>
                           <button
@@ -335,12 +381,32 @@ export default function UserManagement() {
                           </button>
                         </>
                       ) : (
-                        <button
-                          onClick={() => setConfirmId(u.id)}
-                          className="flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
-                        >
-                          <Trash2 size={12} /> Delete
-                        </button>
+                        <>
+                          {u.is_active === 0 ? (
+                            <button
+                              disabled={actioningId === u.id}
+                              onClick={() => handleToggleStatus(u, true)}
+                              className="flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                            >
+                              <UserCheck size={12} /> Enable
+                            </button>
+                          ) : (
+                            <button
+                              disabled={actioningId === u.id}
+                              onClick={() => setDeactivateModalUser(u)}
+                              className="flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+                            >
+                              <Ban size={12} /> Disable
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => setConfirmId(u.id)}
+                            className="flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                          >
+                            <Trash2 size={12} /> Delete
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -375,6 +441,244 @@ export default function UserManagement() {
         )}
       </div>
 
+      {/* Rich User Profile Detail Modal */}
+      {selectedUser &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              {/* Modal Header Cover */}
+              <div className="relative bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 p-6 text-white">
+                <button
+                  onClick={() => setSelectedUser(null)}
+                  className="absolute top-4 right-4 rounded-full bg-white/10 p-1.5 text-white/80 backdrop-blur-xs transition hover:bg-white/20 hover:text-white"
+                >
+                  <X size={16} />
+                </button>
+
+                <div className="flex items-start gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-2xl font-black text-white border-2 border-white/20 shadow-lg">
+                    {selectedUser.full_name?.[0]?.toUpperCase() || '?'}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${ROLE_BADGE[selectedUser.role] || 'bg-white/20 text-white'}`}>
+                        {selectedUser.role}
+                      </span>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${selectedUser.is_active ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${selectedUser.is_active ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                        {selectedUser.is_active ? 'Active' : 'Disabled'}
+                      </span>
+                    </div>
+                    <h2 className="text-lg font-bold text-white truncate">{selectedUser.full_name}</h2>
+                    <p className="text-xs text-primary-200/90 truncate">{selectedUser.email}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Body Info Cards */}
+              <div className="max-h-[60vh] overflow-y-auto p-6 space-y-4 text-xs">
+                {/* Deactivation Banner if disabled */}
+                {!selectedUser.is_active && (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50/90 p-3.5 text-rose-950 space-y-1">
+                    <div className="flex items-center gap-2 font-bold text-rose-900">
+                      <Ban size={14} className="text-rose-600" /> Account Currently Deactivated
+                    </div>
+                    {selectedUser.deactivation_reason ? (
+                      <p className="text-[11.5px] text-rose-800 leading-relaxed font-medium pl-5">
+                        <strong>Reason:</strong> {selectedUser.deactivation_reason}
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-rose-700/80 italic pl-5">No explicit reason was documented during deactivation.</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Academic / Affiliation Credentials */}
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 space-y-3">
+                  <h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                    <Landmark size={14} className="text-primary-600" /> Academic & Institutional Affiliation
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-slate-700">
+                    <div>
+                      <span className="text-[10.5px] font-semibold text-slate-400 block">Institution / College</span>
+                      <span className="font-bold text-slate-900">{selectedUser.college_name || '—'}</span>
+                    </div>
+                    {selectedUser.role === 'student' && (
+                      <>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Faculty</span>
+                          <span className="font-bold text-slate-900">{selectedUser.faculty_name || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Course / Degree</span>
+                          <span className="font-bold text-slate-900">{selectedUser.course_name || selectedUser.course_major || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Cohort Level & Group</span>
+                          <span className="font-bold text-slate-900">
+                            {selectedUser.academic_level ? `Level ${selectedUser.academic_level}` : '—'}
+                            {selectedUser.academic_semester ? ` · Sem ${selectedUser.academic_semester}` : ''}
+                            {selectedUser.academic_group ? ` (G${selectedUser.academic_group})` : ''}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    {selectedUser.role === 'faculty' && (
+                      <>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Faculty Code</span>
+                          <span className="font-mono font-bold text-slate-900">{selectedUser.faculty_id_code || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Department</span>
+                          <span className="font-bold text-slate-900">{selectedUser.department || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Designation</span>
+                          <span className="font-bold text-slate-900">{selectedUser.designation || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Community</span>
+                          <span className="font-bold text-slate-900">{selectedUser.community || '—'}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Contact & Registration Meta */}
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 space-y-3">
+                  <h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                    <Mail size={14} className="text-primary-600" /> Contact & Registration
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-slate-700">
+                    <div>
+                      <span className="text-[10.5px] font-semibold text-slate-400 block">Email Address</span>
+                      <span className="font-medium text-slate-900 truncate block">{selectedUser.email}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10.5px] font-semibold text-slate-400 block">Phone Number</span>
+                      <span className="font-medium text-slate-900">{selectedUser.phone || 'Not provided'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10.5px] font-semibold text-slate-400 block">Registered On</span>
+                      <span className="font-medium text-slate-900">
+                        {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10.5px] font-semibold text-slate-400 block">System User ID</span>
+                      <span className="font-mono text-slate-600">#{selectedUser.id}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="border-t border-slate-100 bg-slate-50/80 px-6 py-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setSelectedUser(null)}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                >
+                  Close
+                </button>
+
+                {selectedUser.id !== currentUser?.id && (
+                  <div className="flex items-center gap-2">
+                    {selectedUser.is_active ? (
+                      <button
+                        type="button"
+                        disabled={actioningId === selectedUser.id}
+                        onClick={() => {
+                          const target = selectedUser;
+                          setSelectedUser(null);
+                          setDeactivateModalUser(target);
+                        }}
+                        className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 active:scale-95 transition disabled:opacity-50"
+                      >
+                        <Ban size={13} /> Disable Account
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={actioningId === selectedUser.id}
+                        onClick={() => handleToggleStatus(selectedUser, true)}
+                        className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 active:scale-95 transition disabled:opacity-50"
+                      >
+                        <Check size={13} /> Enable Account
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={actioningId === selectedUser.id}
+                      onClick={() => handleDelete(selectedUser.id)}
+                      className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100 active:scale-95 transition disabled:opacity-50"
+                    >
+                      <Trash2 size={13} /> Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* Account Deactivation Modal */}
+      {deactivateModalUser &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                  <AlertTriangle size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Deactivate Account</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Deactivating <strong className="text-slate-700">{deactivateModalUser.full_name}</strong> will block login and display the reason on their login screen.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Reason for Deactivation <span className="text-slate-400 font-normal">(Displayed on user's login page & access attempts)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={deactivateReason}
+                  onChange={(e) => setDeactivateReason(e.target.value)}
+                  placeholder="e.g., Account suspended due to policy review, alumni record, or guideline violation."
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-hidden"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setDeactivateModalUser(null); setDeactivateReason(''); }}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={submittingStatus}
+                  onClick={() => handleToggleStatus(deactivateModalUser, false, deactivateReason)}
+                  className="flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-700 active:scale-95 disabled:opacity-50"
+                >
+                  {submittingStatus ? <Loader2 className="animate-spin" size={14} /> : <Ban size={14} />}
+                  Deactivate Account
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

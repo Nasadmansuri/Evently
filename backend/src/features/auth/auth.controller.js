@@ -25,6 +25,14 @@ async function login(req, res) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    if (user.is_active === 0) {
+      return res.status(403).json({
+        message: 'Your account has been deactivated by campus administration.',
+        reason: user.deactivation_reason || 'Administrative decision or violation of campus guidelines.',
+        isDeactivated: true,
+      });
+    }
+
     if (user.role === 'faculty' && user.approval_status !== 'approved') {
       const status = user.approval_status || 'pending';
       return res.status(403).json({
@@ -55,6 +63,13 @@ async function sendSignupOtp(req, res) {
 
     const existing = await authModel.findByEmail(normalizedEmail);
     if (existing) {
+      if (existing.is_active === 0) {
+        return res.status(403).json({
+          message: 'This account has been deactivated by campus administration and cannot be re-registered.',
+          reason: existing.deactivation_reason || 'Administrative review and policy compliance.',
+          isDeactivated: true,
+        });
+      }
       return res.status(409).json({ message: 'An account with this email already exists. Please log in.' });
     }
 
@@ -128,6 +143,13 @@ async function signupStudent(req, res) {
 
     const existing = await authModel.findByEmail(normalizedEmail);
     if (existing) {
+      if (existing.is_active === 0) {
+        return res.status(403).json({
+          message: 'This account has been deactivated by campus administration and cannot be re-registered.',
+          reason: existing.deactivation_reason || 'Administrative policy review.',
+          isDeactivated: true,
+        });
+      }
       return res.status(409).json({ message: 'An account with this email already exists' });
     }
 
@@ -188,6 +210,13 @@ async function signupFaculty(req, res) {
 
     const existing = await authModel.findByEmail(normalizedEmail);
     if (existing) {
+      if (existing.is_active === 0) {
+        return res.status(403).json({
+          message: 'This account has been deactivated by campus administration and cannot be re-registered.',
+          reason: existing.deactivation_reason || 'Administrative policy review.',
+          isDeactivated: true,
+        });
+      }
       return res.status(409).json({ message: 'An account with this email already exists' });
     }
 
@@ -366,6 +395,14 @@ async function googleLogin(req, res) {
 
     // If user already exists, log them in directly
     if (user) {
+      if (user.is_active === 0) {
+        return res.status(403).json({
+          message: 'Your account has been deactivated by campus administration.',
+          reason: user.deactivation_reason || 'Administrative decision or violation of campus guidelines.',
+          isDeactivated: true,
+        });
+      }
+
       if (user.role === 'faculty' && user.approval_status !== 'approved') {
         const status = user.approval_status || 'pending';
         return res.status(403).json({
@@ -443,9 +480,17 @@ async function completeGoogleSignup(req, res) {
       }
     }
 
-    // Double check if account was created concurrently
+    // Double check if account was created concurrently or was deactivated
     let user = await authModel.findByEmail(email);
-    if (!user) {
+    if (user) {
+      if (user.is_active === 0) {
+        return res.status(403).json({
+          message: 'Your account has been deactivated by campus administration.',
+          reason: user.deactivation_reason || 'Administrative decision or violation of campus guidelines.',
+          isDeactivated: true,
+        });
+      }
+    } else {
       const resolvedName = (req.body.fullName || googleUser.fullName || email.split('@')[0]).trim();
       user = await authModel.createGoogleStudent({
         fullName: resolvedName,
@@ -461,6 +506,14 @@ async function completeGoogleSignup(req, res) {
         academicSemester: isAffiliated ? academicSemester : undefined,
         academicGroup: isAffiliated ? academicGroup : undefined,
         courseMajor: !isAffiliated ? courseMajor.trim() : undefined,
+      });
+    }
+
+    if (user.is_active === 0) {
+      return res.status(403).json({
+        message: 'Your account has been deactivated by campus administration.',
+        reason: user.deactivation_reason || 'Administrative decision or violation of campus guidelines.',
+        isDeactivated: true,
       });
     }
 

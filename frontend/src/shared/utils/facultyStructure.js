@@ -5,8 +5,8 @@ export const DEPARTMENT_DESIGNATIONS = {
   'SSD (Student Service Department)': ['Manager', 'Officer'],
   'PAT (Personal Academic Tutor)': ['Assistant Liaison Officer', 'Manager', 'Officer'],
   'Registry, Timetable & Examination Department': ['Manager', 'Officer'],
-  'IT Academics': ['GTA', 'Lecturer'],
-  'Business Academics': null,
+  'IT Academics': ['Module Leader', 'Lecturer', 'Tutor', 'GTA'],
+  'Business Academics': ['Module Leader', 'Lecturer', 'Tutor', 'GTA'],
 };
 
 // BIC DevCorps community — optional field on Faculty Signup, also used as

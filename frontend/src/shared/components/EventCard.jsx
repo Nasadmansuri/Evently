@@ -45,8 +45,17 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
   const [showLocationModal, setShowLocationModal] = useState(false);
   const gradient = CARD_GRADIENT[event.category] || DEFAULT_GRADIENT;
   const categoryStyle = CATEGORY_TEXT[event.category] || DEFAULT_CATEGORY_TEXT;
-  const liveStatus = getEventStatus(event.event_date, event.event_time);
-  const statusText = liveStatus === 'ended' ? 'Ended' : liveStatus === 'ongoing' ? 'Ongoing' : 'Upcoming';
+  const liveStatus = getEventStatus(event.event_date, event.event_time, event.status, event.publish_at);
+  const statusText =
+    liveStatus === 'cancelled'
+      ? 'Cancelled'
+      : liveStatus === 'scheduled'
+      ? 'Scheduled'
+      : liveStatus === 'ended'
+      ? 'Ended'
+      : liveStatus === 'ongoing'
+      ? 'Ongoing'
+      : 'Upcoming';
 
   return (
     <>
@@ -78,7 +87,11 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
 
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent z-5" />
           <span className={`absolute right-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm ${
-            liveStatus === 'ended'
+            liveStatus === 'cancelled'
+              ? 'bg-rose-600 text-white'
+              : liveStatus === 'scheduled'
+              ? 'bg-amber-600 text-white'
+              : liveStatus === 'ended'
               ? 'bg-slate-800/90 text-white'
               : liveStatus === 'ongoing'
               ? 'bg-amber-500/95 text-white'
@@ -135,14 +148,21 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
                 <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Organizer</p>
                 <p
                   className="truncate text-xs font-semibold text-slate-700"
-                  title={event.organizing_department || event.organizer_name || ''}
+                  title={event.organizing_community ? `${event.organizing_department} (${event.organizing_community})` : (event.organizing_department || event.organizer_name || '')}
                 >
-                  {event.organizing_department || event.organizer_name || '—'}
+                  {event.organizing_community ? `${event.organizing_department} · ${event.organizing_community}` : (event.organizing_department || event.organizer_name || 'Campus Department')}
                 </p>
               </div>
             )}
 
-            {showRegisterAction && event.is_registered ? (
+            {liveStatus === 'cancelled' ? (
+              <button
+                onClick={onViewDetails}
+                className="flex shrink-0 items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-3.5 py-1.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100"
+              >
+                Cancelled · Details <ArrowRight size={13} />
+              </button>
+            ) : showRegisterAction && event.is_registered ? (
               <span className="flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-700">
                 <CheckCircle2 size={13} /> Registered
               </span>

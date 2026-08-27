@@ -12,6 +12,8 @@
 
 html {
   background: #f1f5f9;
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 body {

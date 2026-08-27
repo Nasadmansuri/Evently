@@ -70,11 +70,17 @@ async function clearAll(userId) {
   return result.affectedRows;
 }
 
+async function create(userId, { title, message }) {
+  if (!userId) return 0;
+  return createForUsers([userId], { title, message });
+}
+
 module.exports = {
   getByUser,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
+  create,
   createForUsers,
   deleteNotification,
   clearAll,

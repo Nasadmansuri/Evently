@@ -51,12 +51,11 @@ async function getMyStats(req, res) {
 // }
 async function createEvent(req, res) {
   try {
-    console.log("RECEIVED PAYLOAD FROM FRONTEND:", req.body); // <-- Diagnostic log
-
     const {
       title, description, category, location, eventDate, eventTime,
       organizingDepartment, organizingCommunity, rulesEligibility,
-      prizeInfo, maxParticipants, isTeamEvent
+      prizeInfo, maxParticipants, isTeamEvent,
+      publishType, publishDate, publishTime,
     } = req.body;
 
     if (!title || !description || !category || !location || !eventDate || !eventTime || !organizingDepartment) {
@@ -69,25 +68,49 @@ async function createEvent(req, res) {
       return res.status(400).json({ message: 'Event date cannot be in the past' });
     }
 
+    let publishAt = null;
+    if (publishType === 'scheduled' && publishDate && publishTime) {
+      const scheduledDateTime = new Date(`${publishDate}T${publishTime}`);
+      const eventStartDateTime = new Date(`${eventDateOnly}T${eventTime}`);
+      const now = new Date();
+
+      if (isNaN(scheduledDateTime.getTime())) {
+        return res.status(400).json({ message: 'Invalid scheduled publish date and time' });
+      }
+      if (scheduledDateTime <= now) {
+        return res.status(400).json({ message: 'Scheduled publish time must be in the future' });
+      }
+      if (scheduledDateTime > eventStartDateTime) {
+        return res.status(400).json({ message: 'Scheduled publish time must be before the event start time' });
+      }
+      publishAt = `${publishDate} ${publishTime}:00`;
+    }
+
     const eventId = await eventsModel.createEvent({
       title, description, category, location, eventDate, eventTime,
       organizingDepartment, organizingCommunity, rulesEligibility,
-      prizeInfo, maxParticipants, isTeamEvent, userId: req.user.id,
+      prizeInfo, maxParticipants, isTeamEvent, publishAt, userId: req.user.id,
     });
 
-    res.status(201).json({ message: 'Event created successfully', eventId });
+    const isScheduled = !!publishAt;
+    res.status(201).json({
+      message: isScheduled ? 'Event scheduled successfully' : 'Event created successfully',
+      eventId,
+      isScheduled,
+    });
 
-    // Fire-and-forget: notify all registered students of the new event,
-    // excluding the event creator themselves and faculty/admin.
-    pool.query('SELECT id FROM users WHERE role = "student" AND id != ?', [req.user.id])
-      .then(([users]) => {
-        const userIds = users.map((u) => u.id);
-        return notificationsModel.createForUsers(userIds, {
-          title: `New Event: ${title}`,
-          message: `${organizingDepartment} posted a new ${category} event — check it out!`,
-        });
-      })
-      .catch((err) => console.error('New-event notification broadcast failed:', err.message));
+    // If published immediately, notify all registered students
+    if (!isScheduled) {
+      pool.query('SELECT id FROM users WHERE role = "student" AND id != ?', [req.user.id])
+        .then(([users]) => {
+          const userIds = users.map((u) => u.id);
+          return notificationsModel.createForUsers(userIds, {
+            title: `New Event: ${title}`,
+            message: `${organizingDepartment} posted a new ${category} event — check it out!`,
+          });
+        })
+        .catch((err) => console.error('New-event notification broadcast failed:', err.message));
+    }
   } catch (err) {
     res.status(500).json({ message: 'Failed to create event', error: err.message });
   }
@@ -171,24 +194,44 @@ async function updateEvent(req, res) {
       return res.status(403).json({ message: 'You can only edit events you created' });
     }
 
+    if (event.status === 'cancelled') {
+      return res.status(400).json({ message: 'Cancelled events cannot be edited' });
+    }
+
     const {
       title, description, category, location, eventDate, eventTime,
       organizingDepartment, organizingCommunity, rulesEligibility,
       prizeInfo, maxParticipants, isTeamEvent,
     } = req.body;
 
-    if (!title || !description || !category || !location || !eventDate || !eventTime || !organizingDepartment) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
+    const existingDateStr = event.event_date ? new Date(event.event_date).toISOString().split('T')[0] : '';
+    const existingTimeStr = event.event_time ? String(event.event_time).slice(0, 5) : '00:00';
+    const eventStart = new Date(`${existingDateStr}T${existingTimeStr}:00`);
+    const isConcluded = eventStart <= new Date() || event.status === 'ended';
 
-    const today = new Date().toISOString().split('T')[0];
-    const eventDateOnly = (eventDate || '').slice(0, 10);
-    if (eventDateOnly < today) {
-      return res.status(400).json({ message: 'Event date cannot be in the past' });
+    let finalEventDate = eventDate || event.event_date;
+    let finalEventTime = eventTime || event.event_time;
+
+    if (isConcluded) {
+      // Concluded events cannot have their historical date/time altered
+      finalEventDate = event.event_date;
+      finalEventTime = event.event_time;
+    } else {
+      // Upcoming events cannot be rescheduled into the past
+      const incomingDateStr = (eventDate || '').slice(0, 10);
+      const incomingTimeStr = (eventTime || '').slice(0, 5) || '00:00';
+      if (incomingDateStr) {
+        const incomingStart = new Date(`${incomingDateStr}T${incomingTimeStr}:00`);
+        if (incomingStart < new Date()) {
+          return res.status(400).json({ message: 'Event date and time cannot be scheduled in the past' });
+        }
+      }
     }
 
     await eventsModel.updateEvent(req.params.id, {
-      title, description, category, location, eventDate, eventTime,
+      title, description, category, location,
+      eventDate: finalEventDate,
+      eventTime: finalEventTime,
       organizingDepartment, organizingCommunity, rulesEligibility, prizeInfo, maxParticipants, isTeamEvent
     });
 
@@ -614,6 +657,12 @@ async function generateReport(req, res) {
     const event = await eventsModel.getEventById(req.params.id, req.user.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
+    const isOwner = event.created_by === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'You can only generate reports for events you organized' });
+    }
+
     const [participants, images, form] = await Promise.all([
       registrationsModel.getEventParticipants(req.params.id),
       eventsModel.getEventImages(req.params.id),
@@ -732,9 +781,130 @@ async function generateReport(req, res) {
   }
 }
 
+async function createDeletionRequest(req, res) {
+  try {
+    const { id } = req.params;
+    const { reasonCategory, problemStatement } = req.body;
+
+    if (!reasonCategory || !problemStatement || !problemStatement.trim()) {
+      return res.status(400).json({ message: 'Reason category and problem statement are required' });
+    }
+
+    const event = await eventsModel.getEventById(id, req.user.id);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    const isOwner = event.created_by === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'You can only request deletion for events you created' });
+    }
+
+    if (event.deletion_request_id) {
+      return res.status(409).json({ message: 'A deletion request for this event is already pending administration review' });
+    }
+
+    const requestId = await eventsModel.createDeletionRequest({
+      eventId: id,
+      userId: req.user.id,
+      reasonCategory: reasonCategory.trim(),
+      problemStatement: problemStatement.trim(),
+    });
+
+    // Notify administrators
+    pool.query('SELECT id FROM users WHERE role = "admin"')
+      .then(([admins]) => {
+        const adminIds = admins.map((a) => a.id);
+        if (adminIds.length > 0) {
+          return notificationsModel.createForUsers(adminIds, {
+            title: `Event Deletion Request: ${event.title}`,
+            message: `${req.user.full_name || 'Faculty organizer'} submitted a deletion request for "${event.title}". Reason: ${reasonCategory}.`,
+          });
+        }
+      })
+      .catch((err) => console.error('Admin deletion request notification failed:', err.message));
+
+    res.status(201).json({
+      message: 'Deletion request submitted successfully. Administration has been notified for review.',
+      requestId,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to submit deletion request', error: err.message });
+  }
+}
+
+async function getDeletionRequests(req, res) {
+  try {
+    const { status } = req.query;
+    const requests = await eventsModel.getDeletionRequests({ status });
+    res.json(requests);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load deletion requests', error: err.message });
+  }
+}
+
+async function resolveDeletionRequest(req, res) {
+  try {
+    const { requestId } = req.params;
+    const { status, adminNotes } = req.body;
+
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Status must be approved or rejected' });
+    }
+
+    const resolved = await eventsModel.resolveDeletionRequest(requestId, {
+      status,
+      adminNotes,
+      adminId: req.user.id,
+    });
+
+    if (!resolved) {
+      return res.status(404).json({ message: 'Deletion request not found' });
+    }
+
+    if (status === 'approved') {
+      const reasonText = resolved.reason_category + (adminNotes ? ` — ${adminNotes}` : (resolved.problem_statement ? ` — ${resolved.problem_statement}` : ''));
+
+      // Soft-delete: mark event as cancelled and document official cancellation reason
+      await pool.query(
+        `UPDATE events SET status = 'cancelled', cancellation_reason = ?, cancelled_at = NOW() WHERE id = ?`,
+        [reasonText, resolved.event_id]
+      );
+
+      await notificationsModel.create(resolved.requested_by, {
+        title: 'Event Cancellation Approved',
+        message: `Your request to cancel "${resolved.event_title}" has been approved by administration. The event is now marked as Cancelled with the reason displayed.`,
+      });
+
+      pool.query('SELECT user_id FROM registrations WHERE event_id = ?', [resolved.event_id])
+        .then(([regs]) => {
+          const studentIds = regs.map((r) => r.user_id);
+          if (studentIds.length > 0) {
+            return notificationsModel.createForUsers(studentIds, {
+              title: `Event Cancelled: ${resolved.event_title}`,
+              message: `Please be advised that "${resolved.event_title}" has been cancelled by administration. Reason: ${resolved.reason_category}.`,
+            });
+          }
+        })
+        .catch((err) => console.error('Student cancellation notification failed:', err.message));
+
+      res.json({ message: 'Deletion request approved. Event has been marked as cancelled with the reason preserved.' });
+    } else {
+      await notificationsModel.create(resolved.requested_by, {
+        title: 'Event Deletion Request Rejected',
+        message: `Your request to delete "${resolved.event_title}" was not approved. Administration Note: ${adminNotes || 'Please contact the administration office for details.'}`,
+      });
+
+      res.json({ message: 'Deletion request rejected. Requester has been notified.' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to resolve deletion request', error: err.message });
+  }
+}
+
 module.exports = {
   getMyEvents, getMyStats, createEvent, getAllEvents, getEventById, getRecommended,
   getAllEventsAdmin, deleteEvent, getAdminStats, updateEvent,
   getEventImages, uploadEventImages, deleteEventImage, getGallerySummary,
   setBannerImage, generateReport,
+  createDeletionRequest, getDeletionRequests, resolveDeletionRequest,
 };

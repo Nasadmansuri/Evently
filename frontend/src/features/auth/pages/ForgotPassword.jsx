@@ -3,9 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, KeyRound, Eye, EyeOff, ArrowRight, ArrowLeft, CalendarHeart, AlertCircle, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
+import { useAuth } from '../../../shared/context/AuthContext';
+import { getDashboardPath } from '../../../shared/utils/navigation';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [step, setStep] = useState(1); // 1: Request Code, 2: Reset with OTP
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -83,12 +86,12 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-3 py-6">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-8">
-        <div className="flex items-center gap-2 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
+        <Link to={getDashboardPath(user)} className="inline-flex items-center gap-2 mb-5 hover:opacity-90 transition group">
+          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
             <CalendarHeart className="text-white" size={18} />
           </div>
-          <span className="text-lg font-bold text-slate-900">Evently</span>
-        </div>
+          <span className="text-lg font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Evently</span>
+        </Link>
 
         <h1 className="text-2xl font-bold text-slate-900 mb-1">
           {step === 1 ? 'Reset Password' : 'Enter Verification Code'}

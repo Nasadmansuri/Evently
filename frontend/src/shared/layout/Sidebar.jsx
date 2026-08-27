@@ -1,5 +1,6 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { LayoutDashboard, CalendarDays, PlusSquare, ListChecks, Images, MessageSquare, X, CalendarHeart, Users, BarChart3, UserCircle } from 'lucide-react';
+import { getDashboardPath } from '../utils/navigation';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, roles: ['admin'] },
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ role, open, onClose }) {
   const items = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const dashboardUrl = getDashboardPath({ role });
 
   return (
     <>
@@ -32,12 +34,12 @@ export default function Sidebar({ role, open, onClose }) {
         } lg:translate-x-0`}
       >
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 shadow-sm">
+          <Link to={dashboardUrl} onClick={onClose} className="flex items-center gap-2.5 hover:opacity-90 transition group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 shadow-sm group-hover:scale-105 transition-transform">
               <CalendarHeart className="text-white" size={16} />
             </div>
-            <span className="text-[15px] font-bold tracking-tight text-slate-900">Evently</span>
-          </div>
+            <span className="text-[15px] font-bold tracking-tight text-slate-900 group-hover:text-primary-700 transition-colors">Evently</span>
+          </Link>
           <button onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 lg:hidden" aria-label="Close menu">
             <X size={18} />
           </button>
