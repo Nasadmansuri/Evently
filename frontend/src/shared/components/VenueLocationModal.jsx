@@ -33,7 +33,7 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xl overflow-hidden rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-150"
+        className="skeuo-card relative w-full max-w-xl overflow-hidden rounded-[28px] p-6 shadow-2xl animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -51,31 +51,27 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
             aria-label="Close"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Venue Info Card */}
-        <div className="my-4 space-y-3">
-          <div className="rounded-2xl border border-primary-100 bg-primary-50/70 p-4">
-            <div className="flex items-center gap-2 text-xs font-bold text-primary-900 mb-1">
-              <Landmark size={15} className="text-primary-700 shrink-0" />
-              <span>Biratnagar International College (BIC)</span>
-            </div>
-            <p className="text-sm font-semibold text-slate-900">
-              Venue / Room: <span className="text-primary-700 font-bold">{displayVenue}</span>
-            </p>
-            <p className="mt-1 text-xs text-slate-600 leading-relaxed font-medium flex items-center gap-1.5">
-              <MapPin size={14} className="text-slate-500 shrink-0" />
-              <span>Bhrikuti Chowk, Biratnagar, Morang, Koshi Province, Nepal</span>
-            </p>
+        {/* Venue Information Preview */}
+        <div className="my-4 rounded-2xl bg-slate-50/80 p-3.5 border border-slate-200/80 space-y-1">
+          <div className="flex items-center gap-2">
+            <Landmark size={15} className="text-primary-700 shrink-0" />
+            <h4 className="text-xs font-bold text-slate-900 line-clamp-1">{displayVenue}</h4>
           </div>
+          <p className="text-[11.5px] text-slate-600 font-medium pl-6 leading-relaxed">
+            {BIC_FULL_ADDRESS}
+          </p>
+        </div>
 
-          {/* Embedded Google Maps Box */}
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-inner">
+        {/* Embedded Interactive Google Map */}
+        <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-inner mb-4">
+          <div className="relative aspect-[16/9] w-full bg-slate-100">
             <iframe
               title="Biratnagar International College Map"
               src={BIC_MAP_EMBED_URL}
@@ -95,7 +91,7 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
           <button
             type="button"
             onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 active:scale-95 transition"
+            className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold"
           >
             {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
             <span>{copied ? 'Copied Location' : 'Copy Address'}</span>
@@ -104,7 +100,7 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
           <button
             type="button"
             onClick={handleOpenMaps}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-600 active:scale-95 transition"
+            className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold"
           >
             <Navigation size={14} />
             <span>Get Directions</span>
