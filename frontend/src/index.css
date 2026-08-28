@@ -318,3 +318,95 @@ textarea {
   transform: translateY(-12px) scale(1.02);
   box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -8px rgba(0, 0, 0, 0.1);
 }
+
+/* Upward Stagger Entrance Animation (SheKunj feel) */
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUpFade 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-up-delay-1 {
+  animation: slideUpFade 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.animate-slide-up-delay-2 {
+  animation: slideUpFade 0.48s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+}
+
+/* Discreet Custom Scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Zero Scrollbar Utility */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0px;
+  height: 0px;
+}
+
+/* SheKunj Flashlight / Spotlight Sweep Animation across Left Showcase Card */
+@keyframes flashlightSweep {
+  0% {
+    transform: translateX(-140%) rotate(25deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  60% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateX(260%) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+.animate-flashlight {
+  position: absolute;
+  top: -60%;
+  left: -40%;
+  width: 60%;
+  height: 240%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(52, 211, 153, 0.05) 15%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(52, 211, 153, 0.05) 85%,
+    transparent 100%
+  );
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 5;
+  animation: flashlightSweep 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

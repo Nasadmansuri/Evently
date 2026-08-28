@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   User, Mail, Phone, IdCard, Landmark, Briefcase, Users, Lock, ShieldCheck,
   UserPlus, Info, AlertCircle, Loader2, Eye, EyeOff, CalendarHeart, ChevronDown, CheckCircle2,
@@ -13,6 +13,8 @@ import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facu
 
 export default function FacultySignup() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isRoleSwitch = Boolean(location.state?.fromRoleSwitch);
   const { user } = useAuth();
 
   const [fullName, setFullName] = useState('');
@@ -144,15 +146,18 @@ export default function FacultySignup() {
   return (
     <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#edf0f5] p-2.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
       {/* Master Dual-Column Container */}
-      <div className="w-full max-w-[1360px] h-auto lg:h-[calc(100vh-2rem)] max-h-[860px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      <div className="w-full max-w-[1340px] h-auto lg:h-[calc(100vh-2.5rem)] max-h-[840px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
         {/* Left Column: SheKunj Floating Inset Card */}
-        <div className="lg:col-span-5 m-2 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
+        <div className="lg:col-span-6 m-2.5 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
+          {/* Flashlight Beam Sweep Effect - Only on Sign In / Join Us navigation */}
+          {!isRoleSwitch && <div className="animate-flashlight" />}
+
           {/* Ambient Glows */}
           <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-purple-500/15 blur-3xl" />
 
-          {/* 1. Top Header: Logo + Navigation Pills */}
+          {/* 1. Top Header: Logo + Navigation Pills (Stays solid & constant) */}
           <div className="relative z-10 flex items-center justify-between">
             <Link to={getDashboardPath(user)} className="flex items-center gap-2 group">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
@@ -176,23 +181,22 @@ export default function FacultySignup() {
             </div>
           </div>
 
-          {/* 2. Middle Content: Faculty Value Propositions */}
+          {/* 2. Middle Content: Faculty Value Propositions (Slides up from bottom) */}
           <div className="relative z-10 my-auto py-4 sm:py-6 space-y-4">
-            <span className="inline-block text-[10px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-              Faculty & Organizer Desk
-            </span>
-
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 animate-slide-up">
+              <span className="inline-block text-[10px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-500/30 mb-2">
+                Faculty & Organizer Desk
+              </span>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white">
                 Empower Campus.<br />Publish & Lead.
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md">
+              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md mt-1">
                 Register your faculty credentials to organize hackathons, coordinate academic workshops, and manage DevCorps student communities.
               </p>
             </div>
 
             {/* Feature Checklist */}
-            <div className="space-y-2.5 pt-1">
+            <div className="space-y-2.5 pt-1 animate-slide-up-delay-1">
               <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
                 <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   <CheckCircle2 size={12} />
@@ -217,7 +221,7 @@ export default function FacultySignup() {
           </div>
 
           {/* 3. Bottom Metric Stats Bar */}
-          <div className="relative z-10 pt-4 border-t border-white/15 grid grid-cols-3 gap-3">
+          <div className="relative z-10 pt-4 border-t border-white/15 grid grid-cols-3 gap-3 animate-slide-up-delay-2">
             <div>
               <p className="text-lg sm:text-xl font-black text-white">Instant</p>
               <p className="text-[10.5px] text-slate-300 font-medium">Setup</p>
@@ -233,24 +237,24 @@ export default function FacultySignup() {
           </div>
         </div>
 
-        {/* Right Column: Form Container with internal scroll if necessary */}
-        <div className="lg:col-span-7 flex flex-col justify-start lg:justify-center px-6 sm:px-10 lg:px-14 py-6 sm:py-8 h-full max-w-xl mx-auto w-full overflow-y-auto">
-          <div className="w-full max-w-xl mx-auto">
+        {/* Right Column: Clean Form Container with Smooth Slide-Up Entrance */}
+        <div className="lg:col-span-6 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-4 sm:py-6 h-full max-w-lg mx-auto w-full overflow-y-auto no-scrollbar">
+          <div className="w-full max-w-lg mx-auto">
             {/* Header */}
-            <div className="mb-4">
+            <div className="mb-4 animate-slide-up">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                Register as Faculty Organizer
+                Register as Faculty
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
                 Manage and publish campus events for your department.
               </p>
             </div>
 
             {/* Student / Faculty toggle in Skeuomorphic Tray */}
-            <div className="skeuo-tray flex rounded-full p-1 mb-4">
+            <div className="skeuo-tray flex rounded-full p-1 mb-4 animate-slide-up">
               <button
                 type="button"
-                onClick={() => navigate('/signup/student')}
+                onClick={() => navigate('/signup/student', { state: { fromRoleSwitch: true } })}
                 className="flex-1 py-1.5 rounded-full text-xs font-medium text-slate-500 hover:text-slate-900 transition cursor-pointer"
               >
                 Student
@@ -263,41 +267,41 @@ export default function FacultySignup() {
               </button>
             </div>
 
-            <div className="flex items-start gap-2.5 rounded-xl border border-amber-200/90 bg-amber-50/60 p-3 text-xs text-amber-900 mb-4">
-              <Info size={15} className="shrink-0 text-amber-700 mt-0.5" />
-              <span className="leading-relaxed">Faculty accounts require administrator approval before you can publish campus events.</span>
+            <div className="flex items-center gap-2.5 rounded-xl border border-amber-200/90 bg-amber-50/80 py-2 px-3 text-xs text-amber-900 mb-3 animate-slide-up">
+              <Info size={15} className="shrink-0 text-amber-700" />
+              <span className="leading-relaxed">Faculty accounts require administrator approval before publishing events.</span>
             </div>
 
             {error && (
-              <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3.5 py-2.5">
+              <div className="mb-3 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3.5 py-2 animate-slide-up">
                 <AlertCircle size={14} className="shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleInitiateSignup} className="space-y-3.5">
+            <form onSubmit={handleInitiateSignup} className="space-y-3 animate-slide-up-delay-1">
               {/* Row: Name & Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClass}>Full Name</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Dr. John Doe"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>Official Email Address</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Official Email Address</label>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="faculty@bicnepal.edu.np"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
               </div>
@@ -305,7 +309,7 @@ export default function FacultySignup() {
               {/* Row: Phone & Faculty ID */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClass}>Phone Number</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
                   <input
                     type="tel"
                     required
@@ -313,18 +317,18 @@ export default function FacultySignup() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     placeholder="98XXXXXXXX"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>Faculty ID Code</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Faculty ID Code</label>
                   <input
                     type="text"
                     required
                     value={facultyIdCode}
                     onChange={(e) => setFacultyIdCode(e.target.value.toUpperCase())}
                     placeholder="e.g. BIC-FAC-0142"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
               </div>
@@ -332,13 +336,13 @@ export default function FacultySignup() {
               {/* Department & Designation Cascade */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClass}>Department</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Department</label>
                   <div className="relative">
                     <select
                       required
                       value={department}
                       onChange={(e) => handleDepartmentChange(e.target.value)}
-                      className={selectClass}
+                      className="skeuo-input w-full appearance-none rounded-xl px-3.5 pr-8 py-2 text-sm text-slate-900 disabled:opacity-50"
                     >
                       <option value="">Select Department</option>
                       {Object.keys(DEPARTMENT_DESIGNATIONS).map((dep) => (
@@ -350,7 +354,7 @@ export default function FacultySignup() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Designation</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Designation</label>
                   {isFreeTextDesignation ? (
                     <input
                       type="text"
@@ -358,7 +362,7 @@ export default function FacultySignup() {
                       value={designation}
                       onChange={(e) => setDesignation(e.target.value)}
                       placeholder="e.g. Senior Lecturer"
-                      className={inputClass}
+                      className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                     />
                   ) : (
                     <div className="relative">
@@ -367,7 +371,7 @@ export default function FacultySignup() {
                         value={designation}
                         onChange={(e) => setDesignation(e.target.value)}
                         disabled={!department}
-                        className={selectClass}
+                        className="skeuo-input w-full appearance-none rounded-xl px-3.5 pr-8 py-2 text-sm text-slate-900 disabled:opacity-50"
                       >
                         <option value="">{department ? 'Select Designation' : 'Select Department First'}</option>
                         {designationOptions && designationOptions.map((des) => (
@@ -383,12 +387,12 @@ export default function FacultySignup() {
               {/* Optional DevCorps Community Selection */}
               {department === 'DevCorps' && (
                 <div>
-                  <label className={labelClass}>Assigned Tech Community</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Tech Community</label>
                   <div className="relative">
                     <select
                       value={community}
                       onChange={(e) => setCommunity(e.target.value)}
-                      className={selectClass}
+                      className="skeuo-input w-full appearance-none rounded-xl px-3.5 pr-8 py-2 text-sm text-slate-900 disabled:opacity-50"
                     >
                       <option value="">Select Community (Optional)</option>
                       {COMMUNITIES.map((c) => (
@@ -401,9 +405,9 @@ export default function FacultySignup() {
               )}
 
               {/* Row: Password & Confirm */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-0.5">
                 <div>
-                  <label className={labelClass}>Password</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -411,7 +415,7 @@ export default function FacultySignup() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                     />
                     <button
                       type="button"
@@ -424,7 +428,7 @@ export default function FacultySignup() {
                   </div>
                 </div>
                 <div>
-                  <label className={labelClass}>Confirm Password</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Confirm Password</label>
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
@@ -432,7 +436,7 @@ export default function FacultySignup() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                     />
                     <button
                       type="button"
@@ -462,7 +466,7 @@ export default function FacultySignup() {
                 </span>
               </div>
 
-              <p className="text-[11px] text-slate-400 text-center pt-1">
+              <p className="text-[11px] text-slate-400 text-center pt-0.5">
                 By creating an account you agree to our{' '}
                 <Link to="/terms" target="_blank" className="text-primary-700 font-semibold underline hover:text-primary-800">
                   Terms of Service
@@ -476,14 +480,14 @@ export default function FacultySignup() {
               <button
                 type="submit"
                 disabled={loading}
-                className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-1"
               >
-                {loading ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}
+                {loading ? <Loader2 className="animate-spin" size={15} /> : <UserPlus size={15} />}
                 {loading ? 'Validating Faculty Email...' : 'Register Faculty Account'}
               </button>
             </form>
 
-            <p className="text-center text-xs text-slate-500 mt-5">
+            <p className="text-center text-xs text-slate-500 mt-4 animate-slide-up-delay-2">
               Already have an account?{' '}
               <Link to="/login" className="text-primary-700 font-bold hover:underline">
                 Sign in here

@@ -369,15 +369,18 @@ export default function Login() {
   return (
     <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#edf0f5] p-2.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
       {/* Master Dual-Column Container */}
-      <div className="w-full max-w-[1320px] h-auto lg:h-[calc(100vh-2rem)] max-h-[820px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      <div className="w-full max-w-[1340px] h-auto lg:h-[calc(100vh-2.5rem)] max-h-[840px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
         {/* Left Column: SheKunj Floating Inset Card */}
-        <div className="lg:col-span-6 m-2 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
+        <div className="lg:col-span-6 m-2.5 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
+          {/* Flashlight Beam Sweep Effect */}
+          <div className="animate-flashlight" />
+
           {/* Subtle Ambient Glows */}
           <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-purple-500/15 blur-3xl" />
 
-          {/* 1. Top Header: Logo + Navigation Pills */}
+          {/* 1. Top Header: Logo + Navigation Pills (Stays solid & constant) */}
           <div className="relative z-10 flex items-center justify-between">
             <Link to={getDashboardPath(user)} className="flex items-center gap-2 group">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
@@ -401,28 +404,27 @@ export default function Login() {
             </div>
           </div>
 
-          {/* 2. Middle Content: Welcome Back & Campus Platform Value Props */}
+          {/* 2. Middle Content: Welcome Back & Campus Platform Value Props (Slides up from bottom) */}
           <div className="relative z-10 my-auto py-4 sm:py-6 space-y-4">
-            <span className="inline-block text-[10px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-              Eastern Nepal's Premier Campus Platform
-            </span>
-
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 animate-slide-up">
+              <span className="inline-block text-[10px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-500/30 mb-2">
+                Eastern Nepal's Premier Campus Platform
+              </span>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white">
                 Welcome <br className="hidden sm:inline" />back.
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md">
+              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md mt-1">
                 Your campus journey continues here. Sign in to access your dashboard, discover events, and connect with communities.
               </p>
             </div>
 
             {/* Feature Checklist */}
-            <div className="space-y-2.5 pt-1">
+            <div className="space-y-2.5 pt-1 animate-slide-up-delay-1">
               <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
                 <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   <CheckCircle2 size={12} />
                 </div>
-                <span>Discover exclusive college hackathons & workshops</span>
+                <span>Access college hackathons, workshops & tech summits</span>
               </div>
 
               <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
@@ -436,13 +438,13 @@ export default function Login() {
                 <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   <CheckCircle2 size={12} />
                 </div>
-                <span>Connect with BIC DevCorps student tech communities</span>
+                <span>Connect with BIC DevCorps student communities</span>
               </div>
             </div>
           </div>
 
           {/* 3. Bottom Metric Stats Bar */}
-          <div className="relative z-10 pt-4 border-t border-white/15 grid grid-cols-3 gap-3">
+          <div className="relative z-10 pt-4 border-t border-white/15 grid grid-cols-3 gap-3 animate-slide-up-delay-2">
             <div>
               <p className="text-lg sm:text-xl font-black text-white">50+</p>
               <p className="text-[10.5px] text-slate-300 font-medium">Campus Events</p>
@@ -458,21 +460,21 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Right Column: Clean Floating Form Panel */}
-        <div className="lg:col-span-6 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-6 sm:py-8 h-full max-w-md mx-auto w-full">
+        {/* Right Column: Floating Form Panel with Smooth Slide-Up Entrance */}
+        <div className="lg:col-span-6 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-6 sm:py-8 h-full max-w-lg mx-auto w-full overflow-y-auto no-scrollbar">
           {/* Header */}
-          <div className="mb-4">
+          <div className="mb-5 animate-slide-up">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
               Welcome back,
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Sign in to continue your campus journey.
             </p>
           </div>
 
           {/* Deactivated Account Alert */}
           {deactivatedInfo && (
-            <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50/95 p-3.5 text-xs text-rose-950 shadow-xs space-y-2 animate-in fade-in duration-200">
+            <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50/95 p-3.5 text-xs text-rose-950 shadow-xs space-y-2 animate-slide-up">
               <div className="flex items-start gap-2.5">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700 mt-0.5">
                   <Ban size={15} />
@@ -495,16 +497,16 @@ export default function Login() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-3 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+            <div className="mb-3 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2 animate-slide-up">
               <AlertCircle size={14} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-3.5 animate-slide-up-delay-1">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email Address</label>
               <input
                 type="email"
                 required
@@ -513,7 +515,7 @@ export default function Login() {
                   setEmail(e.target.value);
                   setEmailSuggestion(suggestEmailCorrection(e.target.value));
                 }}
-                className="skeuo-input w-full rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400"
+                className="skeuo-input w-full rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
                 placeholder="you@bicnepal.edu.np"
               />
               {emailSuggestion && (
@@ -528,7 +530,7 @@ export default function Login() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-semibold text-slate-700">Password</label>
                 <Link to="/forgot-password" className="text-xs text-primary-700 font-semibold hover:underline">
                   Forgot password?
@@ -540,7 +542,7 @@ export default function Login() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400"
+                  className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
                   placeholder="••••••••"
                 />
                 <button
@@ -558,7 +560,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="skeuo-btn-primary w-full py-2.5 rounded-xl text-xs sm:text-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-1"
+              className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               {loading ? <Loader2 className="animate-spin" size={15} /> : null}
               {loading ? 'Signing in...' : 'Sign In'}
@@ -566,25 +568,25 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="flex items-center gap-3 my-3.5">
+          <div className="flex items-center gap-3 my-4 animate-slide-up-delay-2">
             <div className="flex-1 h-px bg-slate-200" />
             <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">or</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
 
           {/* Google OAuth Button */}
-          <div className="relative h-[38px] w-full">
+          <div className="relative h-[42px] w-full animate-slide-up-delay-2">
             <button
               id="google-custom-btn"
               type="button"
               onClick={handleGoogleClick}
               disabled={googleLoading || loading}
-              className="skeuo-btn-secondary w-full h-full flex items-center justify-center gap-2 rounded-xl py-1.5 text-xs sm:text-sm disabled:opacity-50 cursor-pointer"
+              className="skeuo-btn-secondary w-full h-full flex items-center justify-center gap-2 rounded-xl py-2 text-sm disabled:opacity-50 cursor-pointer"
             >
               {googleLoading ? (
                 <Loader2 className="animate-spin text-slate-500" size={15} />
               ) : (
-                <svg width="17" height="17" viewBox="0 0 48 48" className="shrink-0">
+                <svg width="18" height="18" viewBox="0 0 48 48" className="shrink-0">
                   <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.9 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3.5 24 3.5 12.7 3.5 3.5 12.7 3.5 24S12.7 44.5 24 44.5 44.5 35.3 44.5 24c0-1.2-.1-2.4-.3-3.5z"/>
                   <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3.5 24 3.5c-8 0-14.9 4.6-18.3 11.2z"/>
                   <path fill="#4CAF50" d="M24 44.5c5.4 0 10.3-1.8 14.1-4.9l-6.5-5.5c-2 1.5-4.7 2.4-7.6 2.4-5.4 0-9.9-3.1-11.4-7.6l-6.6 5.1C9 40 16 44.5 24 44.5z"/>
@@ -600,14 +602,14 @@ export default function Login() {
             />
           </div>
 
-          <p className="text-center text-xs text-slate-500 mt-4">
+          <p className="text-center text-xs text-slate-500 mt-5 animate-slide-up-delay-2">
             Don't have an account?{' '}
             <Link to="/signup/student" className="text-primary-700 font-bold hover:underline">
               Create one free
             </Link>
           </p>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-center gap-3 text-[10.5px] text-slate-400">
+          <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-center gap-3 text-[11px] text-slate-400 animate-slide-up-delay-2">
             <Link to="/terms" className="hover:text-slate-600 transition hover:underline">
               Terms & Conditions
             </Link>

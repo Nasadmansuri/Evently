@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   User, Mail, Phone, Landmark, GraduationCap, Lock, ShieldCheck,
   UserPlus, Layers, BarChart3, CalendarDays, Users, CheckCircle2, UserCircle, AlertCircle,
@@ -13,6 +13,8 @@ import { getDashboardPath } from '../../../shared/utils/navigation';
 
 export default function StudentSignup() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isRoleSwitch = Boolean(location.state?.fromRoleSwitch);
   const { user, login } = useAuth();
 
   const [fullName, setFullName] = useState('');
@@ -184,15 +186,18 @@ export default function StudentSignup() {
   return (
     <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#edf0f5] p-2.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
       {/* Master Dual-Column Container */}
-      <div className="w-full max-w-[1360px] h-auto lg:h-[calc(100vh-2rem)] max-h-[860px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      <div className="w-full max-w-[1340px] h-auto lg:h-[calc(100vh-2.5rem)] max-h-[840px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
         {/* Left Column: SheKunj Floating Inset Card */}
-        <div className="lg:col-span-5 m-2 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
+        <div className="lg:col-span-6 m-2.5 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
+          {/* Flashlight Beam Sweep Effect - Only on Sign In / Join Us navigation */}
+          {!isRoleSwitch && <div className="animate-flashlight" />}
+
           {/* Ambient Glows */}
           <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-purple-500/15 blur-3xl" />
 
-          {/* 1. Top Header: Logo + Navigation Pills */}
+          {/* 1. Top Header: Logo + Navigation Pills (Stays solid & constant) */}
           <div className="relative z-10 flex items-center justify-between">
             <Link to={getDashboardPath(user)} className="flex items-center gap-2 group">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
@@ -216,48 +221,47 @@ export default function StudentSignup() {
             </div>
           </div>
 
-          {/* 2. Middle Content: Student Value Propositions */}
+          {/* 2. Middle Content: Student Value Propositions (Slides up from bottom) */}
           <div className="relative z-10 my-auto py-4 sm:py-6 space-y-4">
-            <span className="inline-block text-[10px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-              Student Onboarding Portal
-            </span>
-
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 animate-slide-up">
+              <span className="inline-block text-[10px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-500/30 mb-2">
+                Student Onboarding Portal
+              </span>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white">
-                Join Evently.<br />Never miss out.
+                Join Evently.<br />Never miss an event.
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md">
-                Register with your college email or external student details to unlock hackathons, skill-building workshops, and tech communities.
+              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md mt-1">
+                Register with your student details or college email to discover hackathons, technical workshops, and campus communities.
               </p>
             </div>
 
             {/* Feature Checklist */}
-            <div className="space-y-2.5 pt-1">
+            <div className="space-y-2.5 pt-1 animate-slide-up-delay-1">
               <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
                 <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   <CheckCircle2 size={12} />
                 </div>
-                <span>Free instant access to BIC events & guest hackathons</span>
+                <span>Access college hackathons, workshops & tech summits</span>
               </div>
 
               <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
                 <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   <CheckCircle2 size={12} />
                 </div>
-                <span>Verified certificates & digital attendance tracking</span>
+                <span>Instant 1-tap registration & digital QR attendance passes</span>
               </div>
 
               <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
                 <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   <CheckCircle2 size={12} />
                 </div>
-                <span>DevCorps technical clubs & peer networking</span>
+                <span>Connect with BIC DevCorps student communities</span>
               </div>
             </div>
           </div>
 
           {/* 3. Bottom Metric Stats Bar */}
-          <div className="relative z-10 pt-4 border-t border-white/15 grid grid-cols-3 gap-3">
+          <div className="relative z-10 pt-4 border-t border-white/15 grid grid-cols-3 gap-3 animate-slide-up-delay-2">
             <div>
               <p className="text-lg sm:text-xl font-black text-white">100%</p>
               <p className="text-[10.5px] text-slate-300 font-medium">Free Access</p>
@@ -273,21 +277,21 @@ export default function StudentSignup() {
           </div>
         </div>
 
-        {/* Right Column: Form Container with internal scroll if necessary */}
-        <div className="lg:col-span-7 flex flex-col justify-start lg:justify-center px-6 sm:px-10 lg:px-14 py-6 sm:py-8 h-full max-w-xl mx-auto w-full overflow-y-auto">
-          <div className="w-full max-w-xl mx-auto">
+        {/* Right Column: Clean Form Container with Smooth Slide-Up Entrance */}
+        <div className="lg:col-span-6 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-4 sm:py-6 h-full max-w-lg mx-auto w-full overflow-y-auto no-scrollbar">
+          <div className="w-full max-w-lg mx-auto">
             {/* Header */}
-            <div className="mb-4">
+            <div className="mb-4 animate-slide-up">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
                 Create your student account
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
                 Join Evently and discover upcoming campus opportunities.
               </p>
             </div>
 
             {/* Student / Faculty toggle in Skeuomorphic Tray */}
-            <div className="skeuo-tray flex rounded-full p-1 mb-5">
+            <div className="skeuo-tray flex rounded-full p-1 mb-4 animate-slide-up">
               <button
                 type="button"
                 className="skeuo-pill-active flex-1 py-1.5 rounded-full text-xs font-bold text-white shadow-xs cursor-default"
@@ -296,7 +300,7 @@ export default function StudentSignup() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/signup/faculty')}
+                onClick={() => navigate('/signup/faculty', { state: { fromRoleSwitch: true } })}
                 className="flex-1 py-1.5 rounded-full text-xs font-medium text-slate-500 hover:text-slate-900 transition cursor-pointer"
               >
                 Faculty
@@ -304,35 +308,35 @@ export default function StudentSignup() {
             </div>
 
             {error && (
-              <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3.5 py-2.5">
+              <div className="mb-3 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3.5 py-2 animate-slide-up">
                 <AlertCircle size={14} className="shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleInitiateSignup} className="space-y-3.5">
+            <form onSubmit={handleInitiateSignup} className="space-y-3 animate-slide-up-delay-1">
               {/* Row: Name & Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClass}>Full Name</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Nasad Mansuri"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>Email Address</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@bicnepal.edu.np"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
               </div>
@@ -340,7 +344,7 @@ export default function StudentSignup() {
               {/* Row: Phone & College */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClass}>Phone Number</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
                   <input
                     type="tel"
                     required
@@ -348,18 +352,18 @@ export default function StudentSignup() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     placeholder="98XXXXXXXX"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>College Name</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">College Name</label>
                   <input
                     type="text"
                     required
                     value={collegeName}
                     onChange={(e) => setCollegeName(e.target.value)}
                     placeholder="e.g. Biratnagar International College"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
               </div>
@@ -375,13 +379,13 @@ export default function StudentSignup() {
                 >
                   {isBic ? (
                     <>
-                      <ShieldCheck size={15} className="text-emerald-700 shrink-0" />
+                      <ShieldCheck size={14} className="text-emerald-700 shrink-0" />
                       <span className="font-semibold text-xs">Wolverhampton-affiliated student ({matchedCollegeName})</span>
                     </>
                   ) : (
                     <>
-                      <UserCircle size={15} className="text-slate-500 shrink-0" />
-                      <span className="text-xs">Guest Participant (Open Hackathons & Summits)</span>
+                      <UserCircle size={14} className="text-slate-500 shrink-0" />
+                      <span className="text-xs font-semibold">Guest Participant</span>
                     </>
                   )}
                 </div>
@@ -389,16 +393,16 @@ export default function StudentSignup() {
 
               {/* Affiliated Cascade vs Guest Major */}
               {isBic ? (
-                <div className="space-y-3 rounded-2xl bg-slate-50/80 p-3.5 border border-slate-200/80">
+                <div className="space-y-2.5 rounded-2xl bg-slate-50/80 p-3 border border-slate-200/80">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className={labelClass}>Faculty / School</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Faculty / School</label>
                       <div className="relative">
                         <select
                           required
                           value={facultyName}
                           onChange={(e) => handleFacultyChange(e.target.value)}
-                          className={selectClass}
+                          className="skeuo-input w-full appearance-none rounded-xl px-3.5 pr-8 py-2 text-sm text-slate-900 disabled:opacity-50"
                         >
                           <option value="">Select Faculty</option>
                           {facultyOptions.map((f) => (
@@ -410,14 +414,14 @@ export default function StudentSignup() {
                     </div>
 
                     <div>
-                      <label className={labelClass}>Course</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Course</label>
                       <div className="relative">
                         <select
                           required
                           value={courseName}
                           onChange={(e) => handleCourseChange(e.target.value)}
                           disabled={!facultyName}
-                          className={selectClass}
+                          className="skeuo-input w-full appearance-none rounded-xl px-3.5 pr-8 py-2 text-sm text-slate-900 disabled:opacity-50"
                         >
                           <option value="">{facultyName ? 'Select Course' : 'Select Faculty First'}</option>
                           {courseOptions.map((c) => (
@@ -431,14 +435,14 @@ export default function StudentSignup() {
 
                   <div className="grid grid-cols-3 gap-2.5">
                     <div>
-                      <label className={labelClass}>Level</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Level</label>
                       <div className="relative">
                         <select
                           required
                           value={academicLevel}
                           onChange={(e) => handleLevelChange(e.target.value)}
                           disabled={!courseName}
-                          className={selectClass}
+                          className="skeuo-input w-full appearance-none rounded-xl px-2.5 pr-7 py-2 text-sm text-slate-900 disabled:opacity-50"
                         >
                           <option value="">Level</option>
                           {levelOptions.map((l) => (
@@ -450,14 +454,14 @@ export default function StudentSignup() {
                     </div>
 
                     <div>
-                      <label className={labelClass}>Semester</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Semester</label>
                       <div className="relative">
                         <select
                           required
                           value={academicSemester}
                           onChange={(e) => setAcademicSemester(e.target.value)}
                           disabled={!academicLevel}
-                          className={selectClass}
+                          className="skeuo-input w-full appearance-none rounded-xl px-2.5 pr-7 py-2 text-sm text-slate-900 disabled:opacity-50"
                         >
                           <option value="">Sem</option>
                           {semesterOptions.map((s) => (
@@ -469,14 +473,14 @@ export default function StudentSignup() {
                     </div>
 
                     <div>
-                      <label className={labelClass}>Group</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Group</label>
                       <div className="relative">
                         <select
                           required
                           value={academicGroup}
                           onChange={(e) => setAcademicGroup(e.target.value)}
                           disabled={!academicSemester}
-                          className={selectClass}
+                          className="skeuo-input w-full appearance-none rounded-xl px-2.5 pr-7 py-2 text-sm text-slate-900 disabled:opacity-50"
                         >
                           <option value="">Group</option>
                           {GROUPS.map((g) => (
@@ -490,22 +494,22 @@ export default function StudentSignup() {
                 </div>
               ) : (
                 <div>
-                  <label className={labelClass}>Course / Major</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Course / Major</label>
                   <input
                     type="text"
                     required
                     value={courseMajor}
                     onChange={(e) => setCourseMajor(e.target.value)}
                     placeholder="e.g. BSc Computer Science, MBA, BBA"
-                    className={inputClass}
+                    className="skeuo-input w-full rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
               )}
 
               {/* Row: Password & Confirm */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-0.5">
                 <div>
-                  <label className={labelClass}>Password</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -513,7 +517,7 @@ export default function StudentSignup() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                     />
                     <button
                       type="button"
@@ -526,7 +530,7 @@ export default function StudentSignup() {
                   </div>
                 </div>
                 <div>
-                  <label className={labelClass}>Confirm Password</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Confirm Password</label>
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
@@ -534,7 +538,7 @@ export default function StudentSignup() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                     />
                     <button
                       type="button"
@@ -564,7 +568,7 @@ export default function StudentSignup() {
                 </span>
               </div>
 
-              <p className="text-[11px] text-slate-400 text-center pt-1">
+              <p className="text-[11px] text-slate-400 text-center pt-0.5">
                 By creating an account you agree to our{' '}
                 <Link to="/terms" target="_blank" className="text-primary-700 font-semibold underline hover:text-primary-800">
                   Terms of Service
@@ -578,14 +582,14 @@ export default function StudentSignup() {
               <button
                 type="submit"
                 disabled={loading}
-                className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-1"
               >
-                {loading ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}
+                {loading ? <Loader2 className="animate-spin" size={15} /> : <UserPlus size={15} />}
                 {loading ? 'Validating Email...' : 'Create Account'}
               </button>
             </form>
 
-            <p className="text-center text-xs text-slate-500 mt-5">
+            <p className="text-center text-xs text-slate-500 mt-4 animate-slide-up-delay-2">
               Already have an account?{' '}
               <Link to="/login" className="text-primary-700 font-bold hover:underline">
                 Sign in here
