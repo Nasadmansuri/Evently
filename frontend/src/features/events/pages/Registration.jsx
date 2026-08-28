@@ -102,7 +102,7 @@ export default function Registration() {
           </div>
           
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Registration Confirmed! 🎉</h2>
+            <h2 className="text-xl font-bold text-slate-900">Registration Confirmed</h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
               You're officially registered for <strong className="text-slate-800">{event.title}</strong>.
             </p>

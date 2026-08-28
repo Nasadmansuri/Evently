@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Images, AlertCircle, Camera, Search, Calendar, ArrowRight, Sparkles, X
+  Images, AlertCircle, Camera, Search, Calendar, ArrowRight, X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../../shared/services/api';
@@ -213,7 +213,7 @@ export default function Gallery() {
                   ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] p-4 text-center">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md mb-1.5 border border-white/15">
-                        <Sparkles size={18} className="text-emerald-300" />
+                        <Images size={18} className="text-emerald-300" />
                       </div>
                       <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-emerald-200/90 line-clamp-1">
                         {ev.category || 'Event'}

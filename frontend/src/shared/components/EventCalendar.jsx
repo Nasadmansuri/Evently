@@ -1,16 +1,8 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, CalendarX2, CalendarPlus } from 'lucide-react';
 import { getGoogleCalendarUrl } from '../utils/calendarIntegration';
+import { CATEGORY_COLORS } from '../utils/categoryColors';
 
-const CATEGORY_STYLE = {
-  Technical: { dot: 'bg-primary-600', chip: 'bg-primary-50 text-primary-700' },
-  Cultural: { dot: 'bg-slate-400', chip: 'bg-slate-100 text-slate-600' },
-  Workshop: { dot: 'bg-orange-500', chip: 'bg-orange-50 text-orange-700' },
-  Competition: { dot: 'bg-violet-600', chip: 'bg-violet-50 text-violet-700' },
-  Seminar: { dot: 'bg-amber-700', chip: 'bg-amber-50 text-amber-800' },
-  Sports: { dot: 'bg-pink-500', chip: 'bg-pink-50 text-pink-700' },
-  Conference: { dot: 'bg-slate-600', chip: 'bg-slate-100 text-slate-700' },
-};
 const DEFAULT_STYLE = { dot: 'bg-slate-400', chip: 'bg-slate-100 text-slate-600' };
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -135,7 +127,7 @@ export default function EventCalendar({ events, onDayClick, onEventClick }) {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-x-4 gap-y-1.5 border-b border-slate-100 px-4 py-2.5 sm:px-5">
-        {Object.entries(CATEGORY_STYLE).map(([cat, style]) => (
+        {Object.entries(CATEGORY_COLORS).map(([cat, style]) => (
           <span key={cat} className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
             <span className={`h-2 w-2 rounded-full ${style.dot}`} /> {cat}
           </span>
@@ -198,12 +190,12 @@ export default function EventCalendar({ events, onDayClick, onEventClick }) {
 
                 <div className="mt-1 flex flex-1 flex-col gap-1">
                   {dayEvents.slice(0, 2).map((ev) => {
-                    const style = CATEGORY_STYLE[ev.category] || DEFAULT_STYLE;
+                    const style = CATEGORY_COLORS[ev.category] || DEFAULT_STYLE;
                     return (
                       <div
                         key={ev.id}
                         title={ev.title}
-                        className={`truncate rounded-md px-1.5 py-0.5 text-left text-[9px] font-semibold sm:text-[10.5px] ${style.chip}`}
+                        className={`truncate rounded-md px-1.5 py-0.5 text-left text-[9px] font-semibold sm:text-[10.5px] ${style.bg} ${style.text}`}
                       >
                         {ev.title}
                       </div>
@@ -230,7 +222,7 @@ export default function EventCalendar({ events, onDayClick, onEventClick }) {
                     </p>
                     <div className="max-h-48 space-y-1 overflow-y-auto">
                       {dayEvents.map((ev) => {
-                        const style = CATEGORY_STYLE[ev.category] || DEFAULT_STYLE;
+                        const style = CATEGORY_COLORS[ev.category] || DEFAULT_STYLE;
                         return (
                           <div
                             key={ev.id}

@@ -68,8 +68,9 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
             <p className="text-sm font-semibold text-slate-900">
               Venue / Room: <span className="text-primary-700 font-bold">{displayVenue}</span>
             </p>
-            <p className="mt-1 text-xs text-slate-600 leading-relaxed font-medium">
-              📍 Bhrikuti Chowk, Biratnagar, Morang, Koshi Province, Nepal
+            <p className="mt-1 text-xs text-slate-600 leading-relaxed font-medium flex items-center gap-1.5">
+              <MapPin size={14} className="text-slate-500 shrink-0" />
+              <span>Bhrikuti Chowk, Biratnagar, Morang, Koshi Province, Nepal</span>
             </p>
           </div>
 

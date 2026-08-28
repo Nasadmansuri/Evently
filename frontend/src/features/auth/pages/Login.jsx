@@ -360,10 +360,9 @@ export default function Login() {
   }
 
   const inputClass =
-    'w-full border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white';
+    'w-full border border-slate-200 bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition';
   const selectClass =
-    'w-full appearance-none border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-8 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed';
-  const iconClass = 'absolute left-3 top-1/2 -translate-y-1/2 text-slate-400';
+    'w-full appearance-none border border-slate-200 bg-white rounded-xl px-3.5 pr-8 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50';
   const chevronClass = 'absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none';
   const labelClass = 'block text-xs font-semibold text-slate-700 mb-1';
 
@@ -371,14 +370,14 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-3 py-6">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-8">
         <Link to={getDashboardPath(user)} className="inline-flex items-center gap-2 mb-5 hover:opacity-90 transition group">
-          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+          <div className="w-8 h-8 rounded-lg bg-primary-700 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
             <CalendarHeart className="text-white" size={18} />
           </div>
           <span className="text-lg font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Evently</span>
         </Link>
 
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h1>
-        <p className="text-sm text-slate-500 mb-5">Login to your account</p>
+        <h1 className="text-2xl font-black tracking-tight text-slate-900 mb-1">Welcome back</h1>
+        <p className="text-xs text-slate-500 mb-5">Enter your credentials to access your account</p>
 
         {deactivatedInfo && (
           <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50/95 p-4 text-xs text-rose-950 shadow-xs space-y-2.5 animate-in fade-in duration-200">
@@ -417,24 +416,23 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                type="text" required value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setEmailSuggestion(suggestEmailCorrection(e.target.value));
-                }}
-                className="w-full border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
-                placeholder="you@university.edu"
-              />
-            </div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailSuggestion(suggestEmailCorrection(e.target.value));
+              }}
+              className="w-full border border-slate-200 bg-white rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition"
+              placeholder="you@university.edu"
+            />
             {emailSuggestion && (
               <button
                 type="button"
                 onClick={() => { setEmail(emailSuggestion); setEmailSuggestion(null); }}
-                className="text-[11px] text-amber-700 mt-1 hover:underline"
+                className="text-[11px] text-amber-700 mt-1 hover:underline block"
               >
                 Did you mean <span className="font-semibold">{emailSuggestion}</span>?
               </button>
@@ -442,27 +440,35 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Password</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
-                type={showPassword ? 'text' : 'password'} required value={password}
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-slate-200 bg-slate-50 rounded-lg pl-9 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white"
+                className="w-full border border-slate-200 bg-white rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition"
                 placeholder="••••••••"
               />
-              <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
             <div className="text-right mt-1.5">
-              <Link to="/forgot-password" className="text-xs text-primary-600 hover:underline">Forgot password?</Link>
+              <Link to="/forgot-password" className="text-xs text-primary-700 font-semibold hover:underline">Forgot password?</Link>
             </div>
           </div>
 
           <button
-            type="submit" disabled={loading || googleLoading}
-            className="w-full bg-primary-600 hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] text-white font-medium py-2.5 rounded-lg text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            type="submit"
+            disabled={loading || googleLoading}
+            className="w-full bg-primary-700 hover:bg-primary-800 active:bg-primary-900 hover:shadow-lg hover:shadow-primary-700/20 active:scale-[0.98] text-white font-bold py-2.5 rounded-xl text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-xs"
           >
             {loading ? <Loader2 className="animate-spin" size={16} /> : null}
             {loading ? 'Signing in...' : 'Sign In'}
@@ -483,7 +489,7 @@ export default function Login() {
             type="button"
             onClick={handleGoogleClick}
             disabled={googleLoading || loading}
-            className="w-full h-full flex items-center justify-center gap-2 border border-slate-200 bg-white rounded-lg py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition active:scale-[0.99] disabled:opacity-50"
+            className="w-full h-full flex items-center justify-center gap-2 border border-slate-200 bg-white rounded-xl py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-[0.99] disabled:opacity-50 shadow-2xs"
           >
             {googleLoading ? (
               <Loader2 className="animate-spin text-slate-500" size={16} />
@@ -507,7 +513,7 @@ export default function Login() {
 
         <p className="text-center text-xs text-slate-500 mt-5">
           Don't have an account?{' '}
-          <Link to="/signup/student" className="text-primary-600 font-semibold hover:underline">Sign up here</Link>
+          <Link to="/signup/student" className="text-primary-700 font-bold hover:underline">Sign up here</Link>
         </p>
 
         <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center gap-3 text-[11px] text-slate-400">
@@ -543,34 +549,28 @@ export default function Login() {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Google / College Email Address
                 </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input
-                    type="email"
-                    required
-                    value={directGoogleEmail}
-                    onChange={(e) => setDirectGoogleEmail(e.target.value)}
-                    placeholder="np02cs4a250103@bicnepal.edu.np"
-                    className="w-full border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
+                <input
+                  type="email"
+                  required
+                  value={directGoogleEmail}
+                  onChange={(e) => setDirectGoogleEmail(e.target.value)}
+                  placeholder="np02cs4a250103@bicnepal.edu.np"
+                  className={inputClass}
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Full Legal Name
                 </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input
-                    type="text"
-                    required
-                    value={directGoogleName}
-                    onChange={(e) => setDirectGoogleName(e.target.value)}
-                    placeholder="e.g. Nasad Mansuri"
-                    className="w-full border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
+                <input
+                  type="text"
+                  required
+                  value={directGoogleName}
+                  onChange={(e) => setDirectGoogleName(e.target.value)}
+                  placeholder="e.g. Nasad Mansuri"
+                  className={inputClass}
+                />
               </div>
 
               <div className="pt-2 flex items-center justify-end gap-2">
@@ -584,7 +584,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={!directGoogleEmail.includes('@') || googleLoading}
-                  className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition disabled:opacity-50 flex items-center gap-1.5"
+                  className="bg-primary-700 hover:bg-primary-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition disabled:opacity-50 flex items-center gap-1.5 shadow-xs"
                 >
                   {googleLoading ? <Loader2 className="animate-spin" size={14} /> : <ArrowRight size={14} />}
                   Continue
@@ -634,14 +634,14 @@ export default function Login() {
             {/* Affiliation Banner */}
             <div className="mt-4 mb-4 p-3 rounded-xl bg-primary-50/70 border border-primary-100">
               <div className="flex items-center gap-2 text-xs font-bold text-primary-900">
-                <CheckCircle2 size={16} className="text-primary-600 shrink-0" />
+                <CheckCircle2 size={16} className="text-primary-700 shrink-0" />
                 {isAffiliated ? (
                   <span>Wolverhampton-Affiliated Student ({pendingGoogleUser.collegeName})</span>
                 ) : (
                   <span>External Student (Guest Participant)</span>
                 )}
               </div>
-              <p className="text-[11px] text-primary-700 mt-1">
+              <p className="text-[11px] text-primary-800 mt-1">
                 {isAffiliated
                   ? "Since your Google account is from an affiliated college, please enter your legal name, phone, and academic details."
                   : "Please provide your legal name, phone, college name, and major to participate in campus events."}
@@ -659,51 +659,42 @@ export default function Login() {
               {/* Full Name */}
               <div>
                 <label className={labelClass}>Full Legal Name</label>
-                <div className="relative">
-                  <User className={iconClass} size={15} />
-                  <input
-                    type="text"
-                    required
-                    value={pendingFullName}
-                    onChange={(e) => setPendingFullName(e.target.value)}
-                    placeholder="e.g. Nasad Mansuri"
-                    className={inputClass}
-                  />
-                </div>
+                <input
+                  type="text"
+                  required
+                  value={pendingFullName}
+                  onChange={(e) => setPendingFullName(e.target.value)}
+                  placeholder="e.g. Nasad Mansuri"
+                  className={inputClass}
+                />
               </div>
 
               {/* Phone Number */}
               <div>
                 <label className={labelClass}>Phone Number</label>
-                <div className="relative">
-                  <Phone className={iconClass} size={15} />
-                  <input
-                    type="tel"
-                    required
-                    maxLength={10}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    placeholder="98XXXXXXXX"
-                    className={inputClass}
-                  />
-                </div>
+                <input
+                  type="tel"
+                  required
+                  maxLength={10}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="98XXXXXXXX"
+                  className={inputClass}
+                />
               </div>
 
               {/* College Name */}
               <div>
                 <label className={labelClass}>College Name</label>
-                <div className="relative">
-                  <Landmark className={iconClass} size={15} />
-                  <input
-                    type="text"
-                    required
-                    value={collegeName}
-                    onChange={(e) => setCollegeName(e.target.value)}
-                    readOnly={isAffiliated}
-                    className={`${inputClass} ${isAffiliated ? 'bg-slate-100 text-slate-700 font-medium cursor-not-allowed' : ''}`}
-                    placeholder={isAffiliated ? 'Biratnagar International College' : 'e.g. Adarsha College, Tribhuvan University...'}
-                  />
-                </div>
+                <input
+                  type="text"
+                  required
+                  value={collegeName}
+                  onChange={(e) => setCollegeName(e.target.value)}
+                  readOnly={isAffiliated}
+                  className={`${inputClass} ${isAffiliated ? 'bg-slate-100 text-slate-700 font-medium cursor-not-allowed' : ''}`}
+                  placeholder={isAffiliated ? 'Biratnagar International College' : 'e.g. Adarsha College, Tribhuvan University...'}
+                />
               </div>
 
               {/* Affiliated Wolverhampton Student Fields */}
@@ -712,7 +703,6 @@ export default function Login() {
                   <div>
                     <label className={labelClass}>Faculty</label>
                     <div className="relative">
-                      <Layers className={iconClass} size={15} />
                       <select
                         required
                         value={facultyName}
@@ -731,7 +721,6 @@ export default function Login() {
                   <div>
                     <label className={labelClass}>Course</label>
                     <div className="relative">
-                      <GraduationCap className={iconClass} size={15} />
                       <select
                         required
                         value={courseName}
@@ -752,7 +741,6 @@ export default function Login() {
                     <div>
                       <label className={labelClass}>Level</label>
                       <div className="relative">
-                        <BarChart3 className={iconClass} size={14} />
                         <select
                           required
                           value={academicLevel}
@@ -772,7 +760,6 @@ export default function Login() {
                     <div>
                       <label className={labelClass}>Semester</label>
                       <div className="relative">
-                        <CalendarDays className={iconClass} size={14} />
                         <select
                           required
                           value={academicSemester}
@@ -792,7 +779,6 @@ export default function Login() {
                     <div>
                       <label className={labelClass}>Group</label>
                       <div className="relative">
-                        <Users className={iconClass} size={14} />
                         <select
                           required
                           value={academicGroup}
@@ -814,17 +800,14 @@ export default function Login() {
                 /* Guest Student Field */
                 <div>
                   <label className={labelClass}>Course / Major</label>
-                  <div className="relative">
-                    <GraduationCap className={iconClass} size={15} />
-                    <input
-                      type="text"
-                      required
-                      value={courseMajor}
-                      onChange={(e) => setCourseMajor(e.target.value)}
-                      placeholder="e.g. BSc Computer Science, MBA, BBA"
-                      className={inputClass}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={courseMajor}
+                    onChange={(e) => setCourseMajor(e.target.value)}
+                    placeholder="e.g. BSc Computer Science, MBA, BBA"
+                    className={inputClass}
+                  />
                 </div>
               )}
 
@@ -832,7 +815,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={profileLoading}
-                  className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 rounded-lg text-xs transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full bg-primary-700 hover:bg-primary-800 active:bg-primary-900 text-white font-bold py-2.5 rounded-xl text-xs transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-xs"
                 >
                   {profileLoading ? <Loader2 className="animate-spin" size={15} /> : <CheckCircle2 size={15} />}
                   {profileLoading ? 'Creating Account & Profile...' : 'Complete Registration & Enter Evently'}

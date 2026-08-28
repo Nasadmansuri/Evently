@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Star, CheckCircle2, Loader2, AlertCircle, FileX, ArrowLeft,
-  Calendar, MapPin, Sparkles, MessageSquare, Send, Award, Clock,
+  Calendar, MapPin, MessageSquare, Send, Award, Clock,
   ChevronRight, Quote, ThumbsUp, Tag
 } from 'lucide-react';
 import { motion } from 'framer-motion';

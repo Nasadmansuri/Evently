@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Type, AlignLeft, Tag, MapPin, CalendarDays, Clock, Landmark, Users,
   ClipboardList, Trophy, UserCheck, Image, AlertCircle, Loader2, ChevronDown, X, Upload, UsersRound, Map, ExternalLink,
-  RotateCcw, FileText, CheckCircle2, Info, Lock, CalendarClock, Sparkles, Check, ArrowRight
+  RotateCcw, FileText, CheckCircle2, Info, Lock, CalendarClock, Check, ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/services/api';
@@ -612,8 +612,8 @@ export default function CreateEvent() {
                       {isTeamEvent ? 'Team Participation' : 'Individual Entry'}
                     </span>
                   </div>
-                  <div className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${isTeamEvent ? 'bg-primary-700' : 'bg-slate-300'}`}>
-                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isTeamEvent ? 'translate-x-4.5' : 'translate-x-1'}`} />
+                  <div className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 ${isTeamEvent ? 'bg-primary-700' : 'bg-slate-300'}`}>
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition-transform duration-200 ${isTeamEvent ? 'translate-x-4' : 'translate-x-0'}`} />
                   </div>
                 </button>
               </div>
@@ -759,7 +759,7 @@ export default function CreateEvent() {
                 <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
                   publishType === 'scheduled' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                 }`}>
-                  {publishType === 'scheduled' ? '🕒 Scheduled Release' : '⚡ Instant Publish'}
+                  {publishType === 'scheduled' ? 'Scheduled Release' : 'Instant Publish'}
                 </span>
               </div>
 

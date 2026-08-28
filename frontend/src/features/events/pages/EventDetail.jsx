@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
-  Calendar, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2,
-  Loader2, BarChart3, Navigation, Landmark, Edit3, FileDown, Star, Sparkles,
+  Calendar, CalendarDays, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2,
+  Loader2, BarChart3, Navigation, Landmark, Edit3, FileDown, Star,
   Trash2, AlertTriangle, ShieldAlert, X, Send, ArrowRight, Trophy, Award,
   ClipboardCheck, PlayCircle
 } from 'lucide-react';
@@ -37,6 +37,7 @@ export default function EventDetail() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showDeleteRequestModal, setShowDeleteRequestModal] = useState(false);
   const [reasonCategory, setReasonCategory] = useState(DELETION_REASONS[0]);
@@ -199,108 +200,131 @@ export default function EventDetail() {
 
   return (
     <div className="space-y-6">
-      {event.banner_image ? (
-        <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
-          <div className="grid gap-0 lg:grid-cols-[1.1fr_1fr]">
-            <div className="relative min-h-[260px] lg:min-h-[320px] overflow-hidden p-6 sm:p-8 flex flex-col justify-between">
-              <img
-                src={`${ASSET_BASE_URL}${event.banner_image}`}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{ objectPosition: 'center 20%' }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/40" />
-              <div className="relative z-10 flex items-center justify-between gap-3">
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] shadow-sm ${
-                  event.status === 'cancelled'
-                    ? 'bg-rose-600 text-white'
-                    : liveStatus === 'ongoing'
-                    ? 'bg-amber-500 text-white'
-                    : isPastEvent
-                    ? 'bg-slate-900/90 text-white'
-                    : 'bg-white/90 text-slate-800'
-                }`}>
-                  {event.status === 'cancelled'
-                    ? 'Cancelled'
-                    : liveStatus === 'ongoing'
-                    ? 'Ongoing'
-                    : isPastEvent
-                    ? 'Ended'
-                    : event.status}
-                </span>
-                <div className="flex items-center gap-1.5">
-                  {event.is_team_event ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary-600/90 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
-                      <User size={11} /> Team
-                    </span>
-                  ) : null}
-                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold shadow-xs ${style.bg} ${style.text}`}>
-                    {event.category}
-                  </span>
+      {/* Unified World-Class Event Header Card */}
+      <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
+        <div className="grid gap-0 lg:grid-cols-[1.05fr_1fr]">
+          {/* Left: Poster Image or Academic Deep Teal Backdrop */}
+          <div className="relative min-h-[260px] lg:min-h-[340px] overflow-hidden p-6 sm:p-8 flex flex-col justify-between">
+            {event.banner_image && !imgError ? (
+              <>
+                <img
+                  src={`${ASSET_BASE_URL}${event.banner_image}`}
+                  alt={event.title}
+                  onError={() => setImgError(true)}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  style={{ objectPosition: 'center 20%' }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/40" />
+              </>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] flex flex-col items-center justify-center p-6 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md mb-3 border border-white/15 shadow-md">
+                  <CalendarDays size={32} className="text-emerald-300" />
                 </div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200/90">
+                  {event.category || 'Campus Event'}
+                </p>
+                <p className="mt-1 text-sm font-bold text-white/90 max-w-xs line-clamp-2">
+                  {event.title}
+                </p>
               </div>
-              {event.organizing_community && (
-                <div className="relative z-10 self-start inline-block rounded-2xl border border-white/20 bg-black/40 p-3 backdrop-blur-md shadow-sm">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-300">Featured Event</p>
-                  <p className="mt-0.5 text-base font-bold text-white">{event.organizing_community}</p>
-                </div>
-              )}
+            )}
+
+            {/* Badges Overlay on Poster */}
+            <div className="relative z-10 flex items-center justify-between gap-3">
+              <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] shadow-sm ${
+                event.status === 'cancelled'
+                  ? 'bg-rose-600 text-white'
+                  : liveStatus === 'ongoing'
+                  ? 'bg-emerald-500 text-white'
+                  : isPastEvent
+                  ? 'bg-slate-900/90 text-white'
+                  : 'bg-white/95 text-slate-800'
+              }`}>
+                {event.status === 'cancelled'
+                  ? 'Cancelled'
+                  : liveStatus === 'ongoing'
+                  ? 'Live Now'
+                  : isPastEvent
+                  ? 'Ended'
+                  : event.status}
+              </span>
+              <div className="flex items-center gap-1.5">
+                {event.is_team_event ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary-800/90 border border-white/20 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+                    <User size={11} /> Team
+                  </span>
+                ) : null}
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold shadow-xs ${style.bg} ${style.text}`}>
+                  {event.category}
+                </span>
+              </div>
             </div>
 
-            <div className="p-5 sm:p-7 flex flex-col justify-between">
-              {/* Cancelled by Administration Official Banner */}
-              {event.status === 'cancelled' && (
-                <div className="mb-5 rounded-2xl border border-slate-200 bg-slate-50/90 p-4 shadow-xs">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-100">
-                      <AlertTriangle size={18} />
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h3 className="text-sm font-bold text-slate-900">
-                          Cancelled by Administration
-                        </h3>
-                        {event.cancelled_at && (
-                          <span className="text-[11px] font-medium text-slate-400">
-                            {new Date(String(event.cancelled_at).replace(' ', 'T')).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        <strong className="text-slate-800 font-semibold">Official Reason:</strong> {event.cancellation_reason || 'This event was cancelled following administrative review.'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+            {event.organizing_community && (
+              <div className="relative z-10 self-start inline-block rounded-2xl border border-white/20 bg-black/40 p-3 backdrop-blur-md shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-300">Featured Event</p>
+                <p className="mt-0.5 text-sm sm:text-base font-bold text-white">{event.organizing_community}</p>
+              </div>
+            )}
+          </div>
 
-              {/* Pending Deletion Request Notice */}
-              {event.deletion_request_id && event.status !== 'cancelled' && (
-                <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 shadow-xs space-y-2 animate-in fade-in">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold flex items-center gap-1.5 text-amber-800 text-sm">
-                      <AlertTriangle size={16} className="text-amber-600 shrink-0" />
-                      Event Deletion Requested
-                    </span>
-                    <span className="rounded-full bg-amber-200/90 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-900">
-                      Under Admin Review
-                    </span>
+          {/* Right Column: Title, Action Buttons, Cancellation notices, & Metadata */}
+          <div className="p-5 sm:p-7 flex flex-col justify-between gap-4">
+            {/* Cancelled by Administration Official Banner */}
+            {event.status === 'cancelled' && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-100">
+                    <AlertTriangle size={18} />
                   </div>
-                  <p className="text-xs text-amber-800 font-medium">
-                    <strong>Reason:</strong> {event.deletion_reason || 'Administrative conflict'}
-                  </p>
-                  {event.deletion_problem && (
-                    <p className="text-xs text-amber-800 bg-white/90 p-3 rounded-xl border border-amber-200/80 leading-relaxed whitespace-pre-wrap">
-                      <strong>Problem Statement:</strong> {event.deletion_problem}
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-sm font-bold text-slate-900">
+                        Cancelled by Administration
+                      </h3>
+                      {event.cancelled_at && (
+                        <span className="text-[11px] font-medium text-slate-400">
+                          {new Date(String(event.cancelled_at).replace(' ', 'T')).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      <strong className="text-slate-800 font-semibold">Official Reason:</strong> {event.cancellation_reason || 'This event was cancelled following administrative review.'}
                     </p>
-                  )}
+                  </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-                <div>
+            {/* Pending Deletion Request Notice */}
+            {event.deletion_request_id && event.status !== 'cancelled' && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 shadow-xs space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold flex items-center gap-1.5 text-amber-800 text-sm">
+                    <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+                    Event Deletion Requested
+                  </span>
+                  <span className="rounded-full bg-amber-200/90 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-900">
+                    Under Admin Review
+                  </span>
+                </div>
+                <p className="text-xs text-amber-800 font-medium">
+                  <strong>Reason:</strong> {event.deletion_reason || 'Administrative conflict'}
+                </p>
+                {event.deletion_problem && (
+                  <p className="text-xs text-amber-800 bg-white/90 p-3 rounded-xl border border-amber-200/80 leading-relaxed whitespace-pre-wrap">
+                    <strong>Problem Statement:</strong> {event.deletion_problem}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
                   <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Campus Event</p>
-                  <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.85rem] leading-tight">{event.title}</h1>
+                  <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.75rem] leading-tight break-words">{event.title}</h1>
                 </div>
 
                 {/* Action Buttons based on Role & Ownership */}
@@ -350,7 +374,7 @@ export default function EventDetail() {
                           <div className="flex flex-wrap items-center gap-2">
                             <button
                               onClick={() => navigate(`/events/${id}/register`)}
-                              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-600 active:scale-[0.98]"
+                              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-800 active:scale-[0.98]"
                             >
                               Register Now
                             </button>
@@ -371,7 +395,7 @@ export default function EventDetail() {
                           <button
                             onClick={handleGenerateReport}
                             disabled={generatingReport}
-                            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-600 active:scale-[0.98] disabled:opacity-50"
+                            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-800 active:scale-[0.98] disabled:opacity-50"
                           >
                             {generatingReport ? <Loader2 className="animate-spin" size={14} /> : <FileDown size={14} />}
                             {generatingReport ? 'Generating...' : 'PDF Report'}
@@ -399,258 +423,46 @@ export default function EventDetail() {
                 </div>
               </div>
 
-              <p className="mt-3 max-w-xl text-xs sm:text-sm leading-relaxed text-slate-600 line-clamp-3">{event.description}</p>
-
-              <div className="mt-4 grid gap-2.5 sm:grid-cols-2 pt-3 border-t border-slate-100">
-                <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <Calendar size={14} className="text-primary-600 shrink-0" />
-                  <span><strong className="text-slate-900">Date:</strong> {new Date(event.event_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <Clock size={14} className="text-primary-600 shrink-0" />
-                  <span><strong className="text-slate-900">Time:</strong> {formatTime12hr(event.event_time)}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowLocationModal(true)}
-                  className="group/loc flex items-center gap-2 text-xs text-slate-600 hover:text-primary-700 transition text-left truncate"
-                  title="Click to view campus map & venue directions"
-                >
-                  <MapPin size={14} className="text-primary-600 shrink-0 group-hover/loc:scale-110 transition" />
-                  <span className="truncate">
-                    <strong className="text-slate-900">Location:</strong>{' '}
-                    <span className="underline decoration-dotted underline-offset-2">{event.location || 'Biratnagar International College'}</span>
-                  </span>
-                </button>
-                <div className="flex items-center gap-2 text-xs text-slate-600 truncate">
-                  <User size={14} className="text-primary-600 shrink-0" />
-                  <span className="truncate"><strong className="text-slate-900">Organizer:</strong> {event.organizing_community ? `${event.organizing_department} (${event.organizing_community})` : (event.organizing_department || event.organizer_name || 'Campus Faculty')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* Sleek, full-width header card when no banner image exists */
-        <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white p-6 sm:p-8 shadow-sm space-y-4">
-          {/* Cancelled by Administration Official Banner */}
-          {event.status === 'cancelled' && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 shadow-xs">
-              <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-100">
-                  <AlertTriangle size={18} />
-                </div>
-                <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="text-sm font-bold text-slate-900">
-                      Cancelled by Administration
-                    </h3>
-                    {event.cancelled_at && (
-                      <span className="text-[11px] font-medium text-slate-400">
-                        {new Date(String(event.cancelled_at).replace(' ', 'T')).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    <strong className="text-slate-800 font-semibold">Official Reason:</strong> {event.cancellation_reason || 'This event was cancelled following administrative review.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Pending Deletion Request Notice */}
-          {event.deletion_request_id && event.status !== 'cancelled' && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 shadow-xs space-y-2 animate-in fade-in">
-              <div className="flex items-center justify-between">
-                <span className="font-bold flex items-center gap-1.5 text-amber-800 text-sm">
-                  <AlertTriangle size={16} className="text-amber-600 shrink-0" />
-                  Event Deletion Requested
-                </span>
-                <span className="rounded-full bg-amber-200/90 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-900">
-                  Under Admin Review
-                </span>
-              </div>
-              <p className="text-xs text-amber-800 font-medium">
-                <strong>Reason:</strong> {event.deletion_reason || 'Administrative conflict'}
-              </p>
-              {event.deletion_problem && (
-                <p className="text-xs text-amber-800 bg-white/90 p-3 rounded-xl border border-amber-200/80 leading-relaxed whitespace-pre-wrap">
-                  <strong>Problem Statement:</strong> {event.deletion_problem}
+              {event.description && (
+                <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600 line-clamp-3">
+                  {event.description}
                 </p>
               )}
             </div>
-          )}
 
-          {/* Badges Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className={`rounded-full px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.14em] shadow-2xs ${
-                event.status === 'cancelled'
-                  ? 'bg-rose-600 text-white'
-                  : liveStatus === 'ongoing'
-                  ? 'bg-amber-500 text-white'
-                  : isPastEvent
-                  ? 'bg-slate-800 text-white'
-                  : 'bg-slate-100 text-slate-700'
-              }`}>
-                {event.status === 'cancelled'
-                  ? 'Cancelled'
-                  : liveStatus === 'ongoing'
-                  ? 'Ongoing'
-                  : isPastEvent
-                  ? 'Ended'
-                  : event.status}
-              </span>
-              <span className={`rounded-full px-3 py-1 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
-                {event.category}
-              </span>
-              {!!event.is_team_event && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 border border-primary-200 px-2.5 py-1 text-[10.5px] font-bold text-primary-700">
-                  <User size={11} /> Team Event
+            {/* Metadata Grid (Generous 2-Col layout so Organizer & Location never cut off) */}
+            <div className="mt-2 grid gap-2.5 sm:grid-cols-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-2 text-xs text-slate-600">
+                <Calendar size={14} className="text-primary-700 shrink-0" />
+                <span><strong className="text-slate-900">Date:</strong> {new Date(event.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-600">
+                <Clock size={14} className="text-primary-700 shrink-0" />
+                <span><strong className="text-slate-900">Time:</strong> {formatTime12hr(event.event_time)}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLocationModal(true)}
+                className="group/loc flex items-start gap-2 text-xs text-slate-600 hover:text-primary-700 transition text-left"
+                title="Click to view campus map & venue directions"
+              >
+                <MapPin size={14} className="text-primary-700 shrink-0 mt-0.5 group-hover/loc:scale-110 transition" />
+                <span className="leading-tight">
+                  <strong className="text-slate-900">Location:</strong>{' '}
+                  <span className="underline decoration-dotted underline-offset-2 break-words">{event.location || 'Biratnagar International College'}</span>
                 </span>
-              )}
-            </div>
-            {event.organizing_community && (
-              <span className="rounded-full bg-amber-50 border border-amber-200/80 px-3 py-1 text-xs font-bold text-amber-800 shadow-2xs">
-                Featured · {event.organizing_community}
-              </span>
-            )}
-          </div>
-
-          {/* Title & Action Buttons */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between pt-1">
-            <div>
-              <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Campus Event</p>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{event.title}</h1>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {event.status === 'cancelled' ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={() => navigate('/events')}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 active:scale-95 transition"
-                  >
-                    ← Back to Events
-                  </button>
-                  {isOrganizerOrAdmin && (
-                    <>
-                      <button
-                        onClick={handleGenerateReport}
-                        disabled={generatingReport}
-                        className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-slate-700 active:scale-95 disabled:opacity-50"
-                      >
-                        {generatingReport ? <Loader2 className="animate-spin" size={14} /> : <FileDown size={14} />}
-                        {generatingReport ? 'Generating...' : 'PDF Report'}
-                      </button>
-                      <button
-                        onClick={() => setShowPermanentDeleteModal(true)}
-                        className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-rose-700 shadow-xs hover:bg-rose-50 hover:border-rose-200 active:scale-95 transition"
-                      >
-                        <Trash2 size={14} /> Delete Event
-                      </button>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <>
-                  {user?.role === 'student' && (
-                    event.is_registered ? (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-700">
-                          <CheckCircle2 size={15} /> Already Registered
-                        </span>
-                        <AddToCalendarButton event={event} />
-                      </div>
-                    ) : isPastEvent ? (
-                      <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-semibold text-slate-500">
-                        Event Ended
-                      </span>
-                    ) : (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <button
-                          onClick={() => navigate(`/events/${id}/register`)}
-                          className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-600 active:scale-[0.98]"
-                        >
-                          Register Now
-                        </button>
-                        <AddToCalendarButton event={event} />
-                      </div>
-                    )
-                  )}
-
-                  {isOrganizerOrAdmin && (
-                    <>
-                      <button
-                        onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 active:scale-95 transition"
-                      >
-                        <Edit3 size={14} /> Edit Event
-                      </button>
-
-                      <button
-                        onClick={handleGenerateReport}
-                        disabled={generatingReport}
-                        className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-600 active:scale-[0.98] disabled:opacity-50"
-                      >
-                        {generatingReport ? <Loader2 className="animate-spin" size={14} /> : <FileDown size={14} />}
-                        {generatingReport ? 'Generating...' : 'PDF Report'}
-                      </button>
-
-                      <AddToCalendarButton event={event} />
-
-                      {user?.role === 'faculty' && !event.deletion_request_id && (
-                        <button
-                          onClick={() => {
-                            setShowDeleteRequestModal(true);
-                            setProblemStatement('');
-                          }}
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-bold text-red-700 shadow-xs hover:bg-red-100 active:scale-95 transition"
-                        >
-                          <Trash2 size={14} /> Request Deletion
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  {!user && <AddToCalendarButton event={event} />}
-                </>
-              )}
-            </div>
-          </div>
-
-          <p className="max-w-3xl text-sm leading-relaxed text-slate-600">{event.description}</p>
-
-          {/* Metadata Grid */}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 rounded-2xl bg-slate-50/80 border border-slate-100 p-4">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <Calendar size={14} className="text-primary-600 shrink-0" />
-              <span><strong className="text-slate-900">Date:</strong> {new Date(event.event_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <Clock size={14} className="text-primary-600 shrink-0" />
-              <span><strong className="text-slate-900">Time:</strong> {formatTime12hr(event.event_time)}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowLocationModal(true)}
-              className="group/loc flex items-center gap-2 text-xs text-slate-600 hover:text-primary-700 transition text-left truncate"
-              title="Click to view campus map & venue directions"
-            >
-              <MapPin size={14} className="text-primary-600 shrink-0 group-hover/loc:scale-110 transition" />
-              <span className="truncate">
-                <strong className="text-slate-900">Location:</strong>{' '}
-                <span className="underline decoration-dotted underline-offset-2">{event.location || 'Biratnagar International College'}</span>
-              </span>
-            </button>
-            <div className="flex items-center gap-2 text-xs text-slate-600 truncate">
-              <User size={14} className="text-primary-600 shrink-0" />
-              <span className="truncate"><strong className="text-slate-900">Organizer:</strong> {event.organizing_community ? `${event.organizing_department} (${event.organizing_community})` : (event.organizing_department || event.organizer_name || 'Campus Faculty')}</span>
+              </button>
+              <div className="flex items-start gap-2 text-xs text-slate-600">
+                <User size={14} className="text-primary-700 shrink-0 mt-0.5" />
+                <span className="leading-tight break-words">
+                  <strong className="text-slate-900">Organizer:</strong>{' '}
+                  {event.organizing_community ? `${event.organizing_department} (${event.organizing_community})` : (event.organizing_department || event.organizer_name || 'Campus Faculty')}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Tabs & Content */}
       <div className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-2xs">
@@ -908,7 +720,7 @@ export default function EventDetail() {
                   {/* Feedback Submissions List */}
                   <div>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
-                      <Sparkles size={14} className="text-primary-600" /> Student Submissions ({feedbackResponses.length})
+                      <MessageSquare size={14} className="text-primary-700" /> Student Submissions ({feedbackResponses.length})
                     </h3>
 
                     {feedbackResponses.length === 0 ? (
@@ -1054,8 +866,9 @@ export default function EventDetail() {
                   />
                 </div>
 
-                <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-[11px] text-amber-800">
-                  ⚠️ If approved by administration, the event will be cancelled and registered participants will receive an official cancellation alert.
+                <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-[11px] text-amber-900 flex items-start gap-2">
+                  <AlertTriangle size={14} className="text-amber-700 shrink-0 mt-0.5" />
+                  <span>If approved by administration, the event will be cancelled and registered participants will receive an official cancellation alert.</span>
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2">

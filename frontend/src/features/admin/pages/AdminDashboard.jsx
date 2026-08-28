@@ -4,7 +4,7 @@ import {
   ShieldCheck, Check, X, Loader2, AlertCircle, Inbox, CalendarDays,
   Users, GraduationCap, BarChart3, TrendingUp, Images, Plus, Calendar,
   MapPin, ArrowRight, ChevronRight, UserCheck, Clock, CheckCircle2,
-  Sparkles, Building2, Mail
+  Building2, Mail
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../../shared/services/api';
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
-            Welcome back, {user?.full_name || 'Admin'}! 👋
+            Welcome back, {user?.full_name || 'Admin'}!
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-600">
             Platform governance, faculty onboarding approvals, event monitoring, and analytics.
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalEvents || 0}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Campus-wide activities</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">All published events</p>
         </div>
 
         {/* Metric 2: Total Students */}
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalStudents || 0}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Affiliated & guest learners</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Registered students</p>
         </div>
 
         {/* Metric 3: Total Faculty */}
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
               </span>
             )}
           </div>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Academic organizers</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Registered faculty members</p>
         </div>
 
         {/* Metric 4: Total Registrations */}
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalParticipants || 0}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Platform entries recorded</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Total event registrations</p>
         </div>
       </div>
 

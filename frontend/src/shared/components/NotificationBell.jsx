@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Bell, Trash2, X, CheckCheck, Inbox, Sparkles, ChevronRight,
+  Bell, Trash2, X, CheckCheck, Inbox, ChevronRight,
   ShieldAlert, AlertTriangle, Calendar, CheckCircle2, Ticket
 } from 'lucide-react';
 import {
@@ -40,7 +40,7 @@ function getNotificationIcon(title = '', message = '') {
   if (t.includes('event') || t.includes('published') || t.includes('scheduled')) {
     return <Calendar size={14} className="text-primary-600 shrink-0" />;
   }
-  return <Sparkles size={14} className="text-primary-600 shrink-0" />;
+  return <Bell size={14} className="text-primary-600 shrink-0" />;
 }
 
 export default function NotificationBell() {

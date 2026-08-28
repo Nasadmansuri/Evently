@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Search, ShieldCheck, Check, X, Loader2, AlertCircle, Users, UserCheck, GraduationCap,
   Trash2, ChevronLeft, ChevronRight, ArrowUpDown, UserX, Ban, ShieldAlert, AlertTriangle,
-  Mail, Phone, Calendar, Landmark, BookOpen, Layers, Award, Sparkles, ExternalLink, Eye
+  Mail, Phone, Calendar, Landmark, BookOpen, Layers, Award, ExternalLink, Eye
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
@@ -165,46 +165,45 @@ export default function UserManagement() {
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">User Management</h1>
-          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Manage student and faculty directories and review registrations</p>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Manage student and faculty accounts and pending approvals</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50">
-            <Users className="text-primary-600" size={18} />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Users</p>
-            <p className="text-xl font-black text-slate-900">{loading ? '—' : totalUsers}</p>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Users</p>
+          <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-900">{loading ? '—' : totalUsers}</p>
+          <p className="mt-0.5 text-[11px] text-slate-500 font-medium">Registered accounts</p>
         </div>
-        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50">
-            <GraduationCap className="text-emerald-600" size={18} />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Affiliated Students</p>
-            <p className="text-xl font-black text-slate-900">{loading ? '—' : activeStudents}</p>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Affiliated Students</p>
+          <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-900">{loading ? '—' : activeStudents}</p>
+          <p className="mt-0.5 text-[11px] text-slate-500 font-medium">BIC student cohort</p>
         </div>
-        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
-            <Users className="text-amber-600" size={18} />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Guest Students</p>
-            <p className="text-xl font-black text-slate-900">{loading ? '—' : totalGuests}</p>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Guest Learners</p>
+          <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-900">{loading ? '—' : totalGuests}</p>
+          <p className="mt-0.5 text-[11px] text-slate-500 font-medium">External students</p>
         </div>
-        <div className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-50">
-            <ShieldCheck className="text-violet-600" size={18} />
+        <div className={`rounded-2xl p-4 shadow-2xs transition-all ${
+          pendingApprovals > 0
+            ? 'border-2 border-primary-700 bg-primary-50/40 ring-4 ring-primary-100/60'
+            : 'border border-slate-200/80 bg-white'
+        }`}>
+          <div className="flex items-center justify-between">
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${pendingApprovals > 0 ? 'text-primary-800' : 'text-slate-400'}`}>
+              Pending Approvals
+            </p>
+            {pendingApprovals > 0 && (
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-primary-700 text-white">
+                Action Needed
+              </span>
+            )}
           </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Pending Approvals</p>
-            <p className="text-xl font-black text-slate-900">{loading ? '—' : pendingApprovals}</p>
-          </div>
+          <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-900">{loading ? '—' : pendingApprovals}</p>
+          <p className={`mt-0.5 text-[11px] font-medium ${pendingApprovals > 0 ? 'text-primary-700 font-semibold' : 'text-slate-500'}`}>
+            {pendingApprovals > 0 ? `${pendingApprovals} faculty awaiting review` : 'All requests processed'}
+          </p>
         </div>
       </div>
 

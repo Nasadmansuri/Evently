@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Clock, MapPin, Users, ArrowRight, CheckCircle2, PlayCircle, Sparkles } from 'lucide-react';
+import { Calendar, CalendarDays, Clock, MapPin, Users, ArrowRight, CheckCircle2, PlayCircle } from 'lucide-react';
 import { formatTime12hr } from '../utils/formatTime';
 import { getEventStatus } from '../utils/eventStatus';
 import { getCategoryStyle } from '../utils/categoryColors';
@@ -44,7 +44,7 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
             /* Branded Deep Teal Academic Poster Backdrop */
             <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] p-4 text-center">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md mb-2 border border-white/15 shadow-2xs">
-                <Sparkles size={20} className="text-emerald-300" />
+                <CalendarDays size={20} className="text-emerald-300" />
               </div>
               <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-emerald-200/90 line-clamp-1">
                 {event.category || 'Campus Event'}

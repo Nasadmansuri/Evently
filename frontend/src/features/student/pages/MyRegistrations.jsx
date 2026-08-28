@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Ticket, Calendar, Clock, MapPin, AlertCircle, Inbox, CalendarDays,
-  Sparkles, History, CheckCircle2, ArrowRight, MessageSquare, Plus,
+  History, CheckCircle2, ArrowRight, MessageSquare, Plus,
   Layers, Users
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -92,14 +92,14 @@ export default function MyRegistrations() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
-              Campus Passes
+              Event Registrations
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
             My Registrations
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-600">
-            Track and manage your registered event entries, participation tickets, and feedback history.
+            Track and manage your registered campus events, schedules, and feedback history.
           </p>
         </div>
 
@@ -113,96 +113,90 @@ export default function MyRegistrations() {
 
       {/* 2. Interactive KPI Tab Cards (Click card to filter view) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Metric 1: Total */}
+        {/* Metric 1: Total - Clean Typographic Treatment */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'all' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer ${
+          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
             activeTab === 'all'
-              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-sm ring-4 ring-primary-100/60'
+              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
               : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'all' ? 'text-primary-800' : 'text-slate-500'}`}>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'all' ? 'text-primary-800' : 'text-slate-400'}`}>
               All Registrations
             </p>
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
-              activeTab === 'all' ? 'bg-primary-700 text-white border-primary-700' : 'bg-primary-50 text-primary-700 border-primary-100/80'
-            }`}>
-              <Ticket size={18} />
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : registrations.length}</p>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="text-xs text-slate-400 font-medium">All-time campus entries</p>
             {activeTab === 'all' && (
-              <span className="text-[10.5px] font-bold text-primary-700 bg-primary-100/80 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
                 Active View
               </span>
             )}
           </div>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : registrations.length}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">All-time registrations recorded</p>
+          </div>
         </button>
 
-        {/* Metric 2: Upcoming */}
+        {/* Metric 2: Upcoming - Priority Time-Sensitive Treatment */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'upcoming' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer ${
+          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden ${
             activeTab === 'upcoming'
-              ? 'border-2 border-amber-600 bg-amber-50/40 shadow-sm ring-4 ring-amber-100/60'
+              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
               : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'upcoming' ? 'text-amber-800' : 'text-slate-500'}`}>
-              Upcoming Events
-            </p>
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
-              activeTab === 'upcoming' ? 'bg-amber-600 text-white border-amber-600' : 'bg-amber-50 text-amber-700 border-amber-100'
-            }`}>
-              <Sparkles size={18} />
+            <div className="flex items-center gap-1.5">
+              <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'upcoming' ? 'text-primary-800' : 'text-slate-500'}`}>
+                Upcoming Events
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {upcoming.length > 0 && (
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  {upcoming.length} Scheduled
+                </span>
+              )}
+              {activeTab === 'upcoming' && (
+                <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
+                  Active View
+                </span>
+              )}
             </div>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : upcoming.length}</p>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="text-xs text-slate-400 font-medium">Scheduled on your agenda</p>
-            {activeTab === 'upcoming' && (
-              <span className="text-[10.5px] font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-md">
-                Active View
-              </span>
-            )}
+          <div className="mt-3">
+            <p className="text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : upcoming.length}</p>
+            <p className="mt-1 text-xs text-primary-700 font-semibold">Active registrations</p>
           </div>
         </button>
 
-        {/* Metric 3: Past */}
+        {/* Metric 3: Past - Clean Typographic Treatment */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'past' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer ${
+          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
             activeTab === 'past'
-              ? 'border-2 border-slate-700 bg-slate-100/60 shadow-sm ring-4 ring-slate-200'
+              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
               : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'past' ? 'text-slate-900' : 'text-slate-500'}`}>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'past' ? 'text-primary-800' : 'text-slate-400'}`}>
               Past Attended
             </p>
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
-              activeTab === 'past' ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-100 text-slate-700 border border-slate-200'
-            }`}>
-              <History size={18} />
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : past.length}</p>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="text-xs text-slate-400 font-medium">Concluded event history</p>
             {activeTab === 'past' && (
-              <span className="text-[10.5px] font-bold text-slate-800 bg-slate-200 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
                 Active View
               </span>
             )}
+          </div>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : past.length}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Attended events</p>
           </div>
         </button>
       </div>
@@ -325,7 +319,7 @@ export default function MyRegistrations() {
                           }}
                           className="inline-flex items-center gap-1.5 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-2xs transition active:scale-95"
                         >
-                          View Pass <ArrowRight size={12} />
+                          View Details <ArrowRight size={12} />
                         </button>
                       )}
                     </div>

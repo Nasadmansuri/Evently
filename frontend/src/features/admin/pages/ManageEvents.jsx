@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Calendar, Clock, MapPin, AlertCircle, Inbox, Plus, Trash2, Users,
-  Search, List, CalendarDays, X, Edit3, ArrowRight, Loader2, Sparkles,
+  Search, List, CalendarDays, X, Edit3, ArrowRight, Loader2,
   AlertTriangle, ShieldAlert, Check
 } from 'lucide-react';
 import api from '../../../shared/services/api';
@@ -203,17 +203,17 @@ export default function ManageEvents() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setOngoingOnly((v) => !v)}
-            className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition ${
+            className={`flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all shadow-2xs ${
               ongoingOnly
-                ? 'border-amber-300 bg-amber-50 text-amber-700 shadow-2xs'
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
                 : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
             <span className="relative flex h-2 w-2">
-              {ongoingOnly && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />}
-              <span className={`relative inline-flex h-2 w-2 rounded-full ${ongoingOnly ? 'bg-amber-600' : 'bg-slate-300'}`} />
+              {ongoingOnly && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />}
+              <span className={`relative inline-flex h-2 w-2 rounded-full ${ongoingOnly ? 'bg-emerald-600' : 'bg-slate-300'}`} />
             </span>
-            Ongoing Only
+            <span>Live Now</span>
           </button>
 
           {pendingRequests.length > 0 && (
@@ -415,7 +415,7 @@ export default function ManageEvents() {
                   ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] p-4 text-center">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md mb-1.5 border border-white/15">
-                        <Sparkles size={18} className="text-emerald-300" />
+                        <CalendarDays size={18} className="text-emerald-300" />
                       </div>
                       <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-emerald-200/90 line-clamp-1">
                         {ev.category || 'Event'}

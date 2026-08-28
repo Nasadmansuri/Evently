@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   MessageSquare, Star, CheckCircle2, AlertCircle, Inbox, CalendarDays,
-  FileQuestion, ArrowRight, Sparkles, Clock, Check
+  FileQuestion, ArrowRight, Clock, Check
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../../shared/services/api';
@@ -118,127 +118,116 @@ export default function MyFeedback() {
 
       {/* 2. Interactive KPI Tab Cards (Click card to filter view) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Metric 1: Eligible */}
+        {/* Metric 1: Eligible - Clean Typographic Treatment */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'all' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer ${
+          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
             activeTab === 'all'
-              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-sm ring-4 ring-primary-100/60'
+              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
               : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'all' ? 'text-primary-800' : 'text-slate-500'}`}>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'all' ? 'text-primary-800' : 'text-slate-400'}`}>
               Eligible Events
             </p>
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
-              activeTab === 'all' ? 'bg-primary-700 text-white border-primary-700' : 'bg-primary-50 text-primary-700 border-primary-100/80'
-            }`}>
-              <CalendarDays size={18} />
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : pastEvents.length}</p>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="text-xs text-slate-400 font-medium">Attended events started</p>
             {activeTab === 'all' && (
-              <span className="text-[10.5px] font-bold text-primary-700 bg-primary-100/80 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
                 Active View
               </span>
             )}
           </div>
-        </button>
-
-        {/* Metric 2: Submitted */}
-        <button
-          type="button"
-          onClick={() => setSearchParams({ tab: 'submitted' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer ${
-            activeTab === 'submitted'
-              ? 'border-2 border-emerald-600 bg-emerald-50/40 shadow-sm ring-4 ring-emerald-100/60'
-              : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'submitted' ? 'text-emerald-800' : 'text-slate-500'}`}>
-              Submitted
-            </p>
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
-              activeTab === 'submitted' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-            }`}>
-              <CheckCircle2 size={18} />
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : submitted.length}</p>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="text-xs text-slate-400 font-medium">Reviews submitted</p>
-            {activeTab === 'submitted' && (
-              <span className="text-[10.5px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-md">
-                Active View
-              </span>
-            )}
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : pastEvents.length}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Attended campus events</p>
           </div>
         </button>
 
-        {/* Metric 3: Pending Feedback */}
+        {/* Metric 2: Pending Feedback - Single Priority Actionable Highlight */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'pending' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer ${
+          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden ${
             activeTab === 'pending'
-              ? 'border-2 border-amber-600 bg-amber-50/40 shadow-sm ring-4 ring-amber-100/60'
+              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
               : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'pending' ? 'text-amber-800' : 'text-slate-500'}`}>
-              Pending Feedback
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'pending' ? 'text-primary-800' : 'text-slate-500'}`}>
+              Pending Reviews
             </p>
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
-              activeTab === 'pending' ? 'bg-amber-600 text-white border-amber-600' : 'bg-amber-50 text-amber-700 border border-amber-100'
-            }`}>
-              <Star size={18} />
+            <div className="flex items-center gap-1.5">
+              {pending.length > 0 && (
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                  {pending.length} Action Needed
+                </span>
+              )}
+              {activeTab === 'pending' && (
+                <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
+                  Active View
+                </span>
+              )}
             </div>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : pending.length}</p>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="text-xs text-slate-400 font-medium">Action requested</p>
-            {activeTab === 'pending' && (
-              <span className="text-[10.5px] font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-md">
-                Active View
-              </span>
-            )}
+          <div className="mt-3">
+            <p className="text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : pending.length}</p>
+            <p className="mt-1 text-xs text-amber-800 font-semibold">
+              {pending.length > 0 ? `${pending.length} evaluations awaiting input` : 'All reviews submitted'}
+            </p>
           </div>
         </button>
 
-        {/* Metric 4: No Form Yet */}
+        {/* Metric 3: Submitted - Clean Typographic Treatment */}
         <button
           type="button"
-          onClick={() => setSearchParams({ tab: 'unavailable' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer ${
-            activeTab === 'unavailable'
-              ? 'border-2 border-slate-700 bg-slate-100/60 shadow-sm ring-4 ring-slate-200'
+          onClick={() => setSearchParams({ tab: 'submitted' })}
+          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+            activeTab === 'submitted'
+              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
               : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'unavailable' ? 'text-slate-900' : 'text-slate-500'}`}>
-              No Form Yet
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'submitted' ? 'text-primary-800' : 'text-slate-400'}`}>
+              Submitted
             </p>
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
-              activeTab === 'unavailable' ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-100 text-slate-700 border border-slate-200'
-            }`}>
-              <FileQuestion size={18} />
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : unavailable.length}</p>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="text-xs text-slate-400 font-medium">Awaiting faculty release</p>
-            {activeTab === 'unavailable' && (
-              <span className="text-[10.5px] font-bold text-slate-800 bg-slate-200 px-2 py-0.5 rounded-md">
+            {activeTab === 'submitted' && (
+              <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
                 Active View
               </span>
             )}
+          </div>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : submitted.length}</p>
+            <p className="mt-1 text-xs text-emerald-700 font-medium">Completed evaluations</p>
+          </div>
+        </button>
+
+        {/* Metric 4: No Form Yet - Clean Typographic Treatment */}
+        <button
+          type="button"
+          onClick={() => setSearchParams({ tab: 'unavailable' })}
+          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+            activeTab === 'unavailable'
+              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
+              : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'unavailable' ? 'text-primary-800' : 'text-slate-400'}`}>
+              Awaiting Forms
+            </p>
+            {activeTab === 'unavailable' && (
+              <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
+                Active View
+              </span>
+            )}
+          </div>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : unavailable.length}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Not yet released by faculty</p>
           </div>
         </button>
       </div>

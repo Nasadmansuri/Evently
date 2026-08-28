@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CalendarDays, TrendingUp, Plus, CalendarSearch, Images, AlertCircle,
-  Users, CheckCircle2, UserCheck, ArrowRight, Clock, Award, Sparkles,
+  Users, CheckCircle2, UserCheck, ArrowRight, Clock, Award,
   Building2, Landmark, ShieldCheck, FileSpreadsheet, ChevronRight, PlayCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -63,10 +63,10 @@ export default function FacultyDashboard() {
 
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                Welcome back, {user?.full_name || 'Professor'}! 👋
+                Welcome back, {user?.full_name || 'Professor'}!
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-slate-600">
-                Oversee campus activities, monitor student registrations, and manage event feedback forms.
+                Manage your events, track student registrations, and review event feedback.
               </p>
             </div>
 
@@ -110,54 +110,48 @@ export default function FacultyDashboard() {
         </div>
       )}
 
-      {/* 2. 4-KPI Metric Grid */}
+      {/* 2. 4-KPI Metric Grid with Genuine Visual Hierarchy */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Events */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Events</p>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-100/80">
-              <CalendarDays size={18} />
-            </div>
+        {/* Metric 1: Total Events - Clean Typographic */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150 flex flex-col justify-between">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Events</p>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.totalEvents}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Total events created</p>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.totalEvents}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Organized by you</p>
         </div>
 
-        {/* Upcoming Events */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+        {/* Metric 2: Upcoming Events - Priority Time-Sensitive Card */}
+        <div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-b from-emerald-50/50 via-white to-white p-5 shadow-xs transition-all duration-150 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Upcoming Events</p>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
-              <TrendingUp size={18} />
-            </div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-900">Upcoming Events</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800 border border-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
+              Active
+            </span>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.upcomingEvents}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Scheduled & active</p>
+          <div className="mt-3">
+            <p className="text-3xl font-black tracking-tight text-emerald-950">{loading ? '—' : stats.upcomingEvents}</p>
+            <p className="mt-1 text-xs text-emerald-800 font-semibold">Upcoming & active events</p>
+          </div>
         </div>
 
-        {/* Total Registrations */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Registrations</p>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
-              <UserCheck size={18} />
-            </div>
+        {/* Metric 3: Total Registrations - Clean Typographic */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150 flex flex-col justify-between">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Registrations</p>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.totalRegistrations}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Total student registrations</p>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.totalRegistrations}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Student campus entries</p>
         </div>
 
-        {/* Completed Events */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Completed Events</p>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
-              <CheckCircle2 size={18} />
-            </div>
+        {/* Metric 4: Completed Events - Clean Typographic */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150 flex flex-col justify-between">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Completed Events</p>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.completedEvents}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Past events concluded</p>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.completedEvents}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Concluded successfully</p>
         </div>
       </div>
 
@@ -169,7 +163,7 @@ export default function FacultyDashboard() {
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-slate-900">My Recent Events</h2>
-                <p className="text-xs text-slate-500">Live and upcoming campus activities organized by you</p>
+                <p className="text-xs text-slate-500">Recent events organized by you</p>
               </div>
               {events.length > 0 && (
                 <button
@@ -292,8 +286,8 @@ export default function FacultyDashboard() {
         {/* Quick Actions Card (1 Col on Desktop) */}
         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-2xs flex flex-col justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Faculty Quick Actions</h2>
-            <p className="text-xs text-slate-500 mb-4">Fast shortcuts for common academic operations</p>
+            <h2 className="text-base font-bold text-slate-900">Quick Actions</h2>
+            <p className="text-xs text-slate-500 mb-4">Shortcuts for event management</p>
 
             <div className="space-y-3">
               <button
@@ -305,51 +299,51 @@ export default function FacultyDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-white">Create New Event</p>
-                  <p className="text-[11px] text-white/80 truncate">Publish workshops & hackathons</p>
+                  <p className="text-[11px] text-white/80 truncate">Publish a workshop, hackathon, or seminar</p>
                 </div>
                 <ArrowRight size={15} className="text-white/70 shrink-0" />
               </button>
 
               <button
                 onClick={() => navigate('/faculty/my-events')}
-                className="flex w-full items-center gap-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white p-3.5 text-left transition hover:border-primary-200 hover:shadow-xs active:scale-95"
+                className="group flex w-full items-center gap-3 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50/80 p-3 text-left transition hover:border-slate-300 hover:shadow-xs active:scale-[0.98]"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700 border border-primary-100">
+                <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-primary-50 flex items-center justify-center text-slate-400 group-hover:text-primary-700 transition border border-slate-200/80 shrink-0">
                   <CalendarDays size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-slate-900">Manage My Events</p>
-                  <p className="text-[11px] text-slate-500 truncate">Feedback, editing, & PDF reports</p>
+                  <p className="text-xs font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Manage My Events</p>
+                  <p className="text-[11px] text-slate-500 truncate">Edit events, view feedback, & reports</p>
                 </div>
-                <ArrowRight size={14} className="text-slate-400 shrink-0" />
+                <ArrowRight size={14} className="text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
               </button>
 
               <button
                 onClick={() => navigate('/events')}
-                className="flex w-full items-center gap-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white p-3.5 text-left transition hover:border-primary-200 hover:shadow-xs active:scale-95"
+                className="group flex w-full items-center gap-3 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50/80 p-3 text-left transition hover:border-slate-300 hover:shadow-xs active:scale-[0.98]"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
+                <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-primary-50 flex items-center justify-center text-slate-400 group-hover:text-primary-700 transition border border-slate-200/80 shrink-0">
                   <CalendarSearch size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-slate-900">All Campus Events</p>
-                  <p className="text-[11px] text-slate-500 truncate">Explore student calendar & feed</p>
+                  <p className="text-xs font-bold text-slate-900 group-hover:text-primary-700 transition-colors">All Campus Events</p>
+                  <p className="text-[11px] text-slate-500 truncate">Browse all campus events</p>
                 </div>
-                <ArrowRight size={14} className="text-slate-400 shrink-0" />
+                <ArrowRight size={14} className="text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
               </button>
 
               <button
                 onClick={() => navigate('/faculty/gallery')}
-                className="flex w-full items-center gap-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white p-3.5 text-left transition hover:border-primary-200 hover:shadow-xs active:scale-95"
+                className="group flex w-full items-center gap-3 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50/80 p-3 text-left transition hover:border-slate-300 hover:shadow-xs active:scale-[0.98]"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">
+                <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-primary-50 flex items-center justify-center text-slate-400 group-hover:text-primary-700 transition border border-slate-200/80 shrink-0">
                   <Images size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-slate-900">Event Photo Gallery</p>
-                  <p className="text-[11px] text-slate-500 truncate">Upload & organize event photos</p>
+                  <p className="text-xs font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Event Photo Gallery</p>
+                  <p className="text-[11px] text-slate-500 truncate">Upload and manage event photos</p>
                 </div>
-                <ArrowRight size={14} className="text-slate-400 shrink-0" />
+                <ArrowRight size={14} className="text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
               </button>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   User, Mail, Phone, Landmark, GraduationCap, Layers, BarChart3, CalendarDays,
-  Users, ShieldCheck, CheckCircle2, Award, Sparkles, Edit3, Save, X, Loader2,
+  Users, ShieldCheck, CheckCircle2, Award, Edit3, Save, X, Loader2,
   Calendar, IdCard, Building, MessageSquare, AlertCircle, Copy, Check, Info
 } from 'lucide-react';
 import api from '../../../shared/services/api';
@@ -420,8 +420,7 @@ export default function Profile() {
         {/* Right 1 Column: Stats & Institutional Recognition */}
         <div className="space-y-5">
           <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Sparkles size={15} className="text-primary-600" />
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
               Activity & Engagement
             </h3>
 
@@ -435,31 +434,31 @@ export default function Profile() {
                         {profile?.stats?.createdEvents || 0}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
                       <Calendar size={18} />
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-center justify-between">
+                  <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-emerald-900 font-semibold block">Total Registrations</span>
-                      <span className="text-2xl font-black text-emerald-950">
+                      <span className="text-xs text-primary-900 font-semibold block">Total Registrations</span>
+                      <span className="text-2xl font-black text-primary-950">
                         {profile?.stats?.totalRegistrations || 0}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
                       <Users size={18} />
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 flex items-center justify-between">
+                  <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-amber-900 font-semibold block">Feedback Received</span>
-                      <span className="text-2xl font-black text-amber-950">
+                      <span className="text-xs text-primary-900 font-semibold block">Feedback Received</span>
+                      <span className="text-2xl font-black text-primary-950">
                         {profile?.stats?.feedbackReceived || 0}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
                       <MessageSquare size={18} />
                     </div>
                   </div>
@@ -473,19 +472,19 @@ export default function Profile() {
                         {profile?.stats?.totalEvents || 0}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
                       <Calendar size={18} />
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-violet-50/70 border border-violet-100 flex items-center justify-between">
+                  <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-violet-900 font-semibold block">Total Users</span>
-                      <span className="text-2xl font-black text-violet-950">
+                      <span className="text-xs text-primary-900 font-semibold block">Total Users</span>
+                      <span className="text-2xl font-black text-primary-950">
                         {profile?.stats?.totalUsers || 0}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
                       <Users size={18} />
                     </div>
                   </div>
@@ -499,19 +498,19 @@ export default function Profile() {
                         {profile?.stats?.totalRegistrations || 0}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
                       <Calendar size={18} />
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 flex items-center justify-between">
+                  <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-amber-900 font-semibold block">Feedback Submitted</span>
-                      <span className="text-2xl font-black text-amber-950">
+                      <span className="text-xs text-primary-900 font-semibold block">Feedback Submitted</span>
+                      <span className="text-2xl font-black text-primary-950">
                         {profile?.stats?.totalFeedback || 0}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
                       <MessageSquare size={18} />
                     </div>
                   </div>
@@ -540,8 +539,8 @@ export default function Profile() {
                 : profile?.role === 'faculty'
                 ? 'Publish academic workshops, hackathons, seminars, and gather student feedback on Evently.'
                 : isAffiliated
-                ? 'Your student profile is synchronized with Wolverhampton academic cohorts for event participation and feedback.'
-                : 'Explore upcoming campus events, participate in activities, and share feedback on Evently.'}
+                ? 'Registered student under the Wolverhampton academic partnership program.'
+                : 'Explore campus events, participate in activities, and share feedback on Evently.'}
             </p>
           </div>
         </div>

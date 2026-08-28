@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Calendar, MapPin, AlertCircle, SearchX, CheckCircle2, List, CalendarDays, X, Users, Sparkles, Filter } from 'lucide-react';
+import { Search, Calendar, MapPin, AlertCircle, SearchX, CheckCircle2, List, CalendarDays, X, Users, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/services/api';
 import EventCalendar from '../../../shared/components/EventCalendar';

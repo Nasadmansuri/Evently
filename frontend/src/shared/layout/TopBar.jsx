@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogOut, Menu, User, ChevronDown, ShieldCheck, Landmark, Sparkles } from 'lucide-react';
+import { LogOut, Menu, User, ChevronDown, ShieldCheck, Landmark } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from '../components/NotificationBell';
 import { showToast } from '../utils/toast';
