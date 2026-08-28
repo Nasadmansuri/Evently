@@ -202,7 +202,7 @@ export default function EventDetail() {
     <div className="space-y-6">
       {/* Unified World-Class Event Header Card */}
       <div className="skeuo-card overflow-hidden rounded-[28px]">
-        <div className="grid gap-0 lg:grid-cols-[1.05fr_1fr]">
+        <div className="grid gap-0 lg:grid-cols-[1fr_1.15fr] xl:grid-cols-[1fr_1.25fr]">
           {/* Left: Poster Image or Academic Deep Teal Backdrop */}
           <div className="relative min-h-[260px] lg:min-h-[340px] overflow-hidden p-6 sm:p-8 flex flex-col justify-between">
             {event.banner_image && !imgError ? (
@@ -320,12 +320,12 @@ export default function EventDetail() {
               </div>
             )}
 
-            <div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Campus Event</p>
-                  <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.75rem] leading-tight break-words">{event.title}</h1>
-                </div>
+            <div className="space-y-3">
+              {/* Top Bar: Category & Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2 border-b border-slate-100/80">
+                <span className="text-[11px] font-black uppercase tracking-[0.14em] text-primary-800">
+                  Campus Event • {event.category}
+                </span>
 
                 {/* Action Buttons based on Role & Ownership */}
                 <div className="flex flex-wrap items-center gap-2">
@@ -333,7 +333,7 @@ export default function EventDetail() {
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => navigate('/events')}
-                        className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
+                        className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs"
                       >
                         ← Back to Events
                       </button>
@@ -342,14 +342,14 @@ export default function EventDetail() {
                           <button
                             onClick={handleGenerateReport}
                             disabled={generatingReport}
-                            className="skeuo-btn-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs disabled:opacity-50"
+                            className="skeuo-btn-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs disabled:opacity-50"
                           >
                             {generatingReport ? <Loader2 className="animate-spin" size={14} /> : <FileDown size={14} />}
                             {generatingReport ? 'Generating...' : 'PDF Report'}
                           </button>
                           <button
                             onClick={() => setShowPermanentDeleteModal(true)}
-                            className="skeuo-btn-danger inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
+                            className="skeuo-btn-danger inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs"
                           >
                             <Trash2 size={14} /> Delete Event
                           </button>
@@ -361,20 +361,20 @@ export default function EventDetail() {
                       {user?.role === 'student' && (
                         event.is_registered ? (
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="skeuo-badge-embossed inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800 border-emerald-300">
-                              <CheckCircle2 size={15} /> Already Registered
+                            <span className="skeuo-badge-embossed inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-800 border-emerald-300">
+                              <CheckCircle2 size={14} /> Already Registered
                             </span>
                             <AddToCalendarButton event={event} />
                           </div>
                         ) : isPastEvent ? (
-                          <span className="skeuo-btn-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs text-slate-500 opacity-80 cursor-not-allowed">
+                          <span className="skeuo-btn-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs text-slate-500 opacity-80 cursor-not-allowed">
                             Event Ended
                           </span>
                         ) : (
                           <div className="flex flex-wrap items-center gap-2">
                             <button
                               onClick={() => navigate(`/events/${id}/register`)}
-                              className="skeuo-btn-primary inline-flex shrink-0 items-center justify-center rounded-xl px-5 py-2.5 text-xs"
+                              className="skeuo-btn-primary inline-flex shrink-0 items-center justify-center rounded-xl px-4 py-2 text-xs"
                             >
                               Register Now
                             </button>
@@ -387,17 +387,17 @@ export default function EventDetail() {
                         <>
                           <button
                             onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
-                            className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
+                            className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs"
                           >
-                            <Edit3 size={14} /> Edit Event
+                            <Edit3 size={13} /> Edit Event
                           </button>
 
                           <button
                             onClick={handleGenerateReport}
                             disabled={generatingReport}
-                            className="skeuo-btn-primary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs disabled:opacity-50"
+                            className="skeuo-btn-primary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs disabled:opacity-50"
                           >
-                            {generatingReport ? <Loader2 className="animate-spin" size={14} /> : <FileDown size={14} />}
+                            {generatingReport ? <Loader2 className="animate-spin" size={13} /> : <FileDown size={13} />}
                             {generatingReport ? 'Generating...' : 'PDF Report'}
                           </button>
 
@@ -409,9 +409,9 @@ export default function EventDetail() {
                                 setShowDeleteRequestModal(true);
                                 setProblemStatement('');
                               }}
-                              className="skeuo-btn-danger inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
+                              className="skeuo-btn-danger inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs"
                             >
-                              <Trash2 size={14} /> Request Deletion
+                              <Trash2 size={13} /> Request Deletion
                             </button>
                           )}
                         </>
@@ -423,8 +423,15 @@ export default function EventDetail() {
                 </div>
               </div>
 
+              {/* Full Width Event Title - Never squished */}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 leading-snug break-normal hyphens-none">
+                  {event.title}
+                </h1>
+              </div>
+
               {event.description && (
-                <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600 line-clamp-3">
+                <p className="text-xs sm:text-sm leading-relaxed text-slate-600 line-clamp-3">
                   {event.description}
                 </p>
               )}
