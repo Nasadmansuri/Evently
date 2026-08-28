@@ -119,7 +119,7 @@ async function createEvent(req, res) {
 async function getAllEvents(req, res) {
   try {
     const { category } = req.query;
-    const events = await eventsModel.getAllEvents({ category }, req.user.id);
+    const events = await eventsModel.getAllEvents({ category }, req.user?.id);
     res.json(events);
   } catch (err) {
     res.status(500).json({ message: 'Failed to load events', error: err.message });
@@ -128,7 +128,7 @@ async function getAllEvents(req, res) {
 
 async function getEventById(req, res) {
   try {
-    const event = await eventsModel.getEventById(req.params.id, req.user.id);
+    const event = await eventsModel.getEventById(req.params.id, req.user?.id);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }

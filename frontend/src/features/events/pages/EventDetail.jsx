@@ -199,420 +199,216 @@ export default function EventDetail() {
     : null;
 
   return (
-    <div className="space-y-6">
-      {/* Unified World-Class Event Header Card */}
-      <div className="skeuo-card overflow-hidden rounded-[28px]">
-        <div className="grid gap-0 lg:grid-cols-[1fr_1.15fr] xl:grid-cols-[1fr_1.25fr]">
-          {/* Left: Poster Image or Academic Deep Teal Backdrop */}
-          <div className="relative min-h-[260px] lg:min-h-[340px] overflow-hidden p-6 sm:p-8 flex flex-col justify-between">
-            {event.banner_image && !imgError ? (
-              <>
-                <img
-                  src={`${ASSET_BASE_URL}${event.banner_image}`}
-                  alt={event.title}
-                  onError={() => setImgError(true)}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  style={{ objectPosition: 'center 20%' }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/40" />
-              </>
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] flex flex-col items-center justify-center p-6 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md mb-3 border border-white/20 shadow-md">
-                  <CalendarDays size={32} className="text-emerald-300" />
-                </div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200/90">
-                  {event.category || 'Campus Event'}
-                </p>
-                <p className="mt-1 text-sm font-bold text-white/90 max-w-xs line-clamp-2">
-                  {event.title}
-                </p>
-              </div>
-            )}
+    <div className="space-y-6 max-w-7xl mx-auto px-2 sm:px-4">
+      {/* Top Breadcrumb / Back Bar */}
+      <div className="flex items-center justify-between pb-2">
+        <Link
+          to="/events"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition"
+        >
+          <span>← Back to all events</span>
+        </Link>
+        <span className="text-xs font-semibold text-slate-400">
+          Campus Portal • Event #{event.id}
+        </span>
+      </div>
 
-            {/* Badges Overlay on Poster */}
-            <div className="relative z-10 flex items-center justify-between gap-3">
-              <span className={`skeuo-badge-embossed rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${
-                event.status === 'cancelled'
-                  ? 'bg-rose-600 text-white border-rose-800'
-                  : liveStatus === 'ongoing'
-                  ? 'bg-emerald-500 text-white border-emerald-700'
-                  : isPastEvent
-                  ? 'bg-slate-900/90 text-white border-slate-950'
-                  : 'bg-white/95 text-slate-800 border-slate-300'
-              }`}>
-                {event.status === 'cancelled'
-                  ? 'Cancelled'
-                  : liveStatus === 'ongoing'
-                  ? 'Live Now'
-                  : isPastEvent
-                  ? 'Ended'
-                  : event.status}
+      {/* 1. Full-Width Hero Poster Banner */}
+      <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-3xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+        {event.banner_image && !imgError ? (
+          <>
+            <img
+              src={`${ASSET_BASE_URL}${event.banner_image}`}
+              alt={event.title}
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          </>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] flex flex-col items-center justify-center p-6 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md mb-3 border border-white/20 shadow-md">
+              <CalendarDays size={32} className="text-emerald-300" />
+            </div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200/90">
+              {event.category || 'Campus Event'}
+            </p>
+          </div>
+        )}
+
+        {/* Floating Pills on Top of Banner */}
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+          <span
+            className={`pointer-events-auto rounded-full px-3.5 py-1 text-xs font-bold shadow-md backdrop-blur-md ${
+              event.status === 'cancelled'
+                ? 'bg-rose-600/90 text-white'
+                : liveStatus === 'ongoing'
+                ? 'bg-emerald-500/90 text-white animate-pulse'
+                : isPastEvent
+                ? 'bg-slate-900/80 text-slate-200'
+                : 'bg-white/90 text-slate-900'
+            }`}
+          >
+            {event.status === 'cancelled'
+              ? 'Cancelled'
+              : liveStatus === 'ongoing'
+              ? '● Live Now'
+              : isPastEvent
+              ? 'Event Ended'
+              : 'Upcoming Event'}
+          </span>
+
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {event.is_team_event ? (
+              <span className="rounded-full bg-black/60 border border-white/20 px-3 py-1 text-xs font-bold text-white backdrop-blur-md">
+                Team Event
               </span>
-              <div className="flex items-center gap-1.5">
-                {event.is_team_event ? (
-                  <span className="skeuo-badge-embossed inline-flex items-center gap-1 rounded-full bg-primary-800/90 border border-white/20 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-white">
-                    <User size={11} /> Team
-                  </span>
-                ) : null}
-                <span className={`skeuo-badge-embossed rounded-full px-2.5 py-1 text-[10px] font-bold ${style.bg} ${style.text}`}>
-                  {event.category}
-                </span>
-              </div>
-            </div>
-
-            {event.organizing_community && (
-              <div className="relative z-10 self-start inline-block rounded-2xl border border-white/20 bg-black/40 p-3 backdrop-blur-md shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-300">Featured Event</p>
-                <p className="mt-0.5 text-sm sm:text-base font-bold text-white">{event.organizing_community}</p>
-              </div>
-            )}
+            ) : null}
+            <span className={`rounded-full px-3 py-1 text-xs font-bold shadow-md ${style.bg} ${style.text}`}>
+              {event.category}
+            </span>
           </div>
+        </div>
 
-          {/* Right Column: Title, Action Buttons, Cancellation notices, & Metadata */}
-          <div className="p-5 sm:p-7 flex flex-col justify-between gap-4">
-            {/* Cancelled by Administration Official Banner */}
-            {event.status === 'cancelled' && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 shadow-xs">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-100">
-                    <AlertTriangle size={18} />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-sm font-bold text-slate-900">
-                        Cancelled by Administration
-                      </h3>
-                      {event.cancelled_at && (
-                        <span className="text-[11px] font-medium text-slate-400">
-                          {new Date(String(event.cancelled_at).replace(' ', 'T')).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      <strong className="text-slate-800 font-semibold">Official Reason:</strong> {event.cancellation_reason || 'This event was cancelled following administrative review.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Pending Deletion Request Notice */}
-            {event.deletion_request_id && event.status !== 'cancelled' && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 shadow-xs space-y-2 animate-in fade-in">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold flex items-center gap-1.5 text-amber-800 text-sm">
-                    <AlertTriangle size={16} className="text-amber-600 shrink-0" />
-                    Event Deletion Requested
-                  </span>
-                  <span className="rounded-full bg-amber-200/90 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-900">
-                    Under Admin Review
-                  </span>
-                </div>
-                <p className="text-xs text-amber-800 font-medium">
-                  <strong>Reason:</strong> {event.deletion_reason || 'Administrative conflict'}
-                </p>
-                {event.deletion_problem && (
-                  <p className="text-xs text-amber-800 bg-white/90 p-3 rounded-xl border border-amber-200/80 leading-relaxed whitespace-pre-wrap">
-                    <strong>Problem Statement:</strong> {event.deletion_problem}
-                  </p>
-                )}
-              </div>
-            )}
-
-            <div className="space-y-3">
-              {/* Top Bar: Category & Action Buttons */}
-              <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2 border-b border-slate-100/80">
-                <span className="text-[11px] font-black uppercase tracking-[0.14em] text-primary-800">
-                  Campus Event • {event.category}
-                </span>
-
-                {/* Action Buttons based on Role & Ownership */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {event.status === 'cancelled' ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={() => navigate('/events')}
-                        className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs"
-                      >
-                        ← Back to Events
-                      </button>
-                      {isOrganizerOrAdmin && (
-                        <>
-                          <button
-                            onClick={handleGenerateReport}
-                            disabled={generatingReport}
-                            className="skeuo-btn-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs disabled:opacity-50"
-                          >
-                            {generatingReport ? <Loader2 className="animate-spin" size={14} /> : <FileDown size={14} />}
-                            {generatingReport ? 'Generating...' : 'PDF Report'}
-                          </button>
-                          <button
-                            onClick={() => setShowPermanentDeleteModal(true)}
-                            className="skeuo-btn-danger inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs"
-                          >
-                            <Trash2 size={14} /> Delete Event
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      {user?.role === 'student' && (
-                        event.is_registered ? (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="skeuo-badge-embossed inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-800 border-emerald-300">
-                              <CheckCircle2 size={14} /> Already Registered
-                            </span>
-                            <AddToCalendarButton event={event} />
-                          </div>
-                        ) : isPastEvent ? (
-                          <span className="skeuo-btn-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs text-slate-500 opacity-80 cursor-not-allowed">
-                            Event Ended
-                          </span>
-                        ) : (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <button
-                              onClick={() => navigate(`/events/${id}/register`)}
-                              className="skeuo-btn-primary inline-flex shrink-0 items-center justify-center rounded-xl px-4 py-2 text-xs"
-                            >
-                              Register Now
-                            </button>
-                            <AddToCalendarButton event={event} />
-                          </div>
-                        )
-                      )}
-
-                      {isOrganizerOrAdmin && (
-                        <>
-                          <button
-                            onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
-                            className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs"
-                          >
-                            <Edit3 size={13} /> Edit Event
-                          </button>
-
-                          <button
-                            onClick={handleGenerateReport}
-                            disabled={generatingReport}
-                            className="skeuo-btn-primary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs disabled:opacity-50"
-                          >
-                            {generatingReport ? <Loader2 className="animate-spin" size={13} /> : <FileDown size={13} />}
-                            {generatingReport ? 'Generating...' : 'PDF Report'}
-                          </button>
-
-                          <AddToCalendarButton event={event} />
-
-                          {user?.role === 'faculty' && !event.deletion_request_id && (
-                            <button
-                              onClick={() => {
-                                setShowDeleteRequestModal(true);
-                                setProblemStatement('');
-                              }}
-                              className="skeuo-btn-danger inline-flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs"
-                            >
-                              <Trash2 size={13} /> Request Deletion
-                            </button>
-                          )}
-                        </>
-                      )}
-
-                      {!user && <AddToCalendarButton event={event} />}
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Full Width Event Title - Never squished */}
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 leading-snug break-normal hyphens-none">
-                  {event.title}
-                </h1>
-              </div>
-
-              {event.description && (
-                <p className="text-xs sm:text-sm leading-relaxed text-slate-600 line-clamp-3">
-                  {event.description}
-                </p>
-              )}
-            </div>
-
-            {/* Metadata Grid (Generous 2-Col layout so Organizer & Location never cut off) */}
-            <div className="mt-2 grid gap-2.5 sm:grid-cols-2 pt-3 border-t border-slate-100">
-              <div className="flex items-center gap-2 text-xs text-slate-600">
-                <Calendar size={14} className="text-primary-700 shrink-0" />
-                <span><strong className="text-slate-900">Date:</strong> {new Date(event.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-slate-600">
-                <Clock size={14} className="text-primary-700 shrink-0" />
-                <span><strong className="text-slate-900">Time:</strong> {formatTime12hr(event.event_time)}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowLocationModal(true)}
-                className="group/loc flex items-start gap-2 text-xs text-slate-600 hover:text-primary-700 transition text-left"
-                title="Click to view campus map & venue directions"
-              >
-                <MapPin size={14} className="text-primary-700 shrink-0 mt-0.5 group-hover/loc:scale-110 transition" />
-                <span className="leading-tight">
-                  <strong className="text-slate-900">Location:</strong>{' '}
-                  <span className="underline decoration-dotted underline-offset-2 break-words">{event.location || 'Biratnagar International College'}</span>
-                </span>
-              </button>
-              <div className="flex items-start gap-2 text-xs text-slate-600">
-                <User size={14} className="text-primary-700 shrink-0 mt-0.5" />
-                <span className="leading-tight break-words">
-                  <strong className="text-slate-900">Organizer:</strong>{' '}
-                  {event.organizing_community ? `${event.organizing_department} (${event.organizing_community})` : (event.organizing_department || event.organizer_name || 'Campus Faculty')}
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* Bottom Banner Title Overlay */}
+        <div className="absolute bottom-4 left-4 right-4 text-white z-10">
+          {event.organizing_community && (
+            <span className="inline-block mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-amber-300/30">
+              {event.organizing_community}
+            </span>
+          )}
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight drop-shadow-md line-clamp-2">
+            {event.title}
+          </h1>
         </div>
       </div>
 
-      {/* Tabs & Content in Skeuomorphic Recessed Container */}
-      <div className="skeuo-card overflow-hidden rounded-[24px]">
-        <div className="skeuo-tray flex p-1.5 gap-1 border-x-0 border-t-0 rounded-t-[23px]">
-          {(event.status === 'cancelled' ? ['Details', 'Gallery'] : TABS).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`relative rounded-xl px-5 py-2 text-xs sm:text-sm font-bold transition-all ${
-                activeTab === tab
-                  ? 'text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {activeTab === tab && (
-                <motion.div
-                  layoutId="eventDetailTabIndicator"
-                  className="absolute inset-0 rounded-xl skeuo-pill-active"
-                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                />
-              )}
-              <span className="relative z-10">{tab}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="p-5 sm:p-7">
-          {activeTab === 'Details' && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-6"
-            >
-              <div>
-                <h2 className="mb-2 text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-primary-600 inline-block" /> About This Event
-                </h2>
-                <p className="text-sm leading-7 text-slate-600 whitespace-pre-wrap">{event.description}</p>
+      {/* 2. Main 2-Column Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Event Body & Tabs (8 cols) */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Cancelled Alert Banner */}
+          {event.status === 'cancelled' && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50/90 p-4.5 text-xs text-rose-900 shadow-xs space-y-1.5">
+              <div className="flex items-center gap-2 font-bold text-sm text-rose-800">
+                <AlertTriangle size={17} className="text-rose-600" />
+                <span>Event Cancelled</span>
               </div>
-
-              {/* Rules & Eligibility Section */}
-              {event.rules_eligibility && (
-                <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-5 shadow-2xs space-y-2">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-50 text-primary-700 border border-primary-100">
-                      <ClipboardCheck size={16} />
-                    </div>
-                    <span>Rules & Eligibility</span>
-                  </div>
-                  <p className="text-xs sm:text-sm leading-relaxed text-slate-600 whitespace-pre-wrap pl-9">
-                    {event.rules_eligibility}
-                  </p>
-                </div>
-              )}
-
-              {/* Prize Information Card */}
-              {event.prize_info && (
-                <div className="rounded-2xl border border-amber-200/90 bg-gradient-to-br from-amber-50/80 via-amber-50/30 to-white p-5 shadow-2xs space-y-2">
-                  <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800 border border-amber-200">
-                      <Trophy size={16} />
-                    </div>
-                    <span>Awards & Prize Information</span>
-                  </div>
-                  <p className="text-xs sm:text-sm leading-relaxed text-amber-900/90 whitespace-pre-wrap pl-9 font-medium">
-                    {event.prize_info}
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <h2 className="mb-3 text-sm font-bold text-slate-900">Event Overview & Logistics</h2>
-                <div className="rounded-2xl border border-slate-100 bg-slate-50/50 divide-y divide-slate-100 text-sm">
-                  <div className="flex items-center justify-between p-3.5">
-                    <span className="text-slate-500 text-xs font-medium">Registration Type</span>
-                    <span className="font-bold text-slate-900 text-xs">
-                      {event.is_team_event ? 'Team Event' : 'Individual'}
-                    </span>
-                  </div>
-                  {user?.role === 'student' && event.is_registered && !!event.is_team_event && (
-                    <div className="flex items-center justify-between p-3.5">
-                      <span className="text-slate-500 text-xs font-medium">Your Registration</span>
-                      <span className="max-w-[60%] text-right font-bold text-slate-900 text-xs">
-                        {event.my_team_members ? event.my_team_members : 'Registered Individually'}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between p-3.5">
-                    <span className="text-slate-500 text-xs font-medium">Maximum Capacity</span>
-                    <span className="font-bold text-slate-900 text-xs">{event.max_participants ? `${event.max_participants} Participants` : 'Unlimited'}</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3.5">
-                    <span className="text-slate-500 text-xs font-medium">Organizing Department</span>
-                    <span className="font-bold text-slate-900 text-xs">{event.organizing_department || 'General Campus'}</span>
-                  </div>
-                  {event.organizing_community && (
-                    <div className="flex items-center justify-between p-3.5">
-                      <span className="text-slate-500 text-xs font-medium">Student Community</span>
-                      <span className="font-bold text-slate-900 text-xs">{event.organizing_community}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between p-3.5">
-                    <span className="text-slate-500 text-xs font-medium">Venue / Campus Room</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowLocationModal(true)}
-                      className="inline-flex items-center gap-1 font-bold text-primary-700 hover:underline text-xs"
-                    >
-                      <MapPin size={13} />
-                      <span>{event.location || 'Biratnagar International College'}</span>
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between p-3.5">
-                    <span className="text-slate-500 text-xs font-medium">Lead Organizer</span>
-                    <span className="font-bold text-slate-900 text-xs">{event.organizer_name || 'Faculty Organizer'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Campus Venue Quick Action Card */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-primary-100 bg-primary-50/60 p-4 shadow-2xs">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary-700 shadow-xs border border-primary-200">
-                    <Landmark size={20} />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">Biratnagar International College Campus</h4>
-                    <p className="text-[11px] text-slate-600">Bhrikuti Chowk, Biratnagar • Room: {event.location || 'Main Auditorium'}</p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowLocationModal(true)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-xs active:scale-95 transition"
-                >
-                  <Navigation size={13} />
-                  <span>View Map & Directions</span>
-                </button>
-              </div>
-            </motion.div>
+              <p className="text-slate-700">
+                <strong>Reason:</strong> {event.cancellation_reason || 'This event was cancelled following administrative review.'}
+              </p>
+            </div>
           )}
+
+          {/* Pending Deletion Request Notice */}
+          {event.deletion_request_id && event.status !== 'cancelled' && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 shadow-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold flex items-center gap-1.5 text-amber-800 text-sm">
+                  <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+                  Event Deletion Requested
+                </span>
+                <span className="rounded-full bg-amber-200/90 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-900">
+                  Under Review
+                </span>
+              </div>
+              <p className="text-xs text-amber-800 font-medium">
+                <strong>Reason:</strong> {event.deletion_reason || 'Administrative conflict'}
+              </p>
+            </div>
+          )}
+
+          {/* Tabs Navigation */}
+          <div className="flex border-b border-slate-200 gap-6 text-sm font-bold">
+            {(event.status === 'cancelled' ? ['Details', 'Gallery'] : TABS).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-3 relative transition-colors ${
+                  activeTab === tab ? 'text-primary-700 font-black' : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <span>{tab}</span>
+                {activeTab === tab && (
+                  <motion.div
+                    layoutId="activeTabUnderline"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700 rounded-full"
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div className="pt-2">
+            {activeTab === 'Details' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
+              >
+                {/* About Event */}
+                <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-3">
+                  <h2 className="text-base font-black text-slate-900">About This Event</h2>
+                  <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap font-normal">
+                    {event.description || 'No detailed description provided.'}
+                  </p>
+                </div>
+
+                {/* Rules & Eligibility Section */}
+                {event.rules_eligibility && (
+                  <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-3">
+                    <div className="flex items-center gap-2 text-slate-900 font-black text-sm">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-50 text-primary-700 border border-primary-100">
+                        <ClipboardCheck size={16} />
+                      </div>
+                      <span>Rules & Eligibility</span>
+                    </div>
+                    <p className="text-xs sm:text-sm leading-relaxed text-slate-600 whitespace-pre-wrap pl-9">
+                      {event.rules_eligibility}
+                    </p>
+                  </div>
+                )}
+
+                {/* Prize Information Card */}
+                {event.prize_info && (
+                  <div className="rounded-3xl border border-amber-200/90 bg-amber-50/60 p-6 shadow-xs space-y-3">
+                    <div className="flex items-center gap-2 text-amber-900 font-black text-sm">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800 border border-amber-200">
+                        <Trophy size={16} />
+                      </div>
+                      <span>Awards & Prizes</span>
+                    </div>
+                    <p className="text-xs sm:text-sm leading-relaxed text-amber-950 whitespace-pre-wrap pl-9 font-medium">
+                      {event.prize_info}
+                    </p>
+                  </div>
+                )}
+
+                {/* Venue Location Banner */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-slate-200/80 bg-slate-50 p-5 shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-primary-700 shadow-xs border border-slate-200">
+                      <Landmark size={22} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900">Biratnagar International College Campus</h4>
+                      <p className="text-[11px] text-slate-600">Bhrikuti Chowk, Biratnagar • Room: {event.location || 'Main Hall'}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationModal(true)}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-full bg-slate-900 hover:bg-slate-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs transition"
+                  >
+                    <Navigation size={13} />
+                    <span>View Map</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
 
           {activeTab === 'Gallery' && (
             imagesLoading ? (
@@ -806,6 +602,155 @@ export default function EventDetail() {
               )}
             </div>
           )}
+          </div>
+        </div>
+
+        {/* Right Column: Sticky "HOSTED BY" Registration Card (4 cols) */}
+        <div className="lg:col-span-4 sticky top-20 space-y-4">
+          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm space-y-5">
+            {/* Header */}
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                HOSTED BY
+              </span>
+              <div className="mt-2 flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-100 text-primary-800 font-black text-sm shadow-xs border border-primary-200">
+                  {event.organizer_name ? event.organizer_name.charAt(0) : 'B'}
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 leading-snug">
+                    {event.organizer_name || 'Faculty Organizer'}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {event.organizing_community || event.organizing_department || 'Biratnagar International College'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Spec List */}
+            <div className="divide-y divide-slate-100 border-y border-slate-100 py-1 text-xs">
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500 font-medium">Date</span>
+                <span className="font-bold text-slate-900">
+                  {new Date(event.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500 font-medium">Time</span>
+                <span className="font-bold text-slate-900">
+                  {formatTime12hr(event.event_time)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500 font-medium">Format</span>
+                <span className="font-bold text-slate-900">
+                  {event.is_team_event ? 'Team Registration' : 'Individual'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500 font-medium">Seats</span>
+                <span className="font-bold text-slate-900">
+                  {event.registered_count || 0} / {event.max_participants || '∞'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500 font-medium">Venue</span>
+                <span className="font-bold text-primary-700 max-w-[55%] text-right truncate">
+                  {event.location || 'BIC Campus'}
+                </span>
+              </div>
+            </div>
+
+            {/* Registration Action Area */}
+            <div className="space-y-2.5 pt-1">
+              {event.status === 'cancelled' ? (
+                <div className="w-full text-center py-2.5 px-4 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
+                  This Event Has Been Cancelled
+                </div>
+              ) : (
+                <>
+                  {user?.role === 'student' && (
+                    event.is_registered ? (
+                      <div className="w-full text-center py-2.5 px-4 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 flex items-center justify-center gap-1.5">
+                        <CheckCircle2 size={15} className="text-emerald-600" />
+                        <span>You're registered. See you there!</span>
+                      </div>
+                    ) : isPastEvent ? (
+                      <div className="w-full text-center py-2.5 px-4 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
+                        Event Completed
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => navigate(`/events/${id}/register`)}
+                        className="w-full rounded-full bg-primary-700 hover:bg-primary-800 py-3 text-xs font-bold text-white shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <span>Register For Event</span>
+                        <ArrowRight size={14} />
+                      </button>
+                    )
+                  )}
+
+                  {!user && (
+                    <Link
+                      to="/login"
+                      className="w-full rounded-full bg-slate-900 hover:bg-slate-800 py-3 text-xs font-bold text-white shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <span>Sign In to Register</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  )}
+
+                  {/* Add To Calendar Button */}
+                  <div className="w-full">
+                    <AddToCalendarButton event={event} />
+                  </div>
+
+                  {/* Host / Admin Actions */}
+                  {isOrganizerOrAdmin && (
+                    <div className="pt-3 border-t border-slate-100 space-y-2">
+                      <button
+                        onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
+                        className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white hover:bg-slate-50 py-2.5 text-xs font-bold text-slate-700 transition"
+                      >
+                        <Edit3 size={13} /> Edit Event Details
+                      </button>
+
+                      <button
+                        onClick={handleGenerateReport}
+                        disabled={generatingReport}
+                        className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white hover:bg-slate-50 py-2.5 text-xs font-bold text-slate-700 transition disabled:opacity-50"
+                      >
+                        {generatingReport ? <Loader2 className="animate-spin" size={13} /> : <FileDown size={13} />}
+                        {generatingReport ? 'Generating Report...' : 'Download PDF Report'}
+                      </button>
+
+                      {user?.role === 'faculty' && !event.deletion_request_id && (
+                        <button
+                          onClick={() => {
+                            setShowDeleteRequestModal(true);
+                            setProblemStatement('');
+                          }}
+                          className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50 hover:bg-red-100 py-2 text-xs font-bold text-red-700 transition"
+                        >
+                          <Trash2 size={13} /> Request Deletion
+                        </button>
+                      )}
+
+                      {user?.role === 'admin' && (
+                        <button
+                          onClick={() => setShowPermanentDeleteModal(true)}
+                          className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50 hover:bg-red-100 py-2 text-xs font-bold text-red-700 transition"
+                        >
+                          <Trash2 size={13} /> Delete Event
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

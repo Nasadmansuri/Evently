@@ -67,7 +67,7 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
               : 'bg-primary-700 text-white border-primary-900'
           }`}>
             {liveStatus === 'ongoing' && <PlayCircle size={10} className="animate-pulse" />}
-            {liveStatus === 'ongoing' ? 'Live Now' : liveStatus}
+            {liveStatus === 'ongoing' ? 'Live Now' : liveStatus === 'ended' ? 'Ended' : liveStatus === 'upcoming' ? 'Upcoming' : liveStatus}
           </span>
         </div>
 

@@ -111,6 +111,7 @@ async function getAllEvents({ category } = {}, userId) {
   let query = `
     SELECT e.id, e.title, e.description, e.category, e.location, e.event_date, e.event_time,
            e.organizing_department, e.organizing_community, e.is_team_event, e.status, e.publish_at,
+           e.rules_eligibility, e.prize_info, e.max_participants,
            e.cancellation_reason, e.cancelled_at,
            u.full_name AS organizer_name,
            (r.id IS NOT NULL) AS is_registered,

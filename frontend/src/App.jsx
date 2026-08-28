@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { ReactLenis } from 'lenis/react';
 import ErrorBoundary from './shared/components/ErrorBoundary';
 import Login from './features/auth/pages/Login';
 import ForgotPassword from './features/auth/pages/ForgotPassword';
@@ -25,13 +26,16 @@ import Gallery from './features/events/pages/Gallery';
 import UserManagement from './features/admin/pages/UserManagement';
 import Reports from './features/admin/pages/Reports';
 import Profile from './features/profile/pages/Profile';
-
+import LandingPage from './features/landing/pages/LandingPage';
+import ContactPage from './features/contact/pages/ContactPage';
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+    <ReactLenis root options={{ lerp: 0.08, duration: 1.2, smoothWheel: true }}>
+      <ErrorBoundary>
+        <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/contact" element={<ContactPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/signup/student" element={<StudentSignup />} />
@@ -354,6 +358,7 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/events" replace />} />
       </Routes>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </ReactLenis>
   );
 }
