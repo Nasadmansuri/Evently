@@ -142,74 +142,74 @@ export default function FacultySignup() {
   const labelClass = 'block text-xs font-semibold text-slate-700 mb-1';
 
   return (
-    <div className="min-h-screen bg-[#edf0f5] p-2.5 sm:p-4 md:p-6 selection:bg-primary-600 selection:text-white flex items-center justify-center">
+    <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#edf0f5] p-2.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
       {/* Master Dual-Column Container */}
-      <div className="w-full max-w-[1360px] bg-white rounded-[32px] sm:rounded-[40px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[760px]">
+      <div className="w-full max-w-[1360px] h-auto lg:h-[calc(100vh-2rem)] max-h-[860px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
-        {/* Left Column: SheKunj-style Branded Showcase Panel */}
-        <div className="lg:col-span-5 bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-8 sm:p-12 lg:p-14 flex flex-col justify-between relative overflow-hidden">
+        {/* Left Column: SheKunj Floating Inset Card */}
+        <div className="lg:col-span-5 m-2 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
           {/* Ambient Glows */}
-          <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-500/15 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-purple-500/15 blur-3xl" />
+          <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-purple-500/15 blur-3xl" />
 
           {/* 1. Top Header: Logo + Navigation Pills */}
           <div className="relative z-10 flex items-center justify-between">
-            <Link to={getDashboardPath(user)} className="flex items-center gap-2.5 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
-                <CalendarHeart size={20} className="text-emerald-300" />
+            <Link to={getDashboardPath(user)} className="flex items-center gap-2 group">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
+                <CalendarHeart size={18} className="text-emerald-300" />
               </div>
-              <span className="text-2xl font-black tracking-tight text-white font-sans">
+              <span className="text-xl font-black tracking-tight text-white font-sans">
                 Evently
               </span>
             </Link>
 
-            <div className="flex items-center gap-1.5 rounded-full bg-white/10 p-1 border border-white/15 backdrop-blur-md">
+            <div className="flex items-center gap-1 rounded-full bg-white/10 p-0.5 border border-white/15 backdrop-blur-md">
               <Link
                 to="/login"
-                className="rounded-full px-3.5 py-1 text-xs font-medium text-slate-200 hover:text-white transition"
+                className="rounded-full px-3 py-1 text-xs font-medium text-slate-200 hover:text-white transition"
               >
                 Sign In
               </Link>
-              <span className="rounded-full bg-white px-3.5 py-1 text-xs font-bold text-slate-900 shadow-xs">
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 shadow-xs">
                 Join Us
               </span>
             </div>
           </div>
 
           {/* 2. Middle Content: Faculty Value Propositions */}
-          <div className="relative z-10 my-8 sm:my-12 space-y-6">
-            <span className="inline-block text-[11px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
+          <div className="relative z-10 my-auto py-4 sm:py-6 space-y-4">
+            <span className="inline-block text-[10px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
               Faculty & Organizer Desk
             </span>
 
-            <div className="space-y-2">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
+            <div className="space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white">
                 Empower Campus.<br />Publish & Lead.
               </h2>
-              <p className="text-sm sm:text-base text-slate-300/90 font-normal leading-relaxed max-w-md">
+              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md">
                 Register your faculty credentials to organize hackathons, coordinate academic workshops, and manage DevCorps student communities.
               </p>
             </div>
 
             {/* Feature Checklist */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200 font-medium">
-                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <CheckCircle2 size={13} />
+            <div className="space-y-2.5 pt-1">
+              <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
+                <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={12} />
                 </div>
                 <span>Direct campus event publishing & scheduling</span>
               </div>
 
-              <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200 font-medium">
-                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <CheckCircle2 size={13} />
+              <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
+                <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={12} />
                 </div>
                 <span>Live attendee rosters & PDF / CSV analytics export</span>
               </div>
 
-              <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200 font-medium">
-                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <CheckCircle2 size={13} />
+              <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
+                <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={12} />
                 </div>
                 <span>Custom dynamic post-event feedback survey builder</span>
               </div>
@@ -217,24 +217,24 @@ export default function FacultySignup() {
           </div>
 
           {/* 3. Bottom Metric Stats Bar */}
-          <div className="relative z-10 pt-6 border-t border-white/15 grid grid-cols-3 gap-4">
+          <div className="relative z-10 pt-4 border-t border-white/15 grid grid-cols-3 gap-3">
             <div>
-              <p className="text-xl sm:text-2xl font-black text-white">Instant</p>
-              <p className="text-[11px] text-slate-300 font-medium">Setup</p>
+              <p className="text-lg sm:text-xl font-black text-white">Instant</p>
+              <p className="text-[10.5px] text-slate-300 font-medium">Setup</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-black text-white">Verified</p>
-              <p className="text-[11px] text-slate-300 font-medium">Faculty Queue</p>
+              <p className="text-lg sm:text-xl font-black text-white">Verified</p>
+              <p className="text-[10.5px] text-slate-300 font-medium">Faculty Queue</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-black text-white">Prestige</p>
-              <p className="text-[11px] text-slate-300 font-medium">Governance</p>
+              <p className="text-lg sm:text-xl font-black text-white">Prestige</p>
+              <p className="text-[10.5px] text-slate-300 font-medium">Governance</p>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Form Container */}
-        <div className="lg:col-span-7 flex flex-col justify-center px-6 sm:px-12 lg:px-16 py-8 sm:py-10 bg-white">
+        {/* Right Column: Form Container with internal scroll if necessary */}
+        <div className="lg:col-span-7 flex flex-col justify-start lg:justify-center px-6 sm:px-10 lg:px-14 py-6 sm:py-8 h-full max-w-xl mx-auto w-full overflow-y-auto">
           <div className="w-full max-w-xl mx-auto">
             {/* Header */}
             <div className="mb-4">
