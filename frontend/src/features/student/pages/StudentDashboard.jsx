@@ -123,20 +123,20 @@ export default function StudentDashboard() {
         </div>
       )}
 
-      {/* 2. Stat Metric Cards with Genuine Visual Hierarchy */}
+      {/* 2. Stat Metric Cards with Skeuomorphic Depth */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Registered - Clean Typographic Treatment */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300 transition-all duration-150 flex flex-col justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Registered</p>
+        {/* Total Registered */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Registered</p>
           <div className="mt-3">
             <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : registrations.length}</p>
             <p className="mt-1 text-xs text-slate-500 font-medium">All-time registrations</p>
           </div>
         </div>
 
-        {/* Upcoming Events - Clean Typographic Treatment */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300 transition-all duration-150 flex flex-col justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Upcoming</p>
+        {/* Upcoming Events */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Upcoming</p>
           <div className="mt-3">
             <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : upcoming.length}</p>
             <p className="mt-1 text-xs text-primary-700 font-semibold">Scheduled on calendar</p>
@@ -144,7 +144,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Live / Ongoing - Urgent Visual Hierarchy with Live Indicator */}
-        <div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-b from-emerald-50/50 via-white to-white p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl !border-emerald-500/60 bg-gradient-to-b from-emerald-50/60 via-white to-white p-5 relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
@@ -153,7 +153,7 @@ export default function StudentDashboard() {
               </span>
               <p className="text-[11px] font-black uppercase tracking-wider text-emerald-800">Happening Now</p>
             </div>
-            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">LIVE</span>
+            <span className="skeuo-badge-embossed text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border-emerald-300">LIVE</span>
           </div>
           <div className="mt-3">
             <p className="text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : ongoing.length}</p>
@@ -163,9 +163,9 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Attended / Past - Clean Typographic Treatment */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300 transition-all duration-150 flex flex-col justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Attended & Past</p>
+        {/* Attended / Past */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Attended & Past</p>
           <div className="mt-3">
             <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : past.length}</p>
             <p className="mt-1 text-xs text-slate-500 font-medium">Past events attended</p>
@@ -177,17 +177,17 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_1fr]">
         {/* Left Column: Registered Events with Elevated Card Canvas */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+          <div className="skeuo-card rounded-2xl p-5 sm:p-6">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-100">
               <div>
                 <h2 className="text-base font-bold text-slate-900">My Registered Events</h2>
               </div>
 
-              {/* Fluid Sliding Tab Selector */}
-              <div className="flex items-center gap-1 rounded-xl bg-slate-100/90 p-1 border border-slate-200/80">
+              {/* Fluid Sliding Tab Selector in Recessed Tray */}
+              <div className="skeuo-tray flex items-center gap-1 rounded-xl p-1">
                 <button
                   onClick={() => setActiveTab('upcoming')}
-                  className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                  className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                     activeTab === 'upcoming'
                       ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900'
@@ -196,7 +196,7 @@ export default function StudentDashboard() {
                   {activeTab === 'upcoming' && (
                     <motion.div
                       layoutId="studentDashRegTab"
-                      className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                      className="absolute inset-0 rounded-lg skeuo-pill-active"
                       transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                     />
                   )}
@@ -204,7 +204,7 @@ export default function StudentDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab('past')}
-                  className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                  className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                     activeTab === 'past'
                       ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900'
@@ -213,7 +213,7 @@ export default function StudentDashboard() {
                   {activeTab === 'past' && (
                     <motion.div
                       layoutId="studentDashRegTab"
-                      className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                      className="absolute inset-0 rounded-lg skeuo-pill-active"
                       transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                     />
                   )}
@@ -345,31 +345,31 @@ export default function StudentDashboard() {
           <RecommendedEvents />
         </div>
 
-        {/* Right Column: Quick Action Shortcuts with Inset Slate Well Canvas */}
+        {/* Right Column: Quick Action Shortcuts with Skeuomorphic Depth */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-5 sm:p-6 shadow-2xs">
+          <div className="skeuo-card rounded-2xl p-5 sm:p-6">
             <h2 className="text-base font-bold text-slate-900 mb-3.5">Quick Actions</h2>
 
             <div className="space-y-2.5">
               {/* Primary Action Button */}
               <button
                 onClick={() => navigate('/events')}
-                className="w-full flex items-center justify-between rounded-xl bg-primary-700 hover:bg-primary-800 active:bg-primary-900 p-4 text-left text-white shadow-xs hover:shadow-md active:scale-[0.98] transition-all group"
+                className="skeuo-btn-primary w-full flex items-center justify-between rounded-xl p-4 text-left group"
               >
                 <div className="flex items-center gap-3">
-                  <CalendarDays size={18} className="text-primary-200 shrink-0" />
+                  <CalendarDays size={18} className="text-emerald-300 shrink-0" />
                   <div>
                     <p className="text-sm font-bold text-white">Browse All Campus Events</p>
-                    <p className="text-[11px] text-primary-100/80">Discover upcoming workshops & activities</p>
+                    <p className="text-[11px] text-emerald-100/90 font-normal">Discover upcoming workshops & activities</p>
                   </div>
                 </div>
-                <ArrowRight size={16} className="text-primary-200 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                <ArrowRight size={16} className="text-emerald-300 group-hover:translate-x-0.5 transition-transform shrink-0" />
               </button>
 
-              {/* Secondary Navigation Items without bulky icon boxes */}
+              {/* Secondary Navigation Items with Tactile Card Affordance */}
               <button
                 onClick={() => navigate('/student/my-registrations')}
-                className="w-full flex items-center justify-between rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 p-3.5 text-left shadow-2xs active:scale-[0.98] transition-all group"
+                className="skeuo-card skeuo-card-interactive w-full flex items-center justify-between rounded-xl p-3.5 text-left group"
               >
                 <div className="flex items-center gap-3">
                   <ListChecks size={18} className="text-slate-400 group-hover:text-primary-700 transition-colors shrink-0" />
@@ -383,7 +383,7 @@ export default function StudentDashboard() {
 
               <button
                 onClick={() => navigate('/student/my-feedback')}
-                className="w-full flex items-center justify-between rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 p-3.5 text-left shadow-2xs active:scale-[0.98] transition-all group"
+                className="skeuo-card skeuo-card-interactive w-full flex items-center justify-between rounded-xl p-3.5 text-left group"
               >
                 <div className="flex items-center gap-3">
                   <MessageSquare size={18} className="text-slate-400 group-hover:text-primary-700 transition-colors shrink-0" />
@@ -397,7 +397,7 @@ export default function StudentDashboard() {
 
               <button
                 onClick={() => navigate('/gallery')}
-                className="w-full flex items-center justify-between rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 p-3.5 text-left shadow-2xs active:scale-[0.98] transition-all group"
+                className="skeuo-card skeuo-card-interactive w-full flex items-center justify-between rounded-xl p-3.5 text-left group"
               >
                 <div className="flex items-center gap-3">
                   <Image size={18} className="text-slate-400 group-hover:text-primary-700 transition-colors shrink-0" />

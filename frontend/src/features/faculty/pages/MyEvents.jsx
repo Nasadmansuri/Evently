@@ -95,30 +95,30 @@ export default function MyEvents() {
 
         <button
           onClick={() => navigate('/faculty/create-event')}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all shrink-0 self-start sm:self-auto"
+          className="skeuo-btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs shrink-0 self-start sm:self-auto"
         >
           <Plus size={16} /> Create New Event
         </button>
       </div>
 
       {/* 2. Filter & Search Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3.5 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs">
-        {/* Fluid Status Filter Pills */}
-        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto p-1 bg-slate-100/80 rounded-xl border border-slate-200/80">
+      <div className="skeuo-card flex flex-col sm:flex-row items-center justify-between gap-3.5 p-3.5 rounded-2xl">
+        {/* Fluid Status Filter Pills in Skeuomorphic Tray */}
+        <div className="skeuo-tray flex items-center gap-1 overflow-x-auto w-full sm:w-auto p-1 rounded-xl">
           {STATUS_FILTERS.map((status) => {
             const isActive = activeStatus === status;
             return (
               <button
                 key={status}
                 onClick={() => setActiveStatus(status)}
-                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                   isActive ? 'text-white' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="myEventsStatusPill"
-                    className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                    className="absolute inset-0 rounded-lg skeuo-pill-active"
                     transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                   />
                 )}
@@ -136,7 +136,7 @@ export default function MyEvents() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search title, venue, category..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-8 text-xs font-medium text-slate-900 transition placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+            className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-medium text-slate-900 placeholder:text-slate-400"
           />
           {search && (
             <button

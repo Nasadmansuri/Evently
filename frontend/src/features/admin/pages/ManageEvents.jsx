@@ -203,15 +203,15 @@ export default function ManageEvents() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setOngoingOnly((v) => !v)}
-            className={`flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all shadow-2xs ${
+            className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
               ongoingOnly
-                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                ? 'skeuo-btn-primary !border-emerald-700 !bg-emerald-600'
+                : 'skeuo-btn-secondary'
             }`}
           >
             <span className="relative flex h-2 w-2">
-              {ongoingOnly && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />}
-              <span className={`relative inline-flex h-2 w-2 rounded-full ${ongoingOnly ? 'bg-emerald-600' : 'bg-slate-300'}`} />
+              {ongoingOnly && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />}
+              <span className={`relative inline-flex h-2 w-2 rounded-full ${ongoingOnly ? 'bg-white' : 'bg-slate-400'}`} />
             </span>
             <span>Live Now</span>
           </button>
@@ -219,10 +219,10 @@ export default function ManageEvents() {
           {pendingRequests.length > 0 && (
             <button
               onClick={() => setDeletionRequestsOnly((v) => !v)}
-              className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition active:scale-95 ${
+              className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${
                 deletionRequestsOnly
-                  ? 'border-rose-500 bg-rose-600 text-white shadow-sm'
-                  : 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 shadow-2xs'
+                  ? 'skeuo-btn-danger'
+                  : 'skeuo-btn-secondary !text-rose-700 !border-rose-200'
               }`}
             >
               <span className="relative flex h-2 w-2">
@@ -237,17 +237,17 @@ export default function ManageEvents() {
             </button>
           )}
 
-          <div className="flex rounded-xl border border-slate-200/80 bg-slate-100/90 p-1 shadow-2xs">
+          <div className="skeuo-tray flex rounded-xl p-1">
             <button
               onClick={() => setViewMode('list')}
-              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                 viewMode === 'list' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {viewMode === 'list' && (
                 <motion.div
                   layoutId="manageEventsViewModePill"
-                  className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                  className="absolute inset-0 rounded-lg skeuo-pill-active"
                   transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}
@@ -255,14 +255,14 @@ export default function ManageEvents() {
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-colors ${
+              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                 viewMode === 'calendar' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {viewMode === 'calendar' && (
                 <motion.div
                   layoutId="manageEventsViewModePill"
-                  className="absolute inset-0 rounded-lg bg-primary-700 shadow-xs"
+                  className="absolute inset-0 rounded-lg skeuo-pill-active"
                   transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}
@@ -272,7 +272,7 @@ export default function ManageEvents() {
 
           <button
             onClick={() => navigate('/admin/create-event')}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all"
+            className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
           >
             <Plus size={15} /> Create Event
           </button>
@@ -280,27 +280,27 @@ export default function ManageEvents() {
       </div>
 
       {/* Filter Toolbar */}
-      <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <div className="skeuo-card rounded-[24px] p-4 sm:p-5">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label className="mb-1.5 block text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Search</label>
+            <label className="mb-1.5 block text-[10.5px] font-bold uppercase tracking-wider text-slate-500">Search</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search event title or keywords..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-2 pl-9 pr-3 text-xs text-slate-800 transition placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                className="skeuo-input w-full rounded-xl py-2 pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Category</label>
+            <label className="mb-1.5 block text-[10.5px] font-bold uppercase tracking-wider text-slate-500">Category</label>
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-xs font-medium text-slate-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="skeuo-input w-full rounded-xl px-3 py-2 text-xs font-medium text-slate-800"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
@@ -309,11 +309,11 @@ export default function ManageEvents() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Department</label>
+            <label className="mb-1.5 block text-[10.5px] font-bold uppercase tracking-wider text-slate-500">Department</label>
             <select
               value={activeDepartment}
               onChange={(e) => setActiveDepartment(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-xs font-medium text-slate-800 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="skeuo-input w-full rounded-xl px-3 py-2 text-xs font-medium text-slate-800"
             >
               <option value="All">All Departments</option>
               {ORGANIZING_DEPARTMENTS.filter((dept) => dept !== 'All').map((dept) => (
@@ -330,7 +330,7 @@ export default function ManageEvents() {
           <div className="flex items-end">
             <button
               onClick={resetFilters}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              className="skeuo-btn-secondary w-full rounded-xl px-3 py-2 text-xs"
             >
               Reset Filters
             </button>

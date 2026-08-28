@@ -201,7 +201,7 @@ export default function EventDetail() {
   return (
     <div className="space-y-6">
       {/* Unified World-Class Event Header Card */}
-      <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
+      <div className="skeuo-card overflow-hidden rounded-[28px]">
         <div className="grid gap-0 lg:grid-cols-[1.05fr_1fr]">
           {/* Left: Poster Image or Academic Deep Teal Backdrop */}
           <div className="relative min-h-[260px] lg:min-h-[340px] overflow-hidden p-6 sm:p-8 flex flex-col justify-between">
@@ -218,7 +218,7 @@ export default function EventDetail() {
               </>
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] flex flex-col items-center justify-center p-6 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md mb-3 border border-white/15 shadow-md">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md mb-3 border border-white/20 shadow-md">
                   <CalendarDays size={32} className="text-emerald-300" />
                 </div>
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200/90">
@@ -232,14 +232,14 @@ export default function EventDetail() {
 
             {/* Badges Overlay on Poster */}
             <div className="relative z-10 flex items-center justify-between gap-3">
-              <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] shadow-sm ${
+              <span className={`skeuo-badge-embossed rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${
                 event.status === 'cancelled'
-                  ? 'bg-rose-600 text-white'
+                  ? 'bg-rose-600 text-white border-rose-800'
                   : liveStatus === 'ongoing'
-                  ? 'bg-emerald-500 text-white'
+                  ? 'bg-emerald-500 text-white border-emerald-700'
                   : isPastEvent
-                  ? 'bg-slate-900/90 text-white'
-                  : 'bg-white/95 text-slate-800'
+                  ? 'bg-slate-900/90 text-white border-slate-950'
+                  : 'bg-white/95 text-slate-800 border-slate-300'
               }`}>
                 {event.status === 'cancelled'
                   ? 'Cancelled'
@@ -251,11 +251,11 @@ export default function EventDetail() {
               </span>
               <div className="flex items-center gap-1.5">
                 {event.is_team_event ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary-800/90 border border-white/20 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+                  <span className="skeuo-badge-embossed inline-flex items-center gap-1 rounded-full bg-primary-800/90 border border-white/20 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-white">
                     <User size={11} /> Team
                   </span>
                 ) : null}
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold shadow-xs ${style.bg} ${style.text}`}>
+                <span className={`skeuo-badge-embossed rounded-full px-2.5 py-1 text-[10px] font-bold ${style.bg} ${style.text}`}>
                   {event.category}
                 </span>
               </div>
@@ -333,7 +333,7 @@ export default function EventDetail() {
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => navigate('/events')}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 active:scale-95 transition"
+                        className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
                       >
                         ← Back to Events
                       </button>
@@ -342,14 +342,14 @@ export default function EventDetail() {
                           <button
                             onClick={handleGenerateReport}
                             disabled={generatingReport}
-                            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-slate-700 active:scale-95 disabled:opacity-50"
+                            className="skeuo-btn-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs disabled:opacity-50"
                           >
                             {generatingReport ? <Loader2 className="animate-spin" size={14} /> : <FileDown size={14} />}
                             {generatingReport ? 'Generating...' : 'PDF Report'}
                           </button>
                           <button
                             onClick={() => setShowPermanentDeleteModal(true)}
-                            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-rose-700 shadow-xs hover:bg-rose-50 hover:border-rose-200 active:scale-95 transition"
+                            className="skeuo-btn-danger inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
                           >
                             <Trash2 size={14} /> Delete Event
                           </button>
@@ -361,20 +361,20 @@ export default function EventDetail() {
                       {user?.role === 'student' && (
                         event.is_registered ? (
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-700">
+                            <span className="skeuo-badge-embossed inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800 border-emerald-300">
                               <CheckCircle2 size={15} /> Already Registered
                             </span>
                             <AddToCalendarButton event={event} />
                           </div>
                         ) : isPastEvent ? (
-                          <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-semibold text-slate-500">
+                          <span className="skeuo-btn-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs text-slate-500 opacity-80 cursor-not-allowed">
                             Event Ended
                           </span>
                         ) : (
                           <div className="flex flex-wrap items-center gap-2">
                             <button
                               onClick={() => navigate(`/events/${id}/register`)}
-                              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-800 active:scale-[0.98]"
+                              className="skeuo-btn-primary inline-flex shrink-0 items-center justify-center rounded-xl px-5 py-2.5 text-xs"
                             >
                               Register Now
                             </button>
@@ -387,7 +387,7 @@ export default function EventDetail() {
                         <>
                           <button
                             onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
-                            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 active:scale-95 transition"
+                            className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
                           >
                             <Edit3 size={14} /> Edit Event
                           </button>
@@ -395,7 +395,7 @@ export default function EventDetail() {
                           <button
                             onClick={handleGenerateReport}
                             disabled={generatingReport}
-                            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-800 active:scale-[0.98] disabled:opacity-50"
+                            className="skeuo-btn-primary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs disabled:opacity-50"
                           >
                             {generatingReport ? <Loader2 className="animate-spin" size={14} /> : <FileDown size={14} />}
                             {generatingReport ? 'Generating...' : 'PDF Report'}
@@ -409,7 +409,7 @@ export default function EventDetail() {
                                 setShowDeleteRequestModal(true);
                                 setProblemStatement('');
                               }}
-                              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-bold text-red-700 shadow-xs hover:bg-red-100 active:scale-95 transition"
+                              className="skeuo-btn-danger inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs"
                             >
                               <Trash2 size={14} /> Request Deletion
                             </button>
@@ -464,14 +464,14 @@ export default function EventDetail() {
         </div>
       </div>
 
-      {/* Tabs & Content */}
-      <div className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-2xs">
-        <div className="flex border-b border-slate-200/80 bg-slate-50/80 p-1.5 gap-1">
+      {/* Tabs & Content in Skeuomorphic Recessed Container */}
+      <div className="skeuo-card overflow-hidden rounded-[24px]">
+        <div className="skeuo-tray flex p-1.5 gap-1 border-x-0 border-t-0 rounded-t-[23px]">
           {(event.status === 'cancelled' ? ['Details', 'Gallery'] : TABS).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`relative rounded-xl px-5 py-2.5 text-xs sm:text-sm font-bold transition-colors ${
+              className={`relative rounded-xl px-5 py-2 text-xs sm:text-sm font-bold transition-all ${
                 activeTab === tab
                   ? 'text-white'
                   : 'text-slate-600 hover:text-slate-900'
@@ -480,7 +480,7 @@ export default function EventDetail() {
               {activeTab === tab && (
                 <motion.div
                   layoutId="eventDetailTabIndicator"
-                  className="absolute inset-0 rounded-xl bg-primary-700 shadow-xs"
+                  className="absolute inset-0 rounded-xl skeuo-pill-active"
                   transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}

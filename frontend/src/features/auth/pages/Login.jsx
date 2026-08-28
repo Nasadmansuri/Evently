@@ -368,7 +368,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-3 py-6">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-8">
+      <div className="skeuo-card w-full max-w-sm rounded-2xl p-6 sm:p-8">
         <Link to={getDashboardPath(user)} className="inline-flex items-center gap-2 mb-5 hover:opacity-90 transition group">
           <div className="w-8 h-8 rounded-lg bg-primary-700 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
             <CalendarHeart className="text-white" size={18} />
@@ -425,7 +425,7 @@ export default function Login() {
                 setEmail(e.target.value);
                 setEmailSuggestion(suggestEmailCorrection(e.target.value));
               }}
-              className="w-full border border-slate-200 bg-white rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition"
+              className="skeuo-input w-full rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
               placeholder="you@university.edu"
             />
             {emailSuggestion && (
@@ -447,7 +447,7 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-slate-200 bg-white rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition"
+                className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
                 placeholder="••••••••"
               />
               <button
@@ -468,7 +468,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading || googleLoading}
-            className="w-full bg-primary-700 hover:bg-primary-800 active:bg-primary-900 hover:shadow-lg hover:shadow-primary-700/20 active:scale-[0.98] text-white font-bold py-2.5 rounded-xl text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-xs"
+            className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="animate-spin" size={16} /> : null}
             {loading ? 'Signing in...' : 'Sign In'}
@@ -489,7 +489,7 @@ export default function Login() {
             type="button"
             onClick={handleGoogleClick}
             disabled={googleLoading || loading}
-            className="w-full h-full flex items-center justify-center gap-2 border border-slate-200 bg-white rounded-xl py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-[0.99] disabled:opacity-50 shadow-2xs"
+            className="skeuo-btn-secondary w-full h-full flex items-center justify-center gap-2 rounded-xl py-2 text-sm disabled:opacity-50"
           >
             {googleLoading ? (
               <Loader2 className="animate-spin text-slate-500" size={16} />

@@ -135,15 +135,15 @@ export default function FacultySignup() {
   }
 
   const inputClass =
-    'w-full border border-slate-200 bg-white rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition';
+    'skeuo-input w-full rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400';
   const selectClass =
-    'w-full appearance-none border border-slate-200 bg-white rounded-xl px-3.5 pr-9 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50';
+    'skeuo-input w-full appearance-none rounded-xl px-3.5 pr-9 py-2.5 text-sm text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100';
   const chevronClass = 'absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none';
   const labelClass = 'block text-xs font-semibold text-slate-700 mb-1';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-3 py-6">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-5 sm:p-7">
+      <div className="skeuo-card w-full max-w-lg rounded-2xl p-5 sm:p-7">
         <div className="flex flex-col items-center text-center mb-4">
           <Link to={getDashboardPath(user)} className="inline-flex items-center gap-2 mb-3 hover:opacity-90 transition group">
             <div className="w-8 h-8 rounded-lg bg-primary-700 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
@@ -155,7 +155,8 @@ export default function FacultySignup() {
           <p className="text-xs text-slate-500">Join Evently and never miss a campus event.</p>
         </div>
 
-        <div className="flex bg-slate-100 rounded-full p-1 mb-4">
+        {/* Student / Faculty toggle in Skeuomorphic Tray */}
+        <div className="skeuo-tray flex rounded-full p-1 mb-4">
           <button
             type="button"
             onClick={() => navigate('/signup/student')}
@@ -165,7 +166,7 @@ export default function FacultySignup() {
           </button>
           <button
             type="button"
-            className="flex-1 py-1.5 rounded-full text-xs font-bold bg-white shadow-xs text-primary-700"
+            className="skeuo-pill-active flex-1 py-1.5 rounded-full text-xs font-bold text-white shadow-xs"
           >
             Faculty
           </button>
@@ -318,7 +319,7 @@ export default function FacultySignup() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full border border-slate-200 bg-white rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition"
+                  className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
                 />
                 <button
                   type="button"
@@ -339,7 +340,7 @@ export default function FacultySignup() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full border border-slate-200 bg-white rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700 transition"
+                  className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
                 />
                 <button
                   type="button"
@@ -382,7 +383,7 @@ export default function FacultySignup() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary-700 hover:bg-primary-800 active:bg-primary-900 hover:shadow-lg hover:shadow-primary-700/20 active:scale-[0.98] text-white font-bold py-2.5 rounded-xl text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-xs"
+            className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}
             {loading ? 'Validating Email...' : 'Create Account'}

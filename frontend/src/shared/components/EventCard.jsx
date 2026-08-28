@@ -26,9 +26,9 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
 
   return (
     <>
-      <article className="group flex flex-col rounded-[22px] border border-slate-200/85 bg-white p-3.5 shadow-2xs hover:shadow-md hover:border-primary-300 hover:-translate-y-1 transition-all duration-200">
-        {/* Poster Inset Banner (Consistent 16:10 Ratio) */}
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-100">
+      <article className="group skeuo-card skeuo-card-interactive flex flex-col rounded-[22px] p-3.5">
+        {/* Poster Inset Banner (Consistent 16:10 Ratio with Physical Inset Frame) */}
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-950 border border-slate-900/10 shadow-inner">
           {hasBanner ? (
             <img
               src={`${ASSET_BASE_URL}${event.banner_image}`}
@@ -43,7 +43,7 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
           ) : (
             /* Branded Deep Teal Academic Poster Backdrop */
             <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-[#023433] via-[#035352] to-[#012424] p-4 text-center">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md mb-2 border border-white/15 shadow-2xs">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-md mb-2 border border-white/20 shadow-sm">
                 <CalendarDays size={20} className="text-emerald-300" />
               </div>
               <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-emerald-200/90 line-clamp-1">
@@ -52,19 +52,19 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
             </div>
           )}
 
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-5" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-5" />
 
-          {/* Status Badge in Top Right */}
-          <span className={`absolute right-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ${
+          {/* Status Badge in Top Right with Skeuomorphic Emboss */}
+          <span className={`absolute right-2.5 top-2.5 z-10 skeuo-badge-embossed rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
             liveStatus === 'cancelled'
-              ? 'bg-rose-600 text-white'
+              ? 'bg-rose-600 text-white border-rose-800'
               : liveStatus === 'scheduled'
-              ? 'bg-amber-600 text-white'
+              ? 'bg-amber-600 text-white border-amber-800'
               : liveStatus === 'ended'
-              ? 'bg-slate-800/90 text-white'
+              ? 'bg-slate-850 text-white border-slate-950'
               : liveStatus === 'ongoing'
-              ? 'bg-emerald-600 text-white flex items-center gap-1'
-              : 'bg-primary-700 text-white'
+              ? 'bg-emerald-600 text-white border-emerald-800 flex items-center gap-1'
+              : 'bg-primary-700 text-white border-primary-900'
           }`}>
             {liveStatus === 'ongoing' && <PlayCircle size={10} className="animate-pulse" />}
             {liveStatus === 'ongoing' ? 'Live Now' : liveStatus}
@@ -76,12 +76,12 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
           {/* Date & Time Row */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
             <span className="flex items-center gap-1.5">
-              <Calendar size={13} className="text-slate-400" />
+              <Calendar size={13} className="text-primary-700" />
               {formatEventDate(event.event_date)}
             </span>
             {event.event_time && (
               <span className="flex items-center gap-1.5">
-                <Clock size={13} className="text-slate-400" />
+                <Clock size={13} className="text-primary-700" />
                 {formatTime12hr(event.event_time)}
               </span>
             )}
@@ -102,13 +102,13 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
             </p>
           )}
 
-          {/* Category & Team Badges */}
+          {/* Category & Team Badges with subtle tactile borders */}
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-            <span className={`rounded-md px-2.5 py-0.5 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
+            <span className={`skeuo-badge-embossed rounded-md px-2.5 py-0.5 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
               {event.category}
             </span>
             {!!event.is_team_event && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-primary-50 border border-primary-100 px-2 py-0.5 text-[10.5px] font-bold text-primary-700">
+              <span className="skeuo-badge-embossed inline-flex items-center gap-1 rounded-md bg-primary-50 px-2 py-0.5 text-[10.5px] font-bold text-primary-800">
                 <Users size={10} /> Team Event
               </span>
             )}
@@ -121,10 +121,10 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
               e.stopPropagation();
               setShowLocationModal(true);
             }}
-            className="group/loc mt-2 flex w-fit items-center gap-1.5 text-xs text-slate-500 hover:text-primary-700 transition"
+            className="group/loc mt-2 flex w-fit items-center gap-1.5 text-xs text-slate-600 hover:text-primary-800 transition"
             title="Click to view campus venue & map"
           >
-            <MapPin size={13} className="shrink-0 text-slate-400 group-hover/loc:text-primary-600 group-hover/loc:scale-110 transition" />
+            <MapPin size={13} className="shrink-0 text-primary-700 group-hover/loc:scale-110 transition" />
             <span className="truncate group-hover/loc:underline text-[11.5px] font-medium">
               {event.location || 'Biratnagar International College'}
             </span>
@@ -149,25 +149,25 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
                 {liveStatus === 'cancelled' ? (
                   <button
                     onClick={onViewDetails}
-                    className="flex shrink-0 items-center gap-1.5 rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-1.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100"
+                    className="skeuo-btn-danger flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs"
                   >
                     Cancelled · Details <ArrowRight size={13} />
                   </button>
                 ) : showRegisterAction && event.is_registered ? (
-                  <span className="flex shrink-0 items-center gap-1 rounded-xl bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 text-xs font-bold text-emerald-700">
+                  <span className="skeuo-badge-embossed flex shrink-0 items-center gap-1 rounded-xl bg-emerald-50 text-emerald-800 border-emerald-300 px-3.5 py-1.5 text-xs font-bold">
                     <CheckCircle2 size={13} /> Registered
                   </span>
                 ) : showRegisterAction && !isPast ? (
                   <button
                     onClick={onRegister}
-                    className="flex shrink-0 items-center gap-1.5 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-xs transition active:scale-95"
+                    className="skeuo-btn-primary flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-xs"
                   >
                     {liveStatus === 'ongoing' ? 'Join Now' : 'Register'} <ArrowRight size={13} />
                   </button>
                 ) : (
                   <button
                     onClick={onViewDetails}
-                    className="flex shrink-0 items-center gap-1.5 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-xs transition active:scale-95"
+                    className="skeuo-btn-primary flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-xs"
                   >
                     Details <ArrowRight size={13} />
                   </button>
