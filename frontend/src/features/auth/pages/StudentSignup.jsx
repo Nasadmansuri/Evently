@@ -182,330 +182,417 @@ export default function StudentSignup() {
   const labelClass = 'block text-xs font-semibold text-slate-700 mb-1';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-3 py-6">
-      <div className="skeuo-card w-full max-w-lg rounded-2xl p-5 sm:p-7">
-        {/* Logo */}
-        <div className="flex flex-col items-center text-center mb-4">
-          <Link to={getDashboardPath(user)} className="inline-flex items-center gap-2 mb-3 hover:opacity-90 transition group">
-            <div className="w-8 h-8 rounded-lg bg-primary-700 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
-              <CalendarHeart className="w-4.5 h-4.5 text-white" size={18} />
-            </div>
-            <span className="text-lg font-bold text-slate-900 group-hover:text-primary-700 transition-colors">Evently</span>
-          </Link>
-          <h1 className="text-xl font-black tracking-tight text-slate-900 mb-0.5">Create your account</h1>
-          <p className="text-xs text-slate-500">Join Evently and never miss a campus event.</p>
-        </div>
+    <div className="min-h-screen bg-[#edf0f5] p-2.5 sm:p-4 md:p-6 selection:bg-primary-600 selection:text-white flex items-center justify-center">
+      {/* Master Dual-Column Container */}
+      <div className="w-full max-w-[1360px] bg-white rounded-[32px] sm:rounded-[40px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[760px]">
+        
+        {/* Left Column: SheKunj-style Branded Showcase Panel */}
+        <div className="lg:col-span-5 bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-8 sm:p-12 lg:p-14 flex flex-col justify-between relative overflow-hidden">
+          {/* Ambient Glows */}
+          <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-500/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-purple-500/15 blur-3xl" />
 
-        {/* Student / Faculty toggle in Skeuomorphic Tray */}
-        <div className="skeuo-tray flex rounded-full p-1 mb-4">
-          <button
-            type="button"
-            className="skeuo-pill-active flex-1 py-1.5 rounded-full text-xs font-bold text-white shadow-xs"
-          >
-            Student
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/signup/faculty')}
-            className="flex-1 py-1.5 rounded-full text-xs font-medium text-slate-500 hover:text-slate-700 transition"
-          >
-            Faculty
-          </button>
-        </div>
+          {/* 1. Top Header: Logo + Navigation Pills */}
+          <div className="relative z-10 flex items-center justify-between">
+            <Link to={getDashboardPath(user)} className="flex items-center gap-2.5 group">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
+                <CalendarHeart size={20} className="text-emerald-300" />
+              </div>
+              <span className="text-2xl font-black tracking-tight text-white font-sans">
+                Evently
+              </span>
+            </Link>
 
-        {error && (
-          <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-            <AlertCircle size={14} className="shrink-0" />
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleInitiateSignup} className="space-y-3">
-          {/* Row: Name & Email */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Full Name</label>
-              <input
-                type="text"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Nasad Mansuri"
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Email Address</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className={inputClass}
-              />
+            <div className="flex items-center gap-1.5 rounded-full bg-white/10 p-1 border border-white/15 backdrop-blur-md">
+              <Link
+                to="/login"
+                className="rounded-full px-3.5 py-1 text-xs font-medium text-slate-200 hover:text-white transition"
+              >
+                Sign In
+              </Link>
+              <span className="rounded-full bg-white px-3.5 py-1 text-xs font-bold text-slate-900 shadow-xs">
+                Join Us
+              </span>
             </div>
           </div>
 
-          {/* Row: Phone & College */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Phone Number</label>
-              <input
-                type="tel"
-                required
-                maxLength={10}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                placeholder="98XXXXXXXX"
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className={labelClass}>College Name</label>
-              <input
-                type="text"
-                required
-                value={collegeName}
-                onChange={(e) => setCollegeName(e.target.value)}
-                placeholder="e.g. Biratnagar International College"
-                className={inputClass}
-              />
-              <p className="text-[10px] text-slate-400 mt-1">
-                We'll auto-detect if you're at BIC, Herald, or Fishtail Mountain College.
+          {/* 2. Middle Content: Student Value Propositions */}
+          <div className="relative z-10 my-8 sm:my-12 space-y-6">
+            <span className="inline-block text-[11px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
+              Student Onboarding Portal
+            </span>
+
+            <div className="space-y-2">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
+                Join Evently.<br />Never miss out.
+              </h2>
+              <p className="text-sm sm:text-base text-slate-300/90 font-normal leading-relaxed max-w-md">
+                Register with your college email or external student details to unlock hackathons, skill-building workshops, and tech communities.
               </p>
             </div>
+
+            {/* Feature Checklist */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200 font-medium">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={13} />
+                </div>
+                <span>Free instant access to BIC events & guest hackathons</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200 font-medium">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={13} />
+                </div>
+                <span>Verified certificates & digital attendance tracking</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200 font-medium">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={13} />
+                </div>
+                <span>DevCorps technical clubs & peer networking</span>
+              </div>
+            </div>
           </div>
 
-          {/* Affiliation Indicator */}
-          {collegeName.trim() && (
-            <div
-              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl border ${
-                isBic
-                  ? 'bg-primary-50 text-primary-800 border-primary-200/80'
-                  : 'bg-slate-50 text-slate-600 border-slate-200'
-              }`}
-            >
-              {isBic ? (
-                <>
-                  <ShieldCheck size={14} className="text-primary-700 shrink-0" />
-                  <span className="font-semibold">Wolverhampton-affiliated student ({matchedCollegeName})</span>
-                </>
-              ) : (
-                <>
-                  <UserCircle size={14} className="text-slate-500 shrink-0" />
-                  <span>Guest Participant</span>
-                </>
+          {/* 3. Bottom Metric Stats Bar */}
+          <div className="relative z-10 pt-6 border-t border-white/15 grid grid-cols-3 gap-4">
+            <div>
+              <p className="text-xl sm:text-2xl font-black text-white">100%</p>
+              <p className="text-[11px] text-slate-300 font-medium">Free for Students</p>
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-black text-white">1-Tap</p>
+              <p className="text-[11px] text-slate-300 font-medium">Fast Registration</p>
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-black text-white">Official</p>
+              <p className="text-[11px] text-slate-300 font-medium">BIC Platform</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Form Container */}
+        <div className="lg:col-span-7 flex flex-col justify-center px-6 sm:px-12 lg:px-16 py-8 sm:py-10 bg-white">
+          <div className="w-full max-w-xl mx-auto">
+            {/* Header */}
+            <div className="mb-4">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                Create your student account
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                Join Evently and discover upcoming campus opportunities.
+              </p>
+            </div>
+
+            {/* Student / Faculty toggle in Skeuomorphic Tray */}
+            <div className="skeuo-tray flex rounded-full p-1 mb-5">
+              <button
+                type="button"
+                className="skeuo-pill-active flex-1 py-1.5 rounded-full text-xs font-bold text-white shadow-xs cursor-default"
+              >
+                Student
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/signup/faculty')}
+                className="flex-1 py-1.5 rounded-full text-xs font-medium text-slate-500 hover:text-slate-900 transition cursor-pointer"
+              >
+                Faculty
+              </button>
+            </div>
+
+            {error && (
+              <div className="mb-4 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3.5 py-2.5">
+                <AlertCircle size={14} className="shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleInitiateSignup} className="space-y-3.5">
+              {/* Row: Name & Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Nasad Mansuri"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@bicnepal.edu.np"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              {/* Row: Phone & College */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Phone Number</label>
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="98XXXXXXXX"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>College Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={collegeName}
+                    onChange={(e) => setCollegeName(e.target.value)}
+                    placeholder="e.g. Biratnagar International College"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              {/* Affiliation Indicator */}
+              {collegeName.trim() && (
+                <div
+                  className={`flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-xl border ${
+                    isBic
+                      ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                      : 'bg-slate-50 text-slate-600 border-slate-200'
+                  }`}
+                >
+                  {isBic ? (
+                    <>
+                      <ShieldCheck size={15} className="text-emerald-700 shrink-0" />
+                      <span className="font-semibold text-xs">Wolverhampton-affiliated student ({matchedCollegeName})</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserCircle size={15} className="text-slate-500 shrink-0" />
+                      <span className="text-xs">Guest Participant (Open Hackathons & Summits)</span>
+                    </>
+                  )}
+                </div>
               )}
-            </div>
-          )}
 
-          {/* BIC: Cascading Dropdowns */}
-          {isBic ? (
-            <div className="space-y-3 pt-1 border-t border-slate-100">
-              <p className="text-xs text-slate-500 font-medium">
-                Academic Details:
+              {/* Affiliated Cascade vs Guest Major */}
+              {isBic ? (
+                <div className="space-y-3 rounded-2xl bg-slate-50/80 p-3.5 border border-slate-200/80">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={labelClass}>Faculty / School</label>
+                      <div className="relative">
+                        <select
+                          required
+                          value={facultyName}
+                          onChange={(e) => handleFacultyChange(e.target.value)}
+                          className={selectClass}
+                        >
+                          <option value="">Select Faculty</option>
+                          {facultyOptions.map((f) => (
+                            <option key={f} value={f}>{f}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className={chevronClass} size={14} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Course</label>
+                      <div className="relative">
+                        <select
+                          required
+                          value={courseName}
+                          onChange={(e) => handleCourseChange(e.target.value)}
+                          disabled={!facultyName}
+                          className={selectClass}
+                        >
+                          <option value="">{facultyName ? 'Select Course' : 'Select Faculty First'}</option>
+                          {courseOptions.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className={chevronClass} size={14} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2.5">
+                    <div>
+                      <label className={labelClass}>Level</label>
+                      <div className="relative">
+                        <select
+                          required
+                          value={academicLevel}
+                          onChange={(e) => handleLevelChange(e.target.value)}
+                          disabled={!courseName}
+                          className={selectClass}
+                        >
+                          <option value="">Level</option>
+                          {levelOptions.map((l) => (
+                            <option key={l} value={l}>Level {l}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className={chevronClass} size={12} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Semester</label>
+                      <div className="relative">
+                        <select
+                          required
+                          value={academicSemester}
+                          onChange={(e) => setAcademicSemester(e.target.value)}
+                          disabled={!academicLevel}
+                          className={selectClass}
+                        >
+                          <option value="">Sem</option>
+                          {semesterOptions.map((s) => (
+                            <option key={s} value={s}>Sem {s}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className={chevronClass} size={12} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Group</label>
+                      <div className="relative">
+                        <select
+                          required
+                          value={academicGroup}
+                          onChange={(e) => setAcademicGroup(e.target.value)}
+                          disabled={!academicSemester}
+                          className={selectClass}
+                        >
+                          <option value="">Group</option>
+                          {GROUPS.map((g) => (
+                            <option key={g} value={g}>{g}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className={chevronClass} size={12} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className={labelClass}>Course / Major</label>
+                  <input
+                    type="text"
+                    required
+                    value={courseMajor}
+                    onChange={(e) => setCourseMajor(e.target.value)}
+                    placeholder="e.g. BSc Computer Science, MBA, BBA"
+                    className={inputClass}
+                  />
+                </div>
+              )}
+
+              {/* Row: Password & Confirm */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className={labelClass}>Password</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((p) => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>Confirm Password</label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((p) => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Validation Hints */}
+              <div className="flex items-center gap-4 text-[11px] text-slate-500">
+                <span className={password.length >= 8 ? 'text-emerald-700 font-semibold' : ''}>
+                  {password.length >= 8 ? '✓' : '○'} At least 8 characters
+                </span>
+                <span
+                  className={
+                    confirmPassword && password === confirmPassword
+                      ? 'text-emerald-700 font-semibold'
+                      : ''
+                  }
+                >
+                  {confirmPassword && password === confirmPassword ? '✓' : '○'} Passwords match
+                </span>
+              </div>
+
+              <p className="text-[11px] text-slate-400 text-center pt-1">
+                By creating an account you agree to our{' '}
+                <Link to="/terms" target="_blank" className="text-primary-700 font-semibold underline hover:text-primary-800">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link to="/privacy" target="_blank" className="text-primary-700 font-semibold underline hover:text-primary-800">
+                  Privacy Policy
+                </Link>.
               </p>
 
-              <div>
-                <label className={labelClass}>Faculty</label>
-                <div className="relative">
-                  <select
-                    required
-                    value={facultyName}
-                    onChange={(e) => handleFacultyChange(e.target.value)}
-                    className={selectClass}
-                  >
-                    <option value="">Select faculty</option>
-                    {facultyOptions.map((f) => (
-                      <option key={f} value={f}>{f}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className={chevronClass} size={14} />
-                </div>
-              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loading ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}
+                {loading ? 'Validating Email...' : 'Create Account'}
+              </button>
+            </form>
 
-              <div>
-                <label className={labelClass}>Course</label>
-                <div className="relative">
-                  <select
-                    required
-                    value={courseName}
-                    onChange={(e) => handleCourseChange(e.target.value)}
-                    disabled={!facultyName}
-                    className={selectClass}
-                  >
-                    <option value="">{facultyName ? 'Select course' : 'Select faculty first'}</option>
-                    {courseOptions.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className={chevronClass} size={14} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className={labelClass}>Level</label>
-                  <div className="relative">
-                    <select
-                      required
-                      value={academicLevel}
-                      onChange={(e) => handleLevelChange(e.target.value)}
-                      disabled={!courseName}
-                      className={selectClass}
-                    >
-                      <option value="">Level</option>
-                      {levelOptions.map((l) => (
-                        <option key={l} value={l}>Level {l}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className={chevronClass} size={12} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Semester</label>
-                  <div className="relative">
-                    <select
-                      required
-                      value={academicSemester}
-                      onChange={(e) => setAcademicSemester(e.target.value)}
-                      disabled={!academicLevel}
-                      className={selectClass}
-                    >
-                      <option value="">Sem</option>
-                      {semesterOptions.map((s) => (
-                        <option key={s} value={s}>Sem {s}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className={chevronClass} size={12} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Group</label>
-                  <div className="relative">
-                    <select
-                      required
-                      value={academicGroup}
-                      onChange={(e) => setAcademicGroup(e.target.value)}
-                      disabled={!academicSemester}
-                      className={selectClass}
-                    >
-                      <option value="">Group</option>
-                      {GROUPS.map((g) => (
-                        <option key={g} value={g}>{g}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className={chevronClass} size={12} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <label className={labelClass}>Course / Major</label>
-              <input
-                type="text"
-                required
-                value={courseMajor}
-                onChange={(e) => setCourseMajor(e.target.value)}
-                placeholder="e.g. BSc Computer Science, MBA, BBA"
-                className={inputClass}
-              />
-            </div>
-          )}
-
-          {/* Row: Password & Confirm */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            <div>
-              <label className={labelClass}>Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Confirm Password</label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="skeuo-input w-full rounded-xl px-3.5 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                  tabIndex={-1}
-                >
-                  {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
+            <p className="text-center text-xs text-slate-500 mt-5">
+              Already have an account?{' '}
+              <Link to="/login" className="text-primary-700 font-bold hover:underline">
+                Sign in here
+              </Link>
+            </p>
           </div>
-
-          {/* Password Validation Hints */}
-          <div className="flex items-center gap-4 text-[11px] text-slate-500">
-            <span className={password.length >= 8 ? 'text-primary-700 font-semibold' : ''}>
-              {password.length >= 8 ? '✓' : '○'} At least 8 characters
-            </span>
-            <span
-              className={
-                confirmPassword && password === confirmPassword
-                  ? 'text-primary-700 font-semibold'
-                  : ''
-              }
-            >
-              {confirmPassword && password === confirmPassword ? '✓' : '○'} Passwords match
-            </span>
-          </div>
-
-          <p className="text-[11px] text-slate-400 text-center pt-1">
-            By creating an account you agree to our{' '}
-            <Link to="/terms" target="_blank" className="text-primary-700 font-semibold underline hover:text-primary-800">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link to="/privacy" target="_blank" className="text-primary-700 font-semibold underline hover:text-primary-800">
-              Privacy Policy
-            </Link>.
-          </p>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="skeuo-btn-primary w-full py-2.5 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}
-            {loading ? 'Validating Email...' : 'Create Account'}
-          </button>
-        </form>
-
-        <p className="text-center text-xs text-slate-500 mt-4">
-          Already have an account?{' '}
-          <Link to="/login" className="text-primary-700 font-bold hover:underline">
-            Sign in here
-          </Link>
-        </p>
+        </div>
       </div>
 
       {/* 6-Digit Email Verification OTP Modal */}
@@ -522,15 +609,15 @@ export default function StudentSignup() {
               <button
                 type="button"
                 onClick={() => setShowOtpModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="my-4 p-3.5 rounded-xl bg-primary-50/70 border border-primary-100 text-xs text-primary-900">
-              <p className="text-[11px] text-primary-800">
-                Please check your inbox (and spam folder) and enter the 6-digit verification code below to activate your account.
+            <div className="my-4 p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100 text-xs text-emerald-900">
+              <p className="text-[11px] text-emerald-800">
+                Please check your inbox and enter the 6-digit verification code below to activate your account.
               </p>
             </div>
 
@@ -548,41 +635,59 @@ export default function StudentSignup() {
                 </label>
                 <input
                   type="text"
-                  maxLength={6}
                   required
-                  autoFocus
+                  maxLength={6}
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="123456"
-                  className="w-full text-center tracking-[8px] text-xl font-bold font-mono py-2.5 border border-slate-200 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-700/20 focus:border-primary-700"
+                  className="skeuo-input w-full rounded-xl px-3.5 py-2.5 text-base tracking-widest font-mono text-center"
                 />
               </div>
 
+              {devOtp && (
+                <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <KeyRound size={14} className="text-emerald-700" />
+                    Code: <strong className="font-mono tracking-wider">{devOtp}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setOtp(devOtp)}
+                    className="text-emerald-700 hover:text-emerald-900 underline font-semibold text-[11px] cursor-pointer"
+                  >
+                    Auto-fill
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-xs pt-1">
+                <span className="text-slate-500">Didn't receive the code?</span>
                 <button
                   type="button"
                   onClick={handleResendOtp}
                   disabled={resending}
-                  className="text-primary-700 hover:text-primary-800 font-bold flex items-center gap-1 disabled:opacity-50"
+                  className="text-primary-700 font-semibold hover:underline flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                 >
                   <RefreshCw size={12} className={resending ? 'animate-spin' : ''} />
                   {resending ? 'Resending...' : 'Resend Code'}
                 </button>
-                <span className="text-[11px] text-slate-400 font-medium">Valid for 15 minutes</span>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowOtpModal(false)}
+                  className="skeuo-btn-secondary flex-1 py-2.5 rounded-xl text-xs font-semibold"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
-                  disabled={otpLoading || otp.length !== 6}
-                  className={`w-full font-bold py-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-xs ${
-                    otp.length === 6 && !otpLoading
-                      ? 'bg-primary-700 hover:bg-primary-800 active:bg-primary-900 text-white active:scale-[0.98]'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
+                  disabled={otpLoading}
+                  className="skeuo-btn-primary flex-1 py-2.5 rounded-xl text-xs disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
-                  {otpLoading ? <Loader2 className="animate-spin" size={15} /> : <CheckCircle2 size={15} />}
-                  <span>{otpLoading ? 'Verifying...' : 'Verify Email & Complete Registration'}</span>
+                  {otpLoading ? <Loader2 className="animate-spin" size={14} /> : <CheckCircle2 size={14} />}
+                  {otpLoading ? 'Verifying...' : 'Verify & Enter'}
                 </button>
               </div>
             </form>
