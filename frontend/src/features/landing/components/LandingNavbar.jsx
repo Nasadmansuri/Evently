@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLenis } from 'lenis/react';
 import { useAuth } from '../../../shared/context/AuthContext';
-import { CalendarHeart, Bell, ArrowRight, Menu, X } from 'lucide-react';
+import { CalendarHeart, ArrowRight, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LandingNavbar() {
@@ -127,19 +127,11 @@ export default function LandingNavbar() {
           </a>
         </nav>
 
-        {/* 3. Right: Notification Bell & Get Started Button */}
+        {/* 3. Right: Get Started Button & Mobile Menu Toggle */}
         <div className="flex items-center gap-3">
           <Link
             to={user ? getDashboardRoute() : '/login'}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100/90 transition"
-            title="Notifications"
-          >
-            <Bell size={18} />
-          </Link>
-
-          <Link
-            to={user ? getDashboardRoute() : '/login'}
-            className="rounded-full bg-[#0B0F19] hover:bg-slate-800 px-6 sm:px-7 py-2.5 text-xs font-bold text-white shadow-sm flex items-center gap-1.5 transition-all hover:shadow hover:scale-105 active:scale-95"
+            className="rounded-full bg-[#0B0F19] hover:bg-slate-800 px-6 sm:px-7 py-2.5 text-xs font-bold text-white shadow-sm flex items-center gap-1.5 transition-all hover:shadow hover:scale-105 active:scale-95 cursor-pointer"
           >
             {user ? (
               <>
