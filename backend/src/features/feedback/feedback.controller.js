@@ -1,5 +1,6 @@
 const feedbackModel = require('./feedback.model');
 const eventsModel = require('../events/events.model');
+const registrationsModel = require('../registrations/registrations.model');
 
 const VALID_TYPES = ['short_text', 'long_text', 'rating', 'multiple_choice'];
 
@@ -87,6 +88,14 @@ async function submitResponse(req, res) {
     const eventStart = new Date(`${String(event.event_date).slice(0, 10)}T${event.event_time}`);
     if (new Date() < eventStart) {
       return res.status(400).json({ message: 'Feedback opens once the event begins' });
+    }
+
+    // Role & Registration Gate: Students must be registered to submit feedback
+    if (req.user?.role === 'student') {
+      const reg = await registrationsModel.findRegistration(eventId, req.user.id);
+      if (!reg) {
+        return res.status(403).json({ message: 'You must be registered for this event to leave feedback.' });
+      }
     }
 
     const already = await feedbackModel.hasSubmitted(formId, req.user.id);

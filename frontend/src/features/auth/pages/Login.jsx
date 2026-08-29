@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import {
   Mail, Lock, Eye, EyeOff, ArrowRight, CalendarHeart, AlertCircle, Loader2,
   Phone, Landmark, GraduationCap, Layers, BarChart3, CalendarDays, Users,
-  CheckCircle2, ChevronDown, X, User, Ban, ShieldAlert
+  CheckCircle2, ChevronDown, X, User, Ban, ShieldAlert, Clock
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
@@ -114,7 +114,7 @@ export default function Login() {
       showToast.success(`Welcome back, ${res.data.user.full_name}`);
       navigate(`/${res.data.user.role}/dashboard`);
     } catch (err) {
-      if (err.response?.data?.isDeactivated || err.response?.status === 403) {
+      if (err.response?.data?.isDeactivated) {
         setDeactivatedInfo({
           message: err.response?.data?.message || 'Your account has been deactivated by campus administration.',
           reason: err.response?.data?.reason,
@@ -188,7 +188,7 @@ export default function Login() {
         navigate(`/${res.data.user.role}/dashboard`);
       }
     } catch (err) {
-      if (err.response?.data?.isDeactivated || err.response?.status === 403) {
+      if (err.response?.data?.isDeactivated) {
         setDeactivatedInfo({
           message: err.response?.data?.message || 'Your account has been deactivated by campus administration.',
           reason: err.response?.data?.reason,
@@ -246,7 +246,7 @@ export default function Login() {
         navigate(`/${res.data.user.role}/dashboard`);
       }
     } catch (err) {
-      if (err.response?.data?.isDeactivated || err.response?.status === 403) {
+      if (err.response?.data?.isDeactivated) {
         setDeactivatedInfo({
           message: err.response?.data?.message || 'Your account has been deactivated by campus administration.',
           reason: err.response?.data?.reason,
@@ -495,13 +495,27 @@ export default function Login() {
             </div>
           )}
 
-          {/* Error Message */}
-          {error && (
+          {/* Pending Approval Alert */}
+          {error && (error.toLowerCase().includes('pending') || error.toLowerCase().includes('approval')) ? (
+            <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50/95 p-3.5 text-xs text-amber-950 shadow-xs space-y-1.5 animate-slide-up">
+              <div className="flex items-start gap-2.5">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 mt-0.5">
+                  <Clock size={15} />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="font-bold text-amber-900 text-xs sm:text-sm">Account Pending Approval</h4>
+                  <p className="text-xs text-amber-800 leading-relaxed font-medium">
+                    {error}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : error ? (
             <div className="mb-3 flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2 animate-slide-up">
               <AlertCircle size={14} className="shrink-0" />
               <span>{error}</span>
             </div>
-          )}
+          ) : null}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-3.5 animate-slide-up-delay-1">

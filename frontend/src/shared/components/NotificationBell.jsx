@@ -53,31 +53,51 @@ export default function NotificationBell() {
   const wrapperRef = useRef(null);
 
   const fetchUnreadCount = useCallback(async () => {
+    if (!user || !localStorage.getItem('evently_token')) {
+      setUnreadCount(0);
+      return;
+    }
     try {
       const res = await getUnreadCount();
       setUnreadCount(res.data.count);
     } catch (err) {
-      console.error('Failed to fetch unread count:', err);
+      if (err.response?.status === 401) {
+        setUnreadCount(0);
+      } else {
+        console.error('Failed to fetch unread count:', err);
+      }
     }
-  }, []);
+  }, [user]);
 
   const fetchNotifications = useCallback(async () => {
+    if (!user || !localStorage.getItem('evently_token')) {
+      setNotifications([]);
+      return;
+    }
     setLoading(true);
     try {
       const res = await getNotifications();
       setNotifications(res.data.notifications || []);
     } catch (err) {
-      console.error('Failed to fetch notifications:', err);
+      if (err.response?.status === 401) {
+        setNotifications([]);
+      } else {
+        console.error('Failed to fetch notifications:', err);
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000); // poll every 30s
     return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+  }, [user, fetchUnreadCount]);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -123,13 +143,23 @@ export default function NotificationBell() {
       console.error('Failed to mark notification read:', err);
     }
 
-    // 3. Smart routing based on notification content and user role
+    // 3. Direct routing if notification has link or event_id
+    if (n.link) {
+      navigate(n.link);
+      return;
+    }
+    if (n.event_id) {
+      navigate(`/events/${n.event_id}`);
+      return;
+    }
+
+    // 4. Smart fallback routing based on notification content and user role
     const title = (n.title || '').toLowerCase();
     const message = (n.message || '').toLowerCase();
 
     if (title.includes('deletion request') || message.includes('deletion request')) {
       if (user?.role === 'admin') {
-        navigate('/admin/events?filter=deletion-requests');
+        navigate('/admin/events');
       } else {
         navigate('/faculty/my-events');
       }
@@ -143,7 +173,7 @@ export default function NotificationBell() {
       }
     } else if (title.includes('registration') || title.includes('registered') || title.includes('ticket')) {
       if (user?.role === 'student' || user?.role === 'guest') {
-        navigate('/my-tickets');
+        navigate('/student/registrations');
       } else if (user?.role === 'faculty') {
         navigate('/faculty/my-events');
       } else {
@@ -156,10 +186,13 @@ export default function NotificationBell() {
         navigate('/faculty/dashboard');
       }
     } else if (title.includes('event') || message.includes('event')) {
+      const extracted = (n.title || '').replace(/^(new event|event live|event cancelled|event deletion request):\s*/i, '').trim();
       if (user?.role === 'admin') {
         navigate('/admin/events');
       } else if (user?.role === 'faculty') {
         navigate('/faculty/my-events');
+      } else if (extracted) {
+        navigate(`/events?search=${encodeURIComponent(extracted)}`);
       } else {
         navigate('/events');
       }

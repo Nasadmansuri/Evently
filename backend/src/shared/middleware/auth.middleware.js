@@ -55,7 +55,7 @@ async function optionalAuth(req, res, next) {
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Forbidden' });
+      return res.status(403).json({ message: `Access restricted. This action requires a ${roles.join(' or ')} account.` });
     }
     next();
   };

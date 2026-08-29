@@ -5,7 +5,7 @@ import {
   Calendar, CalendarDays, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2,
   Loader2, BarChart3, Navigation, Landmark, Edit3, FileDown, Star,
   Trash2, AlertTriangle, ShieldAlert, X, Send, ArrowRight, Trophy, Award,
-  ClipboardCheck, PlayCircle
+  ClipboardCheck, PlayCircle, Maximize2, Camera
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../shared/services/api';
@@ -16,6 +16,7 @@ import { formatTime12hr } from '../../../shared/utils/formatTime';
 import { getEventStatus, isEventPast } from '../../../shared/utils/eventStatus';
 import VenueLocationModal from '../../../shared/components/VenueLocationModal';
 import AddToCalendarButton from '../../../shared/components/AddToCalendarButton';
+import ImageLightboxModal from '../../../shared/components/ImageLightboxModal';
 
 const TABS = ['Details', 'Gallery', 'Feedback'];
 const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
@@ -53,6 +54,13 @@ export default function EventDetail() {
   const [generatingReport, setGeneratingReport] = useState(false);
   const [showPermanentDeleteModal, setShowPermanentDeleteModal] = useState(false);
   const [deletingEvent, setDeletingEvent] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (index) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   async function handlePermanentDelete() {
     setDeletingEvent(true);
@@ -190,7 +198,7 @@ export default function EventDetail() {
 
   const style = getCategoryStyle(event.category);
   const liveStatus = getEventStatus(event.event_date, event.event_time, event.status, event.publish_at);
-  const isPastEvent = liveStatus === 'ended' || isEventPast(event.event_date, event.event_time);
+  const isPastEvent = liveStatus === 'ended';
   const hasEventStarted = liveStatus !== 'upcoming';
   const isOrganizerOrAdmin = user?.role === 'admin' || event.created_by === user?.id;
 
@@ -412,38 +420,106 @@ export default function EventDetail() {
 
           {activeTab === 'Gallery' && (
             imagesLoading ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {[1, 2, 3, 4].map((i) => <div key={i} className="aspect-square rounded-lg bg-slate-100 animate-pulse" />)}
+              <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="aspect-square rounded-2xl bg-slate-100 animate-pulse border border-slate-200/60" />
+                ))}
               </div>
             ) : images.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <Images className="mb-3 text-slate-300" size={28} />
-                <p className="text-sm font-semibold text-slate-700">No photos added yet</p>
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-12 px-6 text-center">
+                <div className="mb-3.5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 text-primary-700 border border-primary-100 shadow-2xs">
+                  <Camera size={26} />
+                </div>
+                <h3 className="text-base font-bold text-slate-900">No Photos Added Yet</h3>
+                <p className="mt-1 max-w-sm text-xs text-slate-500 leading-relaxed">
+                  Photos from this event will be showcased here in the campus memory archive.
+                </p>
                 {isOrganizerOrAdmin && (
                   <button
                     onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
-                    className="mt-3 text-xs font-bold text-primary-600 hover:underline"
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-xs active:scale-95 transition"
                   >
-                    + Add Event Photos
+                    <Camera size={14} />
+                    <span>Upload Event Photos</span>
                   </button>
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {images.map((img) => (
-                  <div key={img.id} className="relative aspect-square overflow-hidden rounded-xl border border-slate-200">
+              <div className="space-y-4">
+                {/* Gallery Header Row */}
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-900">
+                      {images.length} {images.length === 1 ? 'Photo' : 'Photos'}
+                    </span>
+                    <span className="text-[11px] text-slate-400">• Click any photo to expand in HD</span>
+                  </div>
+
+                  {isOrganizerOrAdmin && (
+                    <button
+                      onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-700 hover:text-primary-800 hover:underline"
+                    >
+                      <Camera size={13} />
+                      <span>Manage Photos</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* If single photo: Featured Hero Frame */}
+                {images.length === 1 ? (
+                  <div
+                    onClick={() => openLightbox(0)}
+                    className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-xs hover:shadow-lg transition-all duration-300 max-h-[420px] flex items-center justify-center"
+                  >
                     <img
-                      src={`${ASSET_BASE_URL}${img.image_url}`}
-                      alt=""
-                      className="h-full w-full object-cover"
+                      src={`${ASSET_BASE_URL}${images[0].image_url}`}
+                      alt={event?.title || 'Event photo'}
+                      className="max-h-[420px] w-full object-contain sm:object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                     />
-                    {img.is_banner === 1 && (
-                      <span className="absolute bottom-1.5 left-1.5 rounded-full bg-primary-600 px-2 py-0.5 text-[9px] font-bold text-white shadow-sm">
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+
+                    {images[0].is_banner === 1 && (
+                      <span className="absolute top-3 left-3 rounded-full bg-emerald-600/90 backdrop-blur-md px-3 py-1 text-[10.5px] font-extrabold uppercase text-white shadow-md">
                         Cover Banner
                       </span>
                     )}
+
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/70 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-white shadow-lg group-hover:bg-black/90 transition">
+                      <Maximize2 size={13} className="text-emerald-300" />
+                      <span>Click to view full size</span>
+                    </div>
                   </div>
-                ))}
+                ) : (
+                  /* Multi-photo Responsive Grid */
+                  <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4">
+                    {images.map((img, idx) => (
+                      <div
+                        key={img.id || idx}
+                        onClick={() => openLightbox(idx)}
+                        className="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 shadow-2xs hover:shadow-md hover:border-primary-300 hover:-translate-y-0.5 transition-all duration-200"
+                      >
+                        <img
+                          src={`${ASSET_BASE_URL}${img.image_url}`}
+                          alt=""
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                        {img.is_banner === 1 && (
+                          <span className="absolute top-2 left-2 rounded-full bg-primary-700/90 backdrop-blur-xs px-2 py-0.5 text-[9px] font-extrabold uppercase text-white shadow-sm">
+                            Cover
+                          </span>
+                        )}
+
+                        <div className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 backdrop-blur-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 size={13} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           )}
@@ -651,7 +727,7 @@ export default function EventDetail() {
               <div className="flex items-center justify-between py-2.5">
                 <span className="text-slate-500 font-medium">Seats</span>
                 <span className="font-bold text-slate-900">
-                  {event.registered_count || 0} / {event.max_participants || '∞'}
+                  {event.registered_count ?? event.registration_count ?? 0} / {event.max_participants || '∞'}
                 </span>
               </div>
               <div className="flex items-center justify-between py-2.5">
@@ -676,29 +752,39 @@ export default function EventDetail() {
                         <CheckCircle2 size={15} className="text-emerald-600" />
                         <span>You're registered. See you there!</span>
                       </div>
-                    ) : isPastEvent ? (
+                    ) : liveStatus === 'ended' ? (
                       <div className="w-full text-center py-2.5 px-4 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
                         Event Completed
+                      </div>
+                    ) : event.max_participants && (event.registered_count ?? event.registration_count ?? 0) >= event.max_participants ? (
+                      <div className="w-full text-center py-2.5 px-4 rounded-full bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200">
+                        Event Full ({event.max_participants} / {event.max_participants} Seats Filled)
                       </div>
                     ) : (
                       <button
                         onClick={() => navigate(`/events/${id}/register`)}
                         className="w-full rounded-full bg-primary-700 hover:bg-primary-800 py-3 text-xs font-bold text-white shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
                       >
-                        <span>Register For Event</span>
+                        <span>{liveStatus === 'ongoing' ? 'Join Event Now' : 'Register For Event'}</span>
                         <ArrowRight size={14} />
                       </button>
                     )
                   )}
 
                   {!user && (
-                    <Link
-                      to="/login"
-                      className="w-full rounded-full bg-slate-900 hover:bg-slate-800 py-3 text-xs font-bold text-white shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <span>Sign In to Register</span>
-                      <ArrowRight size={14} />
-                    </Link>
+                    liveStatus === 'ended' ? (
+                      <div className="w-full text-center py-2.5 px-4 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
+                        Event Completed
+                      </div>
+                    ) : (
+                      <Link
+                        to={`/login?redirect=/events/${id}/register`}
+                        className="w-full rounded-full bg-slate-900 hover:bg-slate-800 py-3 text-xs font-bold text-white shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        <span>{liveStatus === 'ongoing' ? 'Sign In to Join' : 'Sign In to Register'}</span>
+                        <ArrowRight size={14} />
+                      </Link>
+                    )
                   )}
 
                   {/* Add To Calendar Button */}
@@ -886,6 +972,16 @@ export default function EventDetail() {
           </div>,
           document.body
         )}
+
+      {/* Image Lightbox Modal */}
+      <ImageLightboxModal
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        images={images}
+        currentIndex={lightboxIndex}
+        onIndexChange={setLightboxIndex}
+        eventTitle={event?.title}
+      />
     </div>
   );
 }

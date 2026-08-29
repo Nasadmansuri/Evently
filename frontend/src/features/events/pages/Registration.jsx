@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, AlertCircle, Loader2, FileX, Users, CheckCircle2, Download, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, MapPin, AlertCircle, Loader2, FileX, Users, CheckCircle2, Download, ExternalLink, Ban } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { showToast } from '../../../shared/utils/toast';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
+import { getEventStatus } from '../../../shared/utils/eventStatus';
 import { getGoogleCalendarUrl, downloadIcsFile } from '../../../shared/utils/calendarIntegration';
 import { fireCelebrationConfetti } from '../../../shared/utils/confetti';
 
@@ -68,7 +69,13 @@ export default function Registration() {
       setRegisteredSuccess(true);
       fireCelebrationConfetti();
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed, please try again');
+      if (err.response?.status === 401) {
+        setError('Your session has expired. Please sign in again to complete your registration.');
+      } else if (err.response?.status === 403) {
+        setError(err.response?.data?.message || 'Access restricted: Only student accounts can register for events.');
+      } else {
+        setError(err.response?.data?.message || 'Registration failed, please try again');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -93,7 +100,64 @@ export default function Registration() {
     );
   }
 
-  if (registeredSuccess && event) {
+  if (!user) {
+    return (
+      <div className="mx-auto max-w-lg text-center space-y-6 py-8 animate-in fade-in duration-200">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 sm:p-8 shadow-lg space-y-4">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 text-primary-700 shadow-2xs border border-primary-100">
+            <Users size={28} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Sign In to Register</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Please log in with your student account (or sign up as a guest participant) to register for <strong className="text-slate-800">{event.title}</strong>.
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={() => navigate(`/events/${id}`)}
+              className="w-full sm:w-auto rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+            >
+              ← Back to Event
+            </button>
+            <Link
+              to={`/login?redirect=/events/${id}/register`}
+              className="w-full sm:w-auto rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs transition"
+            >
+              Sign In to Register →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== 'student') {
+    return (
+      <div className="mx-auto max-w-lg text-center space-y-6 py-8 animate-in fade-in duration-200">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 sm:p-8 shadow-lg space-y-4">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 shadow-2xs border border-amber-100">
+            <AlertCircle size={28} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Student Registration Only</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Event registrations are open to students and guest attendees. You are currently signed in as a <strong className="text-slate-800 capitalize">{user.role}</strong> account.
+          </p>
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <button
+              onClick={() => navigate(`/events/${id}`)}
+              className="rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs transition"
+            >
+              ← View Event Details
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const liveStatus = event ? getEventStatus(event.event_date, event.event_time, event.status, event.publish_at) : 'upcoming';
+  const isFull = Boolean(event?.max_participants && (event.registered_count ?? event.registration_count ?? 0) >= event.max_participants);
+
+  if ((registeredSuccess || event.is_registered) && event) {
     return (
       <div className="mx-auto max-w-lg text-center space-y-6 py-6 animate-in fade-in zoom-in-95 duration-200">
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 sm:p-8 shadow-xl space-y-5">
@@ -102,7 +166,9 @@ export default function Registration() {
           </div>
           
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Registration Confirmed</h2>
+            <h2 className="text-xl font-bold text-slate-900">
+              {registeredSuccess ? 'Registration Confirmed' : 'You Are Already Registered'}
+            </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
               You're officially registered for <strong className="text-slate-800">{event.title}</strong>.
             </p>
@@ -140,7 +206,7 @@ export default function Registration() {
               <button
                 type="button"
                 onClick={() => downloadIcsFile(event)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2.5 text-xs font-bold shadow-2xs transition active:scale-95"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2.5 text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
               >
                 <Download size={14} />
                 <span>Apple / Outlook (.ics)</span>
@@ -152,16 +218,90 @@ export default function Registration() {
             <button
               type="button"
               onClick={() => navigate(`/events/${id}`)}
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+              className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
             >
               View Event Details
             </button>
             <button
               type="button"
               onClick={() => navigate('/student/registrations')}
-              className="rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-600 transition"
+              className="rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-primary-600 transition cursor-pointer"
             >
               My Registrations →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (event.status === 'cancelled') {
+    return (
+      <div className="mx-auto max-w-lg text-center space-y-6 py-8 animate-in fade-in duration-200">
+        <div className="rounded-[28px] border border-rose-200 bg-white p-6 sm:p-8 shadow-lg space-y-4">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-700 shadow-2xs border border-rose-100">
+            <Ban size={28} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Event Cancelled</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Registration is closed because <strong className="text-slate-800">{event.title}</strong> has been cancelled.
+          </p>
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <button
+              onClick={() => navigate('/events')}
+              className="rounded-xl bg-slate-900 hover:bg-slate-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs transition"
+            >
+              ← Browse Other Events
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (liveStatus === 'ended') {
+    return (
+      <div className="mx-auto max-w-lg text-center space-y-6 py-8 animate-in fade-in duration-200">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 sm:p-8 shadow-lg space-y-4">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 shadow-2xs border border-slate-200">
+            <Calendar size={28} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Event Concluded</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Registration is closed because <strong className="text-slate-800">{event.title}</strong> took place on{' '}
+            {new Date(event.event_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })} and has already completed.
+          </p>
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <button
+              onClick={() => navigate('/events')}
+              className="rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs transition"
+            >
+              ← Browse Upcoming Events
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isFull) {
+    return (
+      <div className="mx-auto max-w-lg text-center space-y-6 py-8 animate-in fade-in duration-200">
+        <div className="rounded-[28px] border border-amber-200 bg-white p-6 sm:p-8 shadow-lg space-y-4">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-800 shadow-2xs border border-amber-200">
+            <Users size={28} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Event Capacity Full</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            All <strong className="text-slate-800">{event.max_participants}</strong> participant spots for{' '}
+            <strong className="text-slate-800">{event.title}</strong> have been filled.
+          </p>
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <button
+              onClick={() => navigate('/events')}
+              className="rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs transition"
+            >
+              ← Find Other Campus Events
             </button>
           </div>
         </div>

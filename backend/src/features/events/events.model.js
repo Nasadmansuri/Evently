@@ -115,6 +115,8 @@ async function getAllEvents({ category } = {}, userId) {
            e.cancellation_reason, e.cancelled_at,
            u.full_name AS organizer_name,
            (r.id IS NOT NULL) AS is_registered,
+           (SELECT COUNT(*) FROM registrations r2 WHERE r2.event_id = e.id) AS registered_count,
+           (SELECT COUNT(*) FROM registrations r2 WHERE r2.event_id = e.id) AS registration_count,
            (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1) AS banner_image
     FROM events e
     JOIN users u ON u.id = e.created_by
@@ -136,9 +138,11 @@ async function getAllEventsAdmin() {
   const [rows] = await pool.query(
     `SELECT e.id, e.title, e.category, e.location, e.event_date, e.event_time,
             e.status, e.publish_at, e.created_by, e.organizing_department, e.organizing_community, e.is_team_event,
+            e.max_participants,
             e.cancellation_reason, e.cancelled_at,
             u.full_name AS organizer_name,
             (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id) AS registration_count,
+            (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id) AS registered_count,
             (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1) AS banner_image,
             (SELECT id FROM event_deletion_requests WHERE event_id = e.id AND status = 'pending' LIMIT 1) AS deletion_request_id,
             (SELECT reason_category FROM event_deletion_requests WHERE event_id = e.id AND status = 'pending' LIMIT 1) AS deletion_reason,
@@ -191,6 +195,8 @@ async function getEventById(id, userId) {
     `SELECT e.*, u.full_name AS organizer_name,
             (r.id IS NOT NULL) AS is_registered,
             r.team_members AS my_team_members,
+            (SELECT COUNT(*) FROM registrations r2 WHERE r2.event_id = e.id) AS registered_count,
+            (SELECT COUNT(*) FROM registrations r2 WHERE r2.event_id = e.id) AS registration_count,
             (SELECT image_url FROM event_images WHERE event_id = e.id AND is_banner = 1 LIMIT 1) AS banner_image,
             (SELECT id FROM event_deletion_requests WHERE event_id = e.id AND status = 'pending' LIMIT 1) AS deletion_request_id,
             (SELECT reason_category FROM event_deletion_requests WHERE event_id = e.id AND status = 'pending' LIMIT 1) AS deletion_reason,

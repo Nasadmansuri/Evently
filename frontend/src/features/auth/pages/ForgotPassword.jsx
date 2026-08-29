@@ -21,7 +21,6 @@ export default function ForgotPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [devCode, setDevCode] = useState('');
 
   function isValidEmail(val) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
@@ -39,9 +38,6 @@ export default function ForgotPassword() {
     setLoading(true);
     try {
       const res = await api.post('/auth/forgot-password', { email: email.trim().toLowerCase() });
-      if (res.data.devOtp) {
-        setDevCode(res.data.devOtp);
-      }
       showToast.success(res.data.message || 'Verification code sent to your email');
       setStep(2);
     } catch (err) {
@@ -230,22 +226,6 @@ export default function ForgotPassword() {
             </form>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-4 animate-slide-up-delay-1">
-              {devCode && (
-                <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    <KeyRound size={14} className="text-emerald-700" />
-                    Code: <strong className="font-mono tracking-wider">{devCode}</strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setOtp(devCode)}
-                    className="text-emerald-700 hover:text-emerald-900 underline font-semibold text-[11px] cursor-pointer"
-                  >
-                    Auto-fill
-                  </button>
-                </div>
-              )}
-
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">6-Digit Verification Code</label>
                 <input

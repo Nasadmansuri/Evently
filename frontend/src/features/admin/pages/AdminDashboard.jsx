@@ -90,47 +90,53 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Header Profile & Welcome Banner (Consistent with Faculty & Student Portals) */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
-              Admin Portal
-            </span>
-            <span className="text-xs text-slate-400 font-medium">
-              · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
-            Welcome back, {user?.full_name || 'Admin'}!
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-600">
-            Platform governance, faculty onboarding approvals, event monitoring, and analytics.
-          </p>
+      {/* 1. Header Profile & Welcome Banner (Enclosed in uniform container card box) */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-2xs">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
+                Admin Portal
+              </span>
+              <span className="text-xs font-semibold text-slate-300">·</span>
+              <span className="text-xs font-medium text-slate-500">
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
 
-          {/* Academic & Platform Badges */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700">
-              <Building2 size={13} className="text-slate-500 shrink-0" />
-              Biratnagar International College
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-50 border border-primary-100 px-2.5 py-1 text-xs font-bold text-primary-800">
-              <ShieldCheck size={14} className="text-primary-700 shrink-0" />
-              System Governance & Administration
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-medium text-slate-600">
-              <Mail size={13} className="text-slate-400 shrink-0" />
-              {user?.email || 'admin@bic.edu.np'}
-            </span>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                Welcome back, {user?.full_name || 'Admin'}!
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-slate-600">
+                Platform governance, faculty onboarding approvals, event monitoring, and analytics.
+              </p>
+            </div>
+
+            {/* Academic & Platform Badges */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                <Building2 size={13} className="text-slate-500 shrink-0" />
+                Biratnagar International College
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-50 border border-primary-100 px-2.5 py-1 text-xs font-bold text-primary-800">
+                <ShieldCheck size={14} className="text-primary-700 shrink-0" />
+                System Governance & Administration
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-medium text-slate-600">
+                <Mail size={13} className="text-slate-400 shrink-0" />
+                {user?.email || 'admin@bic.edu.np'}
+              </span>
+            </div>
           </div>
+
+          <button
+            onClick={() => navigate('/admin/create-event')}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-3 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all shrink-0 self-start sm:self-center"
+          >
+            <Plus size={16} /> Create Campus Event
+          </button>
         </div>
-
-        <button
-          onClick={() => navigate('/admin/create-event')}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-3 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all shrink-0 self-start sm:self-center"
-        >
-          <Plus size={16} /> Create Campus Event
-        </button>
       </div>
 
       {error && (

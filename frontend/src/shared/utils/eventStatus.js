@@ -3,8 +3,9 @@ export function isEventPast(eventDate, eventTime) {
   const dateStr = String(eventDate).slice(0, 10);
   if (eventTime) {
     const timeStr = String(eventTime).slice(0, 5);
-    const eventDateTime = new Date(`${dateStr}T${timeStr}:00`);
-    return eventDateTime <= new Date();
+    const start = new Date(`${dateStr}T${timeStr}:00`);
+    const endEstimate = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+    return new Date() > endEstimate;
   }
   const d = new Date(`${dateStr}T23:59:59`);
   return d < new Date();

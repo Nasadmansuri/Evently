@@ -9,6 +9,7 @@ router.get('/pending-faculty', requireAuth, requireRole('admin'), usersControlle
 router.patch('/:id/approval', requireAuth, requireRole('admin'), usersController.updateApproval);
 router.patch('/:id/status', requireAuth, requireRole('admin'), usersController.updateUserStatus);
 router.get('/', requireAuth, requireRole('admin'), usersController.getAllUsers);
+router.get('/:id/activity', requireAuth, requireRole('admin'), usersController.getUserActivity);
 router.delete('/:id', requireAuth, requireRole('admin'), usersController.deleteUser);
 
 module.exports = router;

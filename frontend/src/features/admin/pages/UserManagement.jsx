@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import {
   Search, ShieldCheck, Check, X, Loader2, AlertCircle, Users, UserCheck, GraduationCap,
   Trash2, ChevronLeft, ChevronRight, ArrowUpDown, UserX, Ban, ShieldAlert, AlertTriangle,
-  Mail, Phone, Calendar, Landmark, BookOpen, Layers, Award, ExternalLink, Eye
+  Mail, Phone, Calendar, Landmark, BookOpen, Layers, Award, ExternalLink, Eye,
+  Ticket, MessageSquare, Sparkles, MapPin, CalendarDays, BarChart3, Clock
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
@@ -46,6 +47,8 @@ export default function UserManagement() {
   const [actioningId, setActioningId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [userActivity, setUserActivity] = useState(null);
+  const [activityLoading, setActivityLoading] = useState(false);
   const [deactivateModalUser, setDeactivateModalUser] = useState(null);
   const [deactivateReason, setDeactivateReason] = useState('');
   const [submittingStatus, setSubmittingStatus] = useState(false);
@@ -69,6 +72,29 @@ export default function UserManagement() {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  useEffect(() => {
+    if (!selectedUser) {
+      setUserActivity(null);
+      return;
+    }
+    let isMounted = true;
+    setActivityLoading(true);
+    api
+      .get(`/users/${selectedUser.id}/activity`)
+      .then((res) => {
+        if (isMounted) setUserActivity(res.data);
+      })
+      .catch((err) => {
+        console.error('Failed to load user activity:', err);
+      })
+      .finally(() => {
+        if (isMounted) setActivityLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedUser]);
 
   useEffect(() => {
     setPage(1);
@@ -311,9 +337,23 @@ export default function UserManagement() {
                     </div>
 
                     <div className="min-w-0">
-                      <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-0.5 ${ROLE_BADGE[u.role] || 'bg-slate-100 text-slate-600'}`}>
-                        {u.role}
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-0.5 ${ROLE_BADGE[u.role] || 'bg-slate-100 text-slate-600'}`}>
+                          {u.role}
+                        </span>
+                        {u.role === 'faculty' && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-violet-800 bg-violet-50/90 border border-violet-200/80 px-2 py-0.5 rounded-full mb-0.5">
+                            <Calendar size={10} className="text-violet-600" />
+                            {u.events_created_count || 0} evt{(u.events_created_count || 0) === 1 ? '' : 's'} · {u.total_attendees_hosted || 0} att
+                          </span>
+                        )}
+                        {(u.role === 'student' || u.role === 'guest') && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50/90 border border-emerald-200/80 px-2 py-0.5 rounded-full mb-0.5">
+                            <Ticket size={10} className="text-emerald-600" />
+                            {u.registered_events_count || 0} reg{(u.registered_events_count || 0) === 1 ? '' : 's'}
+                          </span>
+                        )}
+                      </div>
                       <p className="truncate text-xs text-slate-600 font-medium">{affiliation}</p>
                     </div>
 
@@ -444,12 +484,12 @@ export default function UserManagement() {
       {selectedUser &&
         createPortal(
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
               {/* Modal Header Cover */}
               <div className="relative bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 p-6 text-white">
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="absolute top-4 right-4 rounded-full bg-white/10 p-1.5 text-white/80 backdrop-blur-xs transition hover:bg-white/20 hover:text-white"
+                  className="absolute top-4 right-4 rounded-full bg-white/10 p-1.5 text-white/80 backdrop-blur-xs transition hover:bg-white/20 hover:text-white cursor-pointer"
                 >
                   <X size={16} />
                 </button>
@@ -476,7 +516,7 @@ export default function UserManagement() {
               </div>
 
               {/* Modal Body Info Cards */}
-              <div className="max-h-[60vh] overflow-y-auto p-6 space-y-4 text-xs">
+              <div className="max-h-[65vh] overflow-y-auto overscroll-contain p-6 space-y-4 text-xs">
                 {/* Deactivation Banner if disabled */}
                 {!selectedUser.is_active && (
                   <div className="rounded-2xl border border-rose-200 bg-rose-50/90 p-3.5 text-rose-950 space-y-1">
@@ -493,6 +533,219 @@ export default function UserManagement() {
                   </div>
                 )}
 
+                {/* 1. Activity & Engagement KPI Strip */}
+                {selectedUser.role === 'faculty' ? (
+                  <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/50 via-white to-slate-50 p-4 space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
+                        <BarChart3 size={15} className="text-violet-700" /> Faculty Event Portfolio & Impact
+                      </h4>
+                      <span className="text-[10px] font-bold text-violet-800 bg-violet-100/80 px-2 py-0.5 rounded-full">
+                        Organizer Metrics
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="rounded-xl border border-slate-200/80 bg-white p-2.5 text-center shadow-2xs">
+                        <div className="flex items-center justify-center text-violet-600 mb-1">
+                          <Calendar size={15} />
+                        </div>
+                        <span className="text-base font-black text-slate-900 block leading-tight">
+                          {selectedUser.events_created_count || 0}
+                        </span>
+                        <span className="text-[9.5px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Events Created
+                        </span>
+                      </div>
+
+                      <div className="rounded-xl border border-slate-200/80 bg-white p-2.5 text-center shadow-2xs">
+                        <div className="flex items-center justify-center text-indigo-600 mb-1">
+                          <Users size={15} />
+                        </div>
+                        <span className="text-base font-black text-slate-900 block leading-tight">
+                          {selectedUser.total_attendees_hosted || 0}
+                        </span>
+                        <span className="text-[9.5px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Total Attendees
+                        </span>
+                      </div>
+
+                      <div className="rounded-xl border border-slate-200/80 bg-white p-2.5 text-center shadow-2xs">
+                        <div className="flex items-center justify-center text-emerald-600 mb-1">
+                          <Sparkles size={15} />
+                        </div>
+                        <span className="text-base font-black text-slate-900 block leading-tight">
+                          {selectedUser.active_events_count || 0}
+                        </span>
+                        <span className="text-[9.5px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Active / Live
+                        </span>
+                      </div>
+
+                      <div className="rounded-xl border border-slate-200/80 bg-white p-2.5 text-center shadow-2xs">
+                        <div className="flex items-center justify-center text-amber-600 mb-1">
+                          <MessageSquare size={15} />
+                        </div>
+                        <span className="text-base font-black text-slate-900 block leading-tight">
+                          {selectedUser.feedback_responses_received || 0}
+                        </span>
+                        <span className="text-[9.5px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Feedback Score
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (selectedUser.role === 'student' || selectedUser.role === 'guest') ? (
+                  <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-slate-50 p-4 space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
+                        <Ticket size={15} className="text-emerald-700" /> Student Event Participation
+                      </h4>
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+                        {selectedUser.is_guest ? 'Guest Learner' : 'Affiliated Student'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-slate-200/80 bg-white p-3 text-center shadow-2xs">
+                        <div className="flex items-center justify-center text-emerald-600 mb-1">
+                          <CalendarDays size={16} />
+                        </div>
+                        <span className="text-lg font-black text-slate-900 block leading-tight">
+                          {selectedUser.registered_events_count || 0}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Registered Events
+                        </span>
+                      </div>
+
+                      <div className="rounded-xl border border-slate-200/80 bg-white p-3 text-center shadow-2xs">
+                        <div className="flex items-center justify-center text-amber-600 mb-1">
+                          <MessageSquare size={16} />
+                        </div>
+                        <span className="text-lg font-black text-slate-900 block leading-tight">
+                          {selectedUser.feedback_submitted_count || 0}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Surveys Completed
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* 2. Recent Events / Registrations Timeline */}
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                      <Clock size={14} className="text-primary-600" />
+                      {selectedUser.role === 'faculty' ? 'Recent Campus Events Created' : 'Recent Event Registrations'}
+                    </h4>
+                    {activityLoading && <Loader2 size={13} className="animate-spin text-slate-400" />}
+                  </div>
+
+                  {selectedUser.role === 'faculty' ? (
+                    activityLoading ? (
+                      <div className="space-y-2 py-1">
+                        <div className="h-12 bg-slate-200/60 animate-pulse rounded-xl" />
+                        <div className="h-12 bg-slate-200/60 animate-pulse rounded-xl" />
+                      </div>
+                    ) : userActivity?.hostedEvents?.length > 0 ? (
+                      <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                        {userActivity.hostedEvents.map((evt) => (
+                          <div key={evt.id} className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-primary-200 transition">
+                            <div className="min-w-0 flex-1 pr-3">
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                                  {evt.category}
+                                </span>
+                                <span className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded-md ${evt.status === 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
+                                  {evt.status}
+                                </span>
+                              </div>
+                              <h5 className="font-bold text-slate-900 text-xs truncate">{evt.title}</h5>
+                              <div className="flex items-center gap-3 text-[10.5px] text-slate-500 mt-0.5">
+                                <span className="flex items-center gap-1">
+                                  <Calendar size={11} />
+                                  {evt.event_date ? new Date(evt.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Users size={11} className="text-primary-600" />
+                                  {evt.registered_count} {evt.max_participants ? `/ ${evt.max_participants}` : ''} registered
+                                </span>
+                              </div>
+                            </div>
+                            <a
+                              href={`/events/${evt.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-primary-700 hover:bg-primary-50 transition"
+                              title="View Event Page"
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-slate-400">
+                        <Calendar size={22} className="mx-auto mb-1 opacity-50" />
+                        <p className="text-xs">No events published yet by this faculty member.</p>
+                      </div>
+                    )
+                  ) : (
+                    activityLoading ? (
+                      <div className="space-y-2 py-1">
+                        <div className="h-12 bg-slate-200/60 animate-pulse rounded-xl" />
+                        <div className="h-12 bg-slate-200/60 animate-pulse rounded-xl" />
+                      </div>
+                    ) : userActivity?.registeredEvents?.length > 0 ? (
+                      <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                        {userActivity.registeredEvents.map((reg) => (
+                          <div key={reg.registration_id} className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-emerald-200 transition">
+                            <div className="min-w-0 flex-1 pr-3">
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                                  {reg.category}
+                                </span>
+                                <span className="text-[9.5px] font-semibold text-slate-400">
+                                  {reg.registered_at ? `Reg ${new Date(reg.registered_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : ''}
+                                </span>
+                              </div>
+                              <h5 className="font-bold text-slate-900 text-xs truncate">{reg.title}</h5>
+                              <div className="flex items-center gap-2 text-[10.5px] text-slate-500 mt-0.5">
+                                <span className="flex items-center gap-1">
+                                  <Calendar size={11} />
+                                  {reg.event_date ? new Date(reg.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}
+                                </span>
+                                {reg.location && (
+                                  <span className="flex items-center gap-1 truncate">
+                                    <MapPin size={11} /> {reg.location}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <a
+                              href={`/events/${reg.event_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition"
+                              title="View Event Details"
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-slate-400">
+                        <Ticket size={22} className="mx-auto mb-1 opacity-50" />
+                        <p className="text-xs">No event registrations found for this user.</p>
+                      </div>
+                    )
+                  )}
+                </div>
+
                 {/* Academic / Affiliation Credentials */}
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 space-y-3">
                   <h4 className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
@@ -501,7 +754,11 @@ export default function UserManagement() {
                   <div className="grid grid-cols-2 gap-3 text-slate-700">
                     <div>
                       <span className="text-[10.5px] font-semibold text-slate-400 block">Institution / College</span>
-                      <span className="font-bold text-slate-900">{selectedUser.college_name || '—'}</span>
+                      <span className="font-bold text-slate-900">
+                        {selectedUser.role === 'faculty' || selectedUser.role === 'admin'
+                          ? 'Biratnagar International College'
+                          : (selectedUser.college_name || selectedUser.sp_college_name || selectedUser.gp_college_name || 'Biratnagar International College')}
+                      </span>
                     </div>
                     {selectedUser.role === 'student' && (
                       <>
@@ -523,6 +780,18 @@ export default function UserManagement() {
                         </div>
                       </>
                     )}
+                    {selectedUser.role === 'guest' && (
+                      <>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Course / Major</span>
+                          <span className="font-bold text-slate-900">{selectedUser.course_major || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10.5px] font-semibold text-slate-400 block">Participation Type</span>
+                          <span className="font-bold text-slate-900">External Guest Learner</span>
+                        </div>
+                      </>
+                    )}
                     {selectedUser.role === 'faculty' && (
                       <>
                         <div>
@@ -537,10 +806,12 @@ export default function UserManagement() {
                           <span className="text-[10.5px] font-semibold text-slate-400 block">Designation</span>
                           <span className="font-bold text-slate-900">{selectedUser.designation || '—'}</span>
                         </div>
-                        <div>
-                          <span className="text-[10.5px] font-semibold text-slate-400 block">Community</span>
-                          <span className="font-bold text-slate-900">{selectedUser.community || '—'}</span>
-                        </div>
+                        {selectedUser.community && (
+                          <div>
+                            <span className="text-[10.5px] font-semibold text-slate-400 block">Community</span>
+                            <span className="font-bold text-slate-900">{selectedUser.community}</span>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>

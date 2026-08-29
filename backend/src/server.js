@@ -85,6 +85,8 @@ app.listen(PORT, () => {
             await notificationsModel.createForUsers(userIds, {
               title: `Event Live: ${ev.title}`,
               message: `${ev.organizing_department || 'DevCorps'} just published a new ${ev.category} event — check it out!`,
+              eventId: ev.id,
+              link: `/events/${ev.id}`,
             });
           }
         }

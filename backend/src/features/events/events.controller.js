@@ -107,6 +107,8 @@ async function createEvent(req, res) {
           return notificationsModel.createForUsers(userIds, {
             title: `New Event: ${title}`,
             message: `${organizingDepartment} posted a new ${category} event — check it out!`,
+            eventId,
+            link: `/events/${eventId}`,
           });
         })
         .catch((err) => console.error('New-event notification broadcast failed:', err.message));
@@ -826,6 +828,8 @@ async function createDeletionRequest(req, res) {
           return notificationsModel.createForUsers(adminIds, {
             title: `Event Deletion Request: ${event.title}`,
             message: `${req.user.full_name || 'Faculty organizer'} submitted a deletion request for "${event.title}". Reason: ${reasonCategory}.`,
+            eventId: event.id,
+            link: `/events/${event.id}`,
           });
         }
       })
@@ -881,6 +885,8 @@ async function resolveDeletionRequest(req, res) {
       await notificationsModel.create(resolved.requested_by, {
         title: 'Event Cancellation Approved',
         message: `Your request to cancel "${resolved.event_title}" has been approved by administration. The event is now marked as Cancelled with the reason displayed.`,
+        eventId: resolved.event_id,
+        link: `/events/${resolved.event_id}`,
       });
 
       pool.query('SELECT user_id FROM registrations WHERE event_id = ?', [resolved.event_id])
@@ -890,6 +896,8 @@ async function resolveDeletionRequest(req, res) {
             return notificationsModel.createForUsers(studentIds, {
               title: `Event Cancelled: ${resolved.event_title}`,
               message: `Please be advised that "${resolved.event_title}" has been cancelled by administration. Reason: ${resolved.reason_category}.`,
+              eventId: resolved.event_id,
+              link: `/events/${resolved.event_id}`,
             });
           }
         })
@@ -900,6 +908,8 @@ async function resolveDeletionRequest(req, res) {
       await notificationsModel.create(resolved.requested_by, {
         title: 'Event Deletion Request Rejected',
         message: `Your request to delete "${resolved.event_title}" was not approved. Administration Note: ${adminNotes || 'Please contact the administration office for details.'}`,
+        eventId: resolved.event_id,
+        link: `/events/${resolved.event_id}`,
       });
 
       res.json({ message: 'Deletion request rejected. Requester has been notified.' });

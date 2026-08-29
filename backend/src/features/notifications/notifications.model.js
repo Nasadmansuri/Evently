@@ -1,7 +1,7 @@
 const pool = require('../../shared/config/db'); // adjust path if your pool export lives elsewhere
 
 async function getByUser(userId, { unreadOnly = false, limit = 50 } = {}) {
-  let query = `SELECT id, title, message, is_read, created_at FROM notifications WHERE user_id = ?`;
+  let query = `SELECT id, title, message, is_read, event_id, link, created_at FROM notifications WHERE user_id = ?`;
   const params = [userId];
   if (unreadOnly) {
     query += ` AND is_read = 0`;
@@ -43,12 +43,13 @@ async function markAllAsRead(userId) {
  * crash the fire-and-forget notification step (and, worse, silently swallow
  * that error, hiding a real bug). Message has no length limit (TEXT column).
  */
-async function createForUsers(userIds, { title, message }) {
+async function createForUsers(userIds, { title, message, eventId = null, link = null }) {
   if (!userIds || userIds.length === 0) return 0;
   const safeTitle = String(title).slice(0, 200);
-  const values = userIds.map((userId) => [userId, safeTitle, message]);
+  const safeLink = link ? String(link).slice(0, 255) : (eventId ? `/events/${eventId}` : null);
+  const values = userIds.map((userId) => [userId, safeTitle, message, eventId || null, safeLink]);
   const [result] = await pool.query(
-    `INSERT INTO notifications (user_id, title, message) VALUES ?`,
+    `INSERT INTO notifications (user_id, title, message, event_id, link) VALUES ?`,
     [values]
   );
   return result.affectedRows;
@@ -70,9 +71,9 @@ async function clearAll(userId) {
   return result.affectedRows;
 }
 
-async function create(userId, { title, message }) {
+async function create(userId, { title, message, eventId = null, link = null }) {
   if (!userId) return 0;
-  return createForUsers([userId], { title, message });
+  return createForUsers([userId], { title, message, eventId, link });
 }
 
 module.exports = {

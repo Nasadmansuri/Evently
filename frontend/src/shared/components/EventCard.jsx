@@ -157,6 +157,13 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
                   <span className="skeuo-badge-embossed flex shrink-0 items-center gap-1 rounded-xl bg-emerald-50 text-emerald-800 border-emerald-300 px-3.5 py-1.5 text-xs font-bold">
                     <CheckCircle2 size={13} /> Registered
                   </span>
+                ) : showRegisterAction && event.max_participants && (event.registered_count ?? event.registration_count ?? 0) >= event.max_participants ? (
+                  <button
+                    onClick={onViewDetails}
+                    className="skeuo-badge-embossed flex shrink-0 items-center gap-1 rounded-xl bg-amber-50 text-amber-900 border-amber-300 px-3.5 py-1.5 text-xs font-bold"
+                  >
+                    Full · Details <ArrowRight size={13} />
+                  </button>
                 ) : showRegisterAction && !isPast ? (
                   <button
                     onClick={onRegister}

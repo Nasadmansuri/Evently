@@ -27,7 +27,14 @@ function normalizeUser(row) {
   }
 
   if (core.role === 'faculty') {
-    Object.assign(user, { faculty_id_code, department, designation, community, approval_status });
+    Object.assign(user, {
+      college_name: 'Biratnagar International College',
+      faculty_id_code,
+      department,
+      designation,
+      community,
+      approval_status,
+    });
   }
 
   return user;

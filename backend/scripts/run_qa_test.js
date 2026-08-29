@@ -310,13 +310,31 @@ async function runQATests() {
     assert(res3_form.data.form && res3_form.data.form.questions.length === 4, 'Feedback form retrieved 4 distinct questions for student');
     const questions = res3_form.data.form.questions;
 
-    // 3.3 Student submits feedback responses
+    // 3.3 Verify Unregistered student is rejected (403 Forbidden)
     const answersObj = {};
     answersObj[questions[0].id] = '5';
     answersObj[questions[1].id] = 'Excellent real-world case studies.';
     answersObj[questions[2].id] = 'More interactive Q&A time would be great.';
     answersObj[questions[3].id] = 'Definitely';
 
+    const res3_unregistered = await request({
+      hostname: 'localhost',
+      port: 5000,
+      path: '/api/feedback/responses',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${studentToken}` },
+    }, {
+      formId,
+      eventId: fbEventId,
+      starRating: 5,
+      answers: answersObj,
+    });
+    assert(res3_unregistered.status === 403, 'Unregistered student feedback submission rejected (403 Forbidden)');
+
+    // Register student for event
+    await pool.query('INSERT INTO registrations (event_id, user_id) VALUES (?, ?)', [fbEventId, studentUser.id]);
+
+    // 3.4 Student submits feedback responses after registering
     const res3_3 = await request({
       hostname: 'localhost',
       port: 5000,

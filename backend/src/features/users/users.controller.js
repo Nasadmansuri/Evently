@@ -105,4 +105,28 @@ async function updateUserStatus(req, res) {
   }
 }
 
-module.exports = { getMe, updateMe, getPendingFaculty, updateApproval, updateUserStatus, getAllUsers, deleteUser };
+async function getUserActivity(req, res) {
+  try {
+    const { id } = req.params;
+    const user = await usersModel.getProfile(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const activity = await usersModel.getUserActivity(id, user.role);
+    const stats = await usersModel.getUserStats(id, user.role);
+    res.json({ user, stats, ...activity });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch user activity', error: err.message });
+  }
+}
+
+module.exports = {
+  getMe,
+  updateMe,
+  getPendingFaculty,
+  updateApproval,
+  updateUserStatus,
+  getAllUsers,
+  deleteUser,
+  getUserActivity,
+};

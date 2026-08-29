@@ -9,7 +9,7 @@ import { isEventPast, getEventStatus } from '../../../shared/utils/eventStatus';
 import { showToast } from '../../../shared/utils/toast';
 import EventCard from '../../../shared/components/EventCard';
 
-const STATUS_FILTERS = ['All', 'Upcoming', 'Ongoing', 'Ended'];
+const STATUS_FILTERS = ['All', 'Upcoming', 'Live Now', 'Past & Concluded'];
 
 export default function MyEvents() {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ export default function MyEvents() {
 
       const liveStatus = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
       const isPast = isEventPast(ev.event_date, ev.event_time);
-      const computedStatus = liveStatus === 'ongoing' ? 'Ongoing' : isPast || liveStatus === 'ended' ? 'Ended' : 'Upcoming';
+      const computedStatus = liveStatus === 'ongoing' ? 'Live Now' : isPast || liveStatus === 'ended' ? 'Past & Concluded' : 'Upcoming';
 
       const matchStatus = activeStatus === 'All' || computedStatus === activeStatus;
       return matchSearch && matchStatus;
@@ -95,7 +95,7 @@ export default function MyEvents() {
 
         <button
           onClick={() => navigate('/faculty/create-event')}
-          className="skeuo-btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs shrink-0 self-start sm:self-auto"
+          className="skeuo-btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs shrink-0 self-start sm:self-auto cursor-pointer"
         >
           <Plus size={16} /> Create New Event
         </button>
@@ -111,7 +111,7 @@ export default function MyEvents() {
               <button
                 key={status}
                 onClick={() => setActiveStatus(status)}
-                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                   isActive ? 'text-white' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -122,7 +122,15 @@ export default function MyEvents() {
                     transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                   />
                 )}
-                <span className="relative z-10">{status}</span>
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {status === 'Live Now' && (
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className={`relative inline-flex h-2 w-2 rounded-full ${isActive ? 'bg-white' : 'bg-emerald-500'}`} />
+                    </span>
+                  )}
+                  <span>{status}</span>
+                </span>
               </button>
             );
           })}

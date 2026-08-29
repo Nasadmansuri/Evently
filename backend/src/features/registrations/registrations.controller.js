@@ -15,11 +15,19 @@ async function register(req, res) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    // Security Gate: Block registration if the event has already passed
-    const eventDate = new Date(event.event_date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate day comparison
-    if (eventDate < today) {
+    // Security Gate: Block registration if event is cancelled, concluded, or in the past
+    if (event.status === 'cancelled') {
+      return res.status(400).json({ message: 'Registration is closed: This event has been cancelled.' });
+    }
+    if (event.status === 'completed' || event.status === 'concluded') {
+      return res.status(400).json({ message: 'Registration is closed: This event has concluded.' });
+    }
+
+    const eventDateStr = String(event.event_date).slice(0, 10);
+    const eventTimeStr = event.event_time ? String(event.event_time).slice(0, 5) : '00:00';
+    const eventStart = new Date(`${eventDateStr}T${eventTimeStr}:00`);
+    const eventEnd = new Date(eventStart.getTime() + 3 * 60 * 60 * 1000);
+    if (new Date() > eventEnd) {
       return res.status(400).json({ message: 'Registration is closed for past events.' });
     }
 

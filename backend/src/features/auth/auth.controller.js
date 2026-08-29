@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const authModel = require('./auth.model');
+const pool = require('../../shared/config/db');
+const notificationsModel = require('../notifications/notifications.model');
 const { verifyEmailDomain } = require('../../shared/utils/verifyEmailDomain');
 
 function signToken(user) {
@@ -113,7 +115,6 @@ async function sendSignupOtp(req, res) {
     res.json({
       message: 'A 6-digit verification code has been sent to your email.',
       email: normalizedEmail,
-      devOtp: process.env.NODE_ENV !== 'production' ? otp : undefined,
     });
   } catch (err) {
     console.error('Send signup OTP error:', err);
@@ -247,6 +248,20 @@ async function signupFaculty(req, res) {
 
     delete user.password_hash;
     res.status(201).json({ message: 'Account created, pending admin approval', user });
+
+    // Notify all campus administrators about the new faculty registration
+    pool.query('SELECT id FROM users WHERE role = "admin"')
+      .then(([admins]) => {
+        const adminIds = admins.map((a) => a.id);
+        if (adminIds.length > 0) {
+          return notificationsModel.createForUsers(adminIds, {
+            title: `New Faculty Registration: ${fullName.trim()}`,
+            message: `${fullName.trim()} (${department} · ${designation}) registered as faculty and is awaiting admin approval.`,
+            link: '/admin/dashboard',
+          });
+        }
+      })
+      .catch((err) => console.error('Admin faculty signup notification failed:', err.message));
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
       const message = err.sqlMessage.includes('email')
@@ -585,7 +600,6 @@ async function forgotPassword(req, res) {
     res.json({
       message: 'A 6-digit verification code has been sent to your email.',
       email: normalizedEmail,
-      devOtp: process.env.NODE_ENV !== 'production' ? otp : undefined,
     });
   } catch (err) {
     console.error('Forgot password error:', err);

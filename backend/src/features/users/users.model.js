@@ -36,11 +36,18 @@ async function setApprovalStatus(id, status) {
     [status, id]
   );
 
-  if (result.affectedRows > 0 && status === 'approved') {
-    await pool.query(
-      `INSERT INTO notifications (user_id, title, message) VALUES (?, ?, ?)`,
-      [id, 'Account Approved', 'Your account has been approved. You can now create and manage events.']
-    );
+  if (result.affectedRows > 0) {
+    if (status === 'approved') {
+      await pool.query(
+        `INSERT INTO notifications (user_id, title, message, link) VALUES (?, ?, ?, ?)`,
+        [id, 'Faculty Account Approved', 'Congratulations! Your faculty account has been approved by campus administration. You can now create and manage events.', '/faculty/dashboard']
+      );
+    } else if (status === 'rejected') {
+      await pool.query(
+        `INSERT INTO notifications (user_id, title, message, link) VALUES (?, ?, ?, ?)`,
+        [id, 'Faculty Registration Rejected', 'Your faculty account registration was not approved by administration. Please contact the campus admin office for assistance.', null]
+      );
+    }
   }
 
   return result.affectedRows > 0;
@@ -85,7 +92,13 @@ async function getAllUsers({ role, search } = {}) {
            sp.college_name AS sp_college_name, sp.faculty_name, sp.course_name,
            sp.academic_level, sp.academic_semester, sp.academic_group,
            gp.college_name AS gp_college_name, gp.course_major,
-           fp.faculty_id_code, fp.department, fp.designation, fp.community, fp.approval_status
+           fp.faculty_id_code, fp.department, fp.designation, fp.community, fp.approval_status,
+           (SELECT COUNT(*) FROM events e WHERE e.created_by = u.id) AS events_created_count,
+           (SELECT COUNT(r.id) FROM registrations r JOIN events e2 ON e2.id = r.event_id WHERE e2.created_by = u.id) AS total_attendees_hosted,
+           (SELECT COUNT(*) FROM events e3 WHERE e3.created_by = u.id AND e3.status = 'published') AS active_events_count,
+           (SELECT COUNT(fr.id) FROM feedback_responses fr JOIN events e4 ON e4.id = fr.event_id WHERE e4.created_by = u.id) AS feedback_responses_received,
+           (SELECT COUNT(*) FROM registrations reg WHERE reg.user_id = u.id) AS registered_events_count,
+           (SELECT COUNT(DISTINCT fresp.form_id) FROM feedback_responses fresp WHERE fresp.user_id = u.id) AS feedback_submitted_count
     FROM users u
     LEFT JOIN student_profiles sp ON sp.user_id = u.id
     LEFT JOIN guest_profiles gp ON gp.user_id = u.id
@@ -112,10 +125,20 @@ async function getAllUsers({ role, search } = {}) {
   const [rows] = await pool.query(query, params);
   return rows.map((r) => {
     const isGuest = r.role === 'student' && (r.gp_college_name != null || r.sp_college_name == null);
+    const collegeName = r.role === 'faculty' || r.role === 'admin'
+      ? 'Biratnagar International College'
+      : (isGuest ? (r.gp_college_name || 'External College') : (r.sp_college_name || 'Biratnagar International College'));
     return {
       ...r,
       role: isGuest ? 'guest' : r.role,
       is_guest: isGuest,
+      college_name: collegeName,
+      events_created_count: Number(r.events_created_count || 0),
+      total_attendees_hosted: Number(r.total_attendees_hosted || 0),
+      active_events_count: Number(r.active_events_count || 0),
+      feedback_responses_received: Number(r.feedback_responses_received || 0),
+      registered_events_count: Number(r.registered_events_count || 0),
+      feedback_submitted_count: Number(r.feedback_submitted_count || 0),
     };
   });
 }
@@ -148,6 +171,35 @@ async function getUserStats(userId, role) {
   }
 
   return stats;
+}
+
+async function getUserActivity(userId, role) {
+  if (role === 'faculty') {
+    const [events] = await pool.query(
+      `SELECT e.id, e.title, e.category, e.event_date, e.event_time, e.status, e.location, e.max_participants,
+              (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id) AS registered_count,
+              (SELECT COUNT(*) FROM feedback_responses fr WHERE fr.event_id = e.id) AS feedback_count
+       FROM events e
+       WHERE e.created_by = ?
+       ORDER BY e.event_date DESC, e.id DESC
+       LIMIT 10`,
+      [userId]
+    );
+    return { hostedEvents: events };
+  }
+
+  // Student or Guest
+  const [registrations] = await pool.query(
+    `SELECT r.id AS registration_id, r.registered_at, r.team_members,
+            e.id AS event_id, e.title, e.category, e.event_date, e.event_time, e.status, e.location
+     FROM registrations r
+     JOIN events e ON e.id = r.event_id
+     WHERE r.user_id = ?
+     ORDER BY r.registered_at DESC, r.id DESC
+     LIMIT 10`,
+    [userId]
+  );
+  return { registeredEvents: registrations };
 }
 
 async function updateProfile(id, data) {
@@ -199,5 +251,6 @@ module.exports = {
   getAllUsers,
   deleteUser,
   getUserStats,
+  getUserActivity,
   updateProfile,
 };

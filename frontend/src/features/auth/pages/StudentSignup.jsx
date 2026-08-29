@@ -43,7 +43,6 @@ export default function StudentSignup() {
   const [otpError, setOtpError] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [resending, setResending] = useState(false);
-  const [devOtp, setDevOtp] = useState(null);
 
   const matchedCollegeName = matchAffiliatedCollege(collegeName);
   const isBic = !!matchedCollegeName;
@@ -111,8 +110,7 @@ export default function StudentSignup() {
     setLoading(true);
     try {
       // Step 1: Request Email Verification OTP
-      const res = await api.post('/auth/signup/send-otp', { email: email.trim().toLowerCase() });
-      if (res.data.devOtp) setDevOtp(res.data.devOtp);
+      await api.post('/auth/signup/send-otp', { email: email.trim().toLowerCase() });
       setShowOtpModal(true);
       showToast.success(`Verification code sent to ${email}`);
     } catch (err) {
@@ -128,8 +126,7 @@ export default function StudentSignup() {
     setResending(true);
     setOtpError('');
     try {
-      const res = await api.post('/auth/signup/send-otp', { email: email.trim().toLowerCase() });
-      if (res.data.devOtp) setDevOtp(res.data.devOtp);
+      await api.post('/auth/signup/send-otp', { email: email.trim().toLowerCase() });
       showToast.success('New verification code sent to your email');
     } catch (err) {
       setOtpError(err.response?.data?.message || 'Failed to resend code');
@@ -647,22 +644,6 @@ export default function StudentSignup() {
                   className="skeuo-input w-full rounded-xl px-3.5 py-2.5 text-base tracking-widest font-mono text-center"
                 />
               </div>
-
-              {devOtp && (
-                <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    <KeyRound size={14} className="text-emerald-700" />
-                    Code: <strong className="font-mono tracking-wider">{devOtp}</strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setOtp(devOtp)}
-                    className="text-emerald-700 hover:text-emerald-900 underline font-semibold text-[11px] cursor-pointer"
-                  >
-                    Auto-fill
-                  </button>
-                </div>
-              )}
 
               <div className="flex items-center justify-between text-xs pt-1">
                 <span className="text-slate-500">Didn't receive the code?</span>
