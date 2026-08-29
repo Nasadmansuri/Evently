@@ -33,14 +33,14 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
       onClick={onClose}
     >
       <div
-        className="skeuo-card relative w-full max-w-xl overflow-hidden rounded-[28px] p-6 shadow-2xl animate-in zoom-in-95 duration-150"
+        className="skeuo-card relative w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-3xl p-5 sm:p-6 shadow-2xl animate-in zoom-in-95 duration-150 custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-start justify-between pb-3.5 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100">
-              <MapPin size={22} className="text-emerald-600 animate-pulse" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-2xs">
+              <MapPin size={22} className="text-emerald-600" />
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">Event Campus Venue</h3>
@@ -51,7 +51,7 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+            className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Close"
           >
             <X size={18} />
@@ -59,7 +59,7 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
         </div>
 
         {/* Venue Information Preview */}
-        <div className="my-4 rounded-2xl bg-slate-50/80 p-3.5 border border-slate-200/80 space-y-1">
+        <div className="my-3.5 rounded-2xl bg-slate-50/80 p-3.5 border border-slate-200/80 space-y-1">
           <div className="flex items-center gap-2">
             <Landmark size={15} className="text-primary-700 shrink-0" />
             <h4 className="text-xs font-bold text-slate-900 line-clamp-1">{displayVenue}</h4>
@@ -87,11 +87,11 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
           <button
             type="button"
             onClick={handleCopy}
-            className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold"
+            className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 min-h-[44px] text-xs font-bold cursor-pointer"
           >
             {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
             <span>{copied ? 'Copied Location' : 'Copy Address'}</span>
@@ -100,7 +100,7 @@ export default function VenueLocationModal({ isOpen, onClose, locationName, even
           <button
             type="button"
             onClick={handleOpenMaps}
-            className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold"
+            className="skeuo-btn-primary inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 min-h-[44px] text-xs font-bold cursor-pointer active:scale-95"
           >
             <Navigation size={14} />
             <span>Get Directions</span>

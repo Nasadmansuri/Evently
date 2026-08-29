@@ -367,7 +367,7 @@ export default function Registration() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-6 sm:p-8 space-y-6">
+      <form onSubmit={handleSubmit} className="skeuo-card rounded-[24px] p-6 sm:p-8 space-y-6">
         <div>
           <h2 className="text-sm font-semibold text-slate-900 mb-3">Personal Information</h2>
           <div className="space-y-1.5 text-sm">
@@ -412,13 +412,13 @@ export default function Registration() {
                 Registration Type <span className="text-red-500">*</span>
               </label>
               <p className="text-xs text-slate-500 mb-3">This is a team event — choose how you'd like to register.</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => { setTeamChoice('individual'); setTeamMembers(''); }}
-                  className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition ${
+                  className={`min-h-[44px] flex items-center justify-center rounded-xl border px-3 py-2.5 text-xs sm:text-sm font-bold transition active:scale-95 cursor-pointer ${
                     teamChoice === 'individual'
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-2xs'
                       : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -427,9 +427,9 @@ export default function Registration() {
                 <button
                   type="button"
                   onClick={() => setTeamChoice('team')}
-                  className={`flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-medium transition ${
+                  className={`min-h-[44px] flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs sm:text-sm font-bold transition active:scale-95 cursor-pointer ${
                     teamChoice === 'team'
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-2xs'
                       : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -440,44 +440,44 @@ export default function Registration() {
 
             {teamChoice === 'team' && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Team Name & Members <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={teamMembers}
                   onChange={(e) => setTeamMembers(e.target.value)}
-                  placeholder="e.g. Team Alpha - John, Sarah, Mike"
-                  className="w-full border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm"
+                  placeholder="e.g. Team Alpha - John Doe, Sarah Smith, Michael Brown"
+                  className="skeuo-input w-full rounded-xl p-3 text-xs sm:text-sm min-h-[90px] resize-y placeholder:text-slate-400"
                 />
               </div>
             )}
           </div>
         ) : null}
 
-        <label className="flex items-start gap-2.5 cursor-pointer">
+        <label className="flex items-start gap-3 py-1 cursor-pointer select-none">
           <input
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-0.5 w-4 h-4 accent-primary-600"
+            className="mt-0.5 h-4.5 w-4.5 shrink-0 rounded-md accent-primary-600 cursor-pointer"
           />
-          <span className="text-xs text-slate-600">
+          <span className="text-xs text-slate-600 leading-relaxed font-medium">
             I agree to the event's rules & eligibility criteria and confirm the details above are correct.
           </span>
         </label>
 
-        <div className="flex items-center gap-3 pt-1">
+        <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
             onClick={() => navigate(`/events/${id}`)}
-            className="flex-1 border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium py-2.5 rounded-lg text-sm transition"
+            className="skeuo-btn-secondary flex-1 min-h-[46px] py-3 rounded-xl text-xs sm:text-sm font-bold cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 bg-primary-600 hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] text-white font-medium py-2.5 rounded-lg text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            className="skeuo-btn-primary flex-1 min-h-[46px] py-3 rounded-xl text-xs sm:text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             {submitting ? <Loader2 className="animate-spin" size={16} /> : null}
             {submitting ? 'Registering...' : 'Register Now'}

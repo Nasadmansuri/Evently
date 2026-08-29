@@ -13,6 +13,7 @@ router.get('/admin/stats', requireAuth, requireRole('admin'), eventsController.g
 router.get('/gallery-summary', optionalAuth, eventsController.getGallerySummary);
 router.get('/deletion-requests/all', requireAuth, requireRole('admin'), eventsController.getDeletionRequests);
 router.patch('/deletion-requests/:requestId', requireAuth, requireRole('admin'), eventsController.resolveDeletionRequest);
+router.post('/admin/deletion-requests/:requestId/resolve', requireAuth, requireRole('admin'), eventsController.resolveDeletionRequest);
 router.get('/:id', optionalAuth, eventsController.getEventById);
 router.post('/:id/deletion-request', requireAuth, requireRole('faculty', 'admin'), eventsController.createDeletionRequest);
 router.post('/', requireAuth, requireRole('faculty', 'admin'), eventsController.createEvent);

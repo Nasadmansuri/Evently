@@ -178,7 +178,7 @@ export default function LandingContact() {
             GET IN TOUCH
           </span>
           <h2 className="mt-2 text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-            Connect with <span className="text-[#7c3aed]">Evently & BIC.</span>
+            Connect with <span className="bg-gradient-to-r from-primary-700 via-primary-600 to-violet-600 bg-clip-text text-transparent">Evently & BIC.</span>
           </h2>
           <p className="mt-2 text-sm sm:text-base text-slate-500 font-medium max-w-xl">
             Have questions about upcoming campus events, DevCorps communities, or registrations? We're here to assist you.

@@ -47,59 +47,58 @@ export default function FacultyDashboard() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Header Profile & Welcome Banner */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-2xs">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
+      {/* 1. Signature Deep Teal Academic Hero Banner */}
+      <div className="evently-hero-banner rounded-2xl p-6 sm:p-7 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-1/4 w-72 h-72 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 right-10 w-80 h-80 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div className="space-y-2.5 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-teal-100 border border-white/20">
                 Faculty Portal
               </span>
-              <span className="text-xs font-semibold text-slate-300">·</span>
-              <span className="text-xs font-medium text-slate-500">
+              <span className="text-xs text-teal-200/60">·</span>
+              <span className="text-xs font-semibold text-teal-100/90">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
               </span>
             </div>
 
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
                 Welcome back, {user?.full_name || 'Professor'}!
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-slate-600">
-                Manage your events, track student registrations, and review event feedback.
+              <p className="mt-1 text-xs sm:text-sm text-teal-100/90 leading-relaxed">
+                Manage your events, track student registrations, and review event feedback across campus.
               </p>
             </div>
 
             {/* Clean Academic Badges */}
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                <Landmark size={13} className="text-slate-500 shrink-0" />
-                {user?.department || 'Academic Department'}
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-xs font-semibold text-white shadow-2xs">
+                <Landmark size={13} className="text-teal-200 shrink-0" />
+                {user?.department || 'Biratnagar International College'}
               </span>
               {user?.designation && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-50/80 border border-primary-100 px-2.5 py-1 text-xs font-bold text-primary-800">
-                  <Award size={13} className="text-primary-700 shrink-0" />
+                <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-400/20 backdrop-blur-md border border-emerald-300/30 px-3 py-1 text-xs font-bold text-emerald-200 shadow-2xs">
+                  <Award size={13} className="text-emerald-300 shrink-0" />
                   {user.designation}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-medium text-slate-600">
-                <ShieldCheck size={13} className="text-slate-400 shrink-0" />
-                ID: {user?.faculty_id_code || 'FAC-CAMPUS'}
-              </span>
             </div>
           </div>
 
           <button
             onClick={() => navigate('/faculty/create-event')}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-3 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all shrink-0 self-start sm:self-center"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-50 text-primary-900 active:scale-95 px-5 py-3 text-xs font-bold shadow-md hover:shadow-lg transition-all shrink-0 self-start sm:self-center cursor-pointer"
           >
-            <Plus size={16} /> Create Event
+            <Plus size={16} className="text-primary-700" /> Create Event <ArrowRight size={14} className="text-primary-700" />
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="flex items-center justify-between gap-2 text-xs text-rose-700 bg-rose-50 border border-rose-100 rounded-2xl p-4 shadow-xs">
+        <div className="flex items-center justify-between gap-2 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-xs">
           <span className="flex items-center gap-2 font-medium">
             <AlertCircle size={16} className="shrink-0 text-rose-600" />
             {error}
@@ -110,47 +109,61 @@ export default function FacultyDashboard() {
         </div>
       )}
 
-      {/* 2. 4-KPI Metric Grid with Genuine Visual Hierarchy */}
+      {/* 2. Sophisticated 4-KPI Metric Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Metric 1: Total Events - Clean Typographic */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150 flex flex-col justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Events</p>
+        {/* Metric 1: Total Events */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Events</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs">
+              <CalendarDays size={16} />
+            </div>
+          </div>
           <div className="mt-3">
             <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.totalEvents}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">Total events created</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Events managed by you</p>
           </div>
         </div>
 
-        {/* Metric 2: Upcoming Events - Priority Time-Sensitive Card */}
-        <div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-b from-emerald-50/50 via-white to-white p-5 shadow-xs transition-all duration-150 flex flex-col justify-between">
+        {/* Metric 2: Upcoming Events */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-900">Upcoming Events</p>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800 border border-emerald-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
-              Active
-            </span>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Upcoming Events</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-200/60 shadow-2xs">
+              <Clock size={16} />
+            </div>
           </div>
           <div className="mt-3">
-            <p className="text-3xl font-black tracking-tight text-emerald-950">{loading ? '—' : stats.upcomingEvents}</p>
-            <p className="mt-1 text-xs text-emerald-800 font-semibold">Upcoming & active events</p>
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.upcomingEvents}</p>
+            <p className="mt-1 text-xs text-primary-700 font-semibold">Upcoming active events</p>
           </div>
         </div>
 
-        {/* Metric 3: Total Registrations - Clean Typographic */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150 flex flex-col justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Registrations</p>
+        {/* Metric 3: Total Registrations */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Registrations</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-700 border border-violet-200/60 shadow-2xs">
+              <Users size={16} />
+            </div>
+          </div>
           <div className="mt-3">
             <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.totalRegistrations}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">Total student registrations</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Total student signups</p>
           </div>
         </div>
 
-        {/* Metric 4: Completed Events - Clean Typographic */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150 flex flex-col justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Completed Events</p>
+        {/* Metric 4: Completed Events */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Completed Events</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs">
+              <CheckCircle2 size={16} />
+            </div>
+          </div>
           <div className="mt-3">
             <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.completedEvents}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">Past events concluded</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Past concluded events</p>
           </div>
         </div>
       </div>

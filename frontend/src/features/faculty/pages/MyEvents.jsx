@@ -58,6 +58,34 @@ export default function MyEvents() {
     }
   }
 
+  const deletionRequestsCount = useMemo(() => {
+    return events.filter((e) => e.deletion_request_id).length;
+  }, [events]);
+
+  const statusTabs = useMemo(() => {
+    const tabs = [
+      { id: 'All', label: 'All Events' },
+      { id: 'Upcoming', label: 'Upcoming' },
+      { id: 'Live Now', label: 'Live Now' },
+      { id: 'Past & Concluded', label: 'Past & Concluded' },
+    ];
+    if (deletionRequestsCount > 0) {
+      tabs.push({
+        id: 'Deletion Requests',
+        label: 'Deletion Requests',
+        count: deletionRequestsCount,
+        isRed: true,
+      });
+    }
+    return tabs;
+  }, [deletionRequestsCount]);
+
+  useEffect(() => {
+    if (activeStatus === 'Deletion Requests' && deletionRequestsCount === 0) {
+      setActiveStatus('All');
+    }
+  }, [deletionRequestsCount, activeStatus]);
+
   const filteredEvents = useMemo(() => {
     return events.filter((ev) => {
       const matchSearch =
@@ -65,6 +93,10 @@ export default function MyEvents() {
         ev.title?.toLowerCase().includes(search.toLowerCase().trim()) ||
         ev.category?.toLowerCase().includes(search.toLowerCase().trim()) ||
         ev.location?.toLowerCase().includes(search.toLowerCase().trim());
+
+      if (activeStatus === 'Deletion Requests') {
+        return matchSearch && !!ev.deletion_request_id;
+      }
 
       const liveStatus = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
       const isPast = isEventPast(ev.event_date, ev.event_time);
@@ -95,24 +127,28 @@ export default function MyEvents() {
 
         <button
           onClick={() => navigate('/faculty/create-event')}
-          className="skeuo-btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs shrink-0 self-start sm:self-auto cursor-pointer"
+          className="skeuo-btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold shrink-0 self-start sm:self-auto cursor-pointer"
         >
           <Plus size={16} /> Create New Event
         </button>
       </div>
 
-      {/* 2. Filter & Search Controls */}
-      <div className="skeuo-card flex flex-col sm:flex-row items-center justify-between gap-3.5 p-3.5 rounded-2xl">
-        {/* Fluid Status Filter Pills in Skeuomorphic Tray */}
+      {/* 2. Filter & Search Controls in a Tactile Card */}
+      <div className="skeuo-card flex flex-col sm:flex-row items-center justify-between gap-3.5 p-4 rounded-2xl">
+        {/* Fluid Status Filter Pills in a Recessed Tray */}
         <div className="skeuo-tray flex items-center gap-1 overflow-x-auto w-full sm:w-auto p-1 rounded-xl">
-          {STATUS_FILTERS.map((status) => {
-            const isActive = activeStatus === status;
+          {statusTabs.map((tab) => {
+            const isActive = activeStatus === tab.id;
             return (
               <button
-                key={status}
-                onClick={() => setActiveStatus(status)}
-                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                  isActive ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                key={tab.id}
+                onClick={() => setActiveStatus(tab.id)}
+                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? 'text-white'
+                    : tab.isRed && tab.count > 0
+                    ? 'text-rose-700 hover:text-rose-900 font-extrabold'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 {isActive && (
@@ -123,13 +159,15 @@ export default function MyEvents() {
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
-                  {status === 'Live Now' && (
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                      <span className={`relative inline-flex h-2 w-2 rounded-full ${isActive ? 'bg-white' : 'bg-emerald-500'}`} />
-                    </span>
+                  {tab.id === 'Live Now' && (
+                    <span className={`inline-block h-2 w-2 rounded-full ${isActive ? 'bg-white' : 'bg-emerald-500'}`} />
                   )}
-                  <span>{status}</span>
+                  {tab.isRed && (
+                    <span className={`inline-block h-2 w-2 rounded-full ${isActive ? 'bg-white' : 'bg-rose-500'}`} />
+                  )}
+                  <span>
+                    {tab.label} {tab.count !== undefined ? `(${tab.count})` : ''}
+                  </span>
                 </span>
               </button>
             );
@@ -144,12 +182,12 @@ export default function MyEvents() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search title, venue, category..."
-            className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-medium text-slate-900 placeholder:text-slate-400"
+            className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-semibold text-slate-800 placeholder:text-slate-400"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
               title="Clear search"
             >
               <X size={13} />
@@ -187,24 +225,30 @@ export default function MyEvents() {
             <Inbox size={26} />
           </div>
           <h3 className="text-base font-bold text-slate-900">
-            {events.length === 0 ? "You haven't created any events yet" : 'No events match your criteria'}
+            {events.length === 0
+              ? "You haven't created any events yet"
+              : activeStatus === 'Deletion Requests'
+              ? 'No pending deletion requests'
+              : 'No events match your criteria'}
           </h3>
           <p className="mt-1 text-xs text-slate-500 max-w-sm leading-relaxed">
             {events.length === 0
               ? 'Organize student workshops, technical hackathons, guest lectures, and campus festivals.'
+              : activeStatus === 'Deletion Requests'
+              ? 'All of your organized events are active and running as scheduled.'
               : 'Try clearing your search query or selecting a different status filter.'}
           </p>
           {events.length === 0 ? (
             <button
               onClick={() => navigate('/faculty/create-event')}
-              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs active:scale-95 transition"
+              className="skeuo-btn-primary mt-4 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold cursor-pointer"
             >
               <Plus size={15} /> Create your first event
             </button>
           ) : (
             <button
               onClick={() => { setSearch(''); setActiveStatus('All'); }}
-              className="mt-4 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-xs active:scale-95 transition"
+              className="skeuo-btn-secondary mt-4 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
             >
               Reset Filters
             </button>
@@ -228,69 +272,85 @@ export default function MyEvents() {
                   isPast={isPast}
                   onViewDetails={() => navigate(`/events/${ev.id}`)}
                   footer={
-                    <div className="flex w-full items-center justify-between gap-1.5">
-                      {ev.status !== 'cancelled' ? (
-                        <>
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/faculty/events/${ev.id}/edit`);
-                              }}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-2.5 py-1.5 text-xs font-bold text-slate-700 transition active:scale-95"
-                              title="Edit event details"
-                            >
-                              <Edit3 size={12} /> Edit
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/events/${ev.id}?tab=feedback`);
-                              }}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-2.5 py-1.5 text-xs font-bold text-slate-700 transition active:scale-95"
-                              title="View student feedback"
-                            >
-                              <MessageSquare size={12} /> Feedback
-                            </button>
-
-                            <button
-                              onClick={(e) => handleDownloadReport(e, ev.id, ev.title)}
-                              disabled={isDownloading}
-                              className="inline-flex items-center gap-1 rounded-lg bg-primary-700 hover:bg-primary-800 px-2.5 py-1.5 text-xs font-bold text-white shadow-2xs transition active:scale-95 disabled:opacity-50"
-                              title="Download PDF report"
-                            >
-                              {isDownloading ? <Loader2 size={12} className="animate-spin" /> : <FileDown size={12} />}
-                              PDF
-                            </button>
+                    <div className="flex flex-col w-full gap-2">
+                      {ev.deletion_request_id && (
+                        <div className="rounded-xl border border-rose-200 bg-rose-50/90 p-2 text-xs flex items-center justify-between gap-1.5 shadow-2xs">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="h-2 w-2 shrink-0 rounded-full bg-rose-500" />
+                            <span className="font-bold text-rose-900 truncate text-[11px]">
+                              Deletion Pending: {ev.deletion_reason || 'Under Review'}
+                            </span>
                           </div>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/events/${ev.id}`);
-                            }}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-primary-700 hover:text-primary-800 hover:underline ml-auto"
-                          >
-                            Manage →
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-xs font-bold text-rose-600">
-                            Cancelled
+                          <span className="text-[9.5px] font-extrabold uppercase text-rose-700 bg-rose-100/90 border border-rose-200 px-2 py-0.5 rounded-full shrink-0">
+                            In Review
                           </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/events/${ev.id}`);
-                            }}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-slate-900 ml-auto"
-                          >
-                            View Notice →
-                          </button>
-                        </>
+                        </div>
                       )}
+
+                      <div className="flex w-full items-center justify-between gap-1.5">
+                        {ev.status !== 'cancelled' ? (
+                          <>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/faculty/events/${ev.id}/edit`);
+                                }}
+                                className="skeuo-btn-secondary inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold cursor-pointer"
+                                title="Edit event details"
+                              >
+                                <Edit3 size={12} /> Edit
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/events/${ev.id}?tab=feedback`);
+                                }}
+                                className="skeuo-btn-secondary inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold cursor-pointer"
+                                title="View student feedback"
+                              >
+                                <MessageSquare size={12} /> Feedback
+                              </button>
+
+                              <button
+                                onClick={(e) => handleDownloadReport(e, ev.id, ev.title)}
+                                disabled={isDownloading}
+                                className="skeuo-btn-primary inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold disabled:opacity-50 cursor-pointer"
+                                title="Download PDF report"
+                              >
+                                {isDownloading ? <Loader2 size={12} className="animate-spin" /> : <FileDown size={12} />}
+                                PDF
+                              </button>
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/events/${ev.id}`);
+                              }}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-primary-700 hover:text-primary-800 hover:underline ml-auto"
+                            >
+                              Manage →
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-xs font-bold text-rose-600">
+                              Cancelled
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/events/${ev.id}`);
+                              }}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-slate-900 ml-auto"
+                            >
+                              View Notice →
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   }
                 />

@@ -239,7 +239,7 @@ export default function FeedbackBuilder() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5 rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+      <form onSubmit={handleSubmit} className="skeuo-card space-y-5 rounded-[24px] p-5 sm:p-7">
         <div>
           <label className="mb-1.5 block text-xs font-bold text-slate-700">
             Form Title <span className="text-red-500">*</span>
@@ -250,7 +250,7 @@ export default function FeedbackBuilder() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Workshop Feedback & Participant Survey"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-medium text-slate-900 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+            className="skeuo-input w-full rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-900"
           />
         </div>
 
@@ -261,7 +261,7 @@ export default function FeedbackBuilder() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Brief message explaining how participant responses will be used..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+            className="skeuo-input w-full rounded-xl px-3.5 py-2.5 text-sm text-slate-900"
           />
         </div>
 

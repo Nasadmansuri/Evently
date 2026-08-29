@@ -215,16 +215,16 @@ export default function NotificationBell() {
     <div className="relative" ref={wrapperRef}>
       <button
         onClick={toggleOpen}
-        className="relative flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition active:scale-95 focus:outline-none"
+        className="group relative flex h-10 w-10 sm:h-10.5 sm:w-10.5 items-center justify-center rounded-full border border-slate-200/90 bg-white text-slate-600 shadow-2xs transition-all duration-300 ease-out hover:bg-slate-50 hover:border-slate-300/90 hover:text-primary-700 hover:shadow-xs hover:scale-105 active:scale-95 focus:outline-none cursor-pointer"
         aria-label={
           unreadCount > 0
             ? `${unreadCount} unread notifications`
             : 'Notifications'
         }
       >
-        <Bell size={19} className="text-slate-600" />
+        <Bell size={19} className="text-slate-600 group-hover:text-primary-700 transition-colors duration-200" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white shadow-xs animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-black text-white shadow-xs">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

@@ -64,7 +64,7 @@ export default function LandingDevCorps() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-8">
           <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-              BIC DevCorps <span className="text-[#7c3aed]">Student Hub.</span>
+              BIC DevCorps <span className="bg-gradient-to-r from-primary-700 via-primary-600 to-violet-600 bg-clip-text text-transparent">Student Hub.</span>
             </h2>
             <p className="mt-2 text-sm sm:text-base text-slate-500 font-medium max-w-xl">
               Collaborate, build projects, and organize flagship events with fellow students in your favorite domain across 4 student-led chapters.

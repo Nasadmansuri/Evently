@@ -88,7 +88,7 @@ export default function BrowseEvents() {
     } else if (statusTab === 'concluded') {
       list = list.filter((ev) => {
         const st = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
-        return st === 'ended';
+        return st === 'ended' || st === 'cancelled';
       });
       list = [...list].sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
     } else {
@@ -147,7 +147,7 @@ export default function BrowseEvents() {
         </div>
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
-          {/* List vs Calendar Toggle in a Recessed Tray */}
+          {/* List vs Calendar Toggle in a Recessed Skeuomorphic Tray */}
           <div className="skeuo-tray flex rounded-xl p-1">
             <button
               onClick={() => setViewMode('list')}
@@ -196,12 +196,12 @@ export default function BrowseEvents() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search title, venue, topic..."
-                className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs text-slate-800 placeholder:text-slate-400"
+                className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-medium text-slate-900 placeholder:text-slate-400"
               />
               {search && (
                 <button
                   onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
                   title="Clear search"
                 >
                   <X size={13} />
@@ -217,7 +217,7 @@ export default function BrowseEvents() {
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
-              className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700"
+              className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -234,7 +234,7 @@ export default function BrowseEvents() {
             <select
               value={activeDepartment}
               onChange={(e) => setActiveDepartment(e.target.value)}
-              className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700"
+              className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer"
             >
               <option value="All">All Departments & Communities</option>
               {ORGANIZING_DEPARTMENTS.filter((dept) => dept !== 'All').map((dept) => (
@@ -251,7 +251,7 @@ export default function BrowseEvents() {
           <div className="flex items-end">
             <button
               onClick={resetFilters}
-              className="skeuo-btn-secondary w-full rounded-xl px-3 py-2.5 text-xs"
+              className="skeuo-btn-secondary w-full rounded-xl px-3 py-2.5 text-xs cursor-pointer"
             >
               Reset Filters
             </button>
@@ -263,13 +263,13 @@ export default function BrowseEvents() {
         <div className="flex items-center gap-2 rounded-xl border border-primary-100 bg-primary-50 px-4 py-2.5 text-xs font-medium text-primary-800 shadow-2xs animate-in fade-in duration-150">
           <Calendar size={14} className="text-primary-600 shrink-0" />
           <span>Showing events on <strong>{new Date(dateFilter).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong></span>
-          <button onClick={() => setDateFilter(null)} className="ml-auto flex items-center gap-1 font-bold hover:underline">
+          <button onClick={() => setDateFilter(null)} className="ml-auto flex items-center gap-1 font-bold hover:underline cursor-pointer">
             <X size={13} /> Clear
           </button>
         </div>
       )}
 
-      {/* 3. Event Status Tabs (Skeuomorphic Segmented Tray with Tactile Active Pill) */}
+      {/* 3. Event Status Tabs in Tactile Segmented Tray */}
       {viewMode === 'list' && (
         <div className="flex items-center justify-between gap-3 flex-wrap border-b border-slate-200/80 pb-3">
           <div className="skeuo-tray flex items-center gap-1 p-1 rounded-xl">
@@ -306,10 +306,7 @@ export default function BrowseEvents() {
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className={`relative inline-flex h-2 w-2 rounded-full ${statusTab === 'ongoing' ? 'bg-white' : 'bg-emerald-500'}`} />
-                  </span>
+                  <span className={`inline-block h-2 w-2 rounded-full ${statusTab === 'ongoing' ? 'bg-white' : 'bg-emerald-500'}`} />
                   <span>Live Now ({ongoingEventsCount})</span>
                 </span>
               </button>
@@ -329,7 +326,7 @@ export default function BrowseEvents() {
                   transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}
-              <span className="relative z-10">Past & Concluded</span>
+              <span className="relative z-10">Concluded</span>
             </button>
 
             <button
@@ -346,7 +343,7 @@ export default function BrowseEvents() {
                   transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}
-              <span className="relative z-10">All Events</span>
+              <span className="relative z-10">All ({events.length})</span>
             </button>
           </div>
 

@@ -113,25 +113,20 @@ export default function MyRegistrations() {
 
       {/* 2. Interactive KPI Tab Cards (Click card to filter view) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Metric 1: Total - Clean Typographic Treatment */}
+        {/* Metric 1: All Registrations */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'all' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+          className={`skeuo-card rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
             activeTab === 'all'
-              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
-              : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
+              ? 'ring-2 ring-primary-600 bg-primary-50/30'
+              : 'hover:border-slate-300'
           }`}
         >
           <div className="flex items-center justify-between">
-            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'all' ? 'text-primary-800' : 'text-slate-400'}`}>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'all' ? 'text-primary-800' : 'text-slate-500'}`}>
               All Registrations
             </p>
-            {activeTab === 'all' && (
-              <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
-                Active View
-              </span>
-            )}
           </div>
           <div className="mt-3">
             <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : registrations.length}</p>
@@ -139,34 +134,25 @@ export default function MyRegistrations() {
           </div>
         </button>
 
-        {/* Metric 2: Upcoming - Priority Time-Sensitive Treatment */}
+        {/* Metric 2: Upcoming */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'upcoming' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden ${
+          className={`skeuo-card rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
             activeTab === 'upcoming'
-              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
-              : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
+              ? 'ring-2 ring-primary-600 bg-primary-50/30'
+              : 'hover:border-slate-300'
           }`}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'upcoming' ? 'text-primary-800' : 'text-slate-500'}`}>
-                Upcoming Events
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5">
-              {upcoming.length > 0 && (
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  {upcoming.length} Scheduled
-                </span>
-              )}
-              {activeTab === 'upcoming' && (
-                <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
-                  Active View
-                </span>
-              )}
-            </div>
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'upcoming' ? 'text-primary-800' : 'text-slate-500'}`}>
+              Upcoming Events
+            </p>
+            {upcoming.length > 0 && (
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                {upcoming.length} Scheduled
+              </span>
+            )}
           </div>
           <div className="mt-3">
             <p className="text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : upcoming.length}</p>
@@ -174,25 +160,20 @@ export default function MyRegistrations() {
           </div>
         </button>
 
-        {/* Metric 3: Past - Clean Typographic Treatment */}
+        {/* Metric 3: Past */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'past' })}
-          className={`relative rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+          className={`skeuo-card rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
             activeTab === 'past'
-              ? 'border-2 border-primary-700 bg-primary-50/40 shadow-xs ring-4 ring-primary-100/60'
-              : 'border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs'
+              ? 'ring-2 ring-primary-600 bg-primary-50/30'
+              : 'hover:border-slate-300'
           }`}
         >
           <div className="flex items-center justify-between">
-            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'past' ? 'text-primary-800' : 'text-slate-400'}`}>
-              Past Attended
+            <p className={`text-[11px] font-bold uppercase tracking-wider ${activeTab === 'past' ? 'text-primary-800' : 'text-slate-500'}`}>
+              Past & Completed
             </p>
-            {activeTab === 'past' && (
-              <span className="text-[10px] font-extrabold text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded-md">
-                Active View
-              </span>
-            )}
           </div>
           <div className="mt-3">
             <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : past.length}</p>

@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import {
-  BarChart3, Calendar, AlertCircle, Inbox, Loader2, FileDown,
+  BarChart3, Calendar, AlertCircle, Inbox, Loader2, FileDown, FileText,
   Clock, Search, CheckCircle2, History, Trash2, ArrowRight, ShieldCheck
 } from 'lucide-react';
 import api from '../../../shared/services/api';
@@ -230,40 +231,55 @@ export default function Reports() {
       )}
 
       {/* Main Event Table Section */}
-      <div className="overflow-hidden rounded-[24px] border border-slate-200/90 bg-white shadow-xs">
+      <div className="skeuo-card overflow-hidden rounded-[24px]">
         {/* Controls Toolbar */}
         <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* Tabs */}
-          <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
+          {/* Tabs in Skeuomorphic Tray */}
+          <div className="skeuo-tray flex items-center gap-1 rounded-xl p-1">
             <button
               onClick={() => setFilterTab('all')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                filterTab === 'all'
-                  ? 'bg-white text-primary-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                filterTab === 'all' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              All Events ({events.length})
+              {filterTab === 'all' && (
+                <motion.div
+                  layoutId="reportsFilterPill"
+                  className="absolute inset-0 rounded-lg skeuo-pill-active"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10">All Events ({events.length})</span>
             </button>
             <button
               onClick={() => setFilterTab('concluded')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                filterTab === 'concluded'
-                  ? 'bg-white text-primary-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                filterTab === 'concluded' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Concluded ({concludedCount})
+              {filterTab === 'concluded' && (
+                <motion.div
+                  layoutId="reportsFilterPill"
+                  className="absolute inset-0 rounded-lg skeuo-pill-active"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10">Concluded ({concludedCount})</span>
             </button>
             <button
               onClick={() => setFilterTab('upcoming')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                filterTab === 'upcoming'
-                  ? 'bg-white text-primary-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                filterTab === 'upcoming' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Upcoming ({upcomingCount})
+              {filterTab === 'upcoming' && (
+                <motion.div
+                  layoutId="reportsFilterPill"
+                  className="absolute inset-0 rounded-lg skeuo-pill-active"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10">Upcoming ({upcomingCount})</span>
             </button>
           </div>
 
@@ -274,7 +290,7 @@ export default function Reports() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search event title, organizer..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs text-slate-700 transition placeholder:text-slate-400 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+              className="skeuo-input w-full rounded-xl py-2 pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400"
             />
           </div>
         </div>
@@ -319,40 +335,38 @@ export default function Reports() {
                     <div className="flex items-center gap-1.5 text-xs text-slate-600">
                       <Calendar size={13} className="text-primary-700 shrink-0" />
                       <span>
-                        {new Date(ev.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} · {formatTime12hr(ev.event_time)}
+                        {new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {ev.event_time ? ` · ${ev.event_time}` : ''}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className={`inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
-                        {ev.category}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`skeuo-badge-embossed inline-flex items-center rounded-md px-2 py-0.5 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
+                        {ev.category || 'General'}
                       </span>
                       {isPast ? (
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-600">
                           Ended
                         </span>
                       ) : (
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                        <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700">
                           Active
                         </span>
                       )}
                     </div>
 
-                    <div className="sm:text-right">
+                    <div className="flex justify-start sm:justify-end">
                       <button
                         onClick={() => handleGenerate(ev)}
                         disabled={generatingId === ev.id}
-                        className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold shadow-xs active:scale-95 transition disabled:opacity-50 ${
-                          isPast
-                            ? 'bg-primary-700 text-white hover:bg-primary-800'
-                            : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                        }`}
+                        className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs cursor-pointer disabled:opacity-50"
                       >
                         {generatingId === ev.id ? (
-                          <><Loader2 className="animate-spin" size={13} /> Generating...</>
+                          <Loader2 size={13} className="animate-spin" />
                         ) : (
-                          <><FileDown size={13} /> Generate PDF Report</>
+                          <FileText size={13} />
                         )}
+                        <span>{generatingId === ev.id ? 'Generating...' : 'Generate PDF Report'}</span>
                       </button>
                     </div>
                   </div>

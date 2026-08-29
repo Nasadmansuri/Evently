@@ -94,12 +94,12 @@ export default function Gallery() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search albums, hackathons, seminars..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-8 text-xs font-medium text-slate-900 transition placeholder:text-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-2xs"
+            className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-semibold text-slate-800 placeholder:text-slate-400"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
               title="Clear search"
             >
               <X size={13} />
@@ -108,29 +108,29 @@ export default function Gallery() {
         </div>
       </div>
 
-      {/* 2. Dynamic Category Filter Pills (Only categories with active photo albums) */}
+      {/* 2. Dynamic Category Filter Pills in a Recessed Skeuomorphic Tray */}
       {!loading && availableCategories.length > 1 && (
-        <div className="flex flex-wrap gap-1.5 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1.5 shadow-2xs w-fit">
+        <div className="skeuo-tray flex flex-wrap gap-1 p-1 w-fit rounded-xl">
           {availableCategories.map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`relative flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                   isActive ? 'text-white' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="galleryCategoryPill"
-                    className="absolute inset-0 rounded-xl bg-primary-700 shadow-xs"
+                    className="absolute inset-0 rounded-lg skeuo-pill-active"
                     transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                   />
                 )}
                 <span className="relative z-10">{cat.label}</span>
                 <span className={`relative z-10 rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  isActive ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
                 }`}>
                   {cat.count}
                 </span>
@@ -175,7 +175,7 @@ export default function Gallery() {
           {(search || activeCategory !== 'All') && (
             <button
               onClick={() => { setSearch(''); setActiveCategory('All'); }}
-              className="mt-4 rounded-xl bg-primary-700 hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-xs active:scale-95 transition"
+              className="skeuo-btn-secondary mt-4 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
             >
               Reset Filters
             </button>
@@ -196,7 +196,7 @@ export default function Gallery() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: idx * 0.03 }}
                 onClick={() => navigate(`/events/${ev.id}?tab=gallery`)}
-                className="group flex cursor-pointer flex-col overflow-hidden rounded-[22px] border border-slate-200/85 bg-white p-3.5 shadow-2xs hover:shadow-md hover:border-primary-300 hover:-translate-y-1 transition-all duration-200"
+                className="skeuo-card skeuo-card-interactive group flex cursor-pointer flex-col overflow-hidden rounded-[22px] p-3.5"
               >
                 {/* 1. Inset Poster Frame */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-100 ring-1 ring-black/5">
@@ -223,9 +223,9 @@ export default function Gallery() {
 
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-5" />
 
-                  {/* Category Pill on bottom-left */}
-                  <div className="absolute bottom-2.5 left-2.5 z-10">
-                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold shadow-xs ${style.bg} ${style.text} bg-white/95 backdrop-blur-xs`}>
+                  {/* Category Badge on top-left */}
+                  <div className="absolute top-2.5 left-2.5 z-10">
+                    <span className={`skeuo-badge-embossed rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${style.bg} ${style.text}`}>
                       {ev.category}
                     </span>
                   </div>
@@ -271,7 +271,7 @@ export default function Gallery() {
                         e.stopPropagation();
                         navigate(`/events/${ev.id}?tab=gallery`);
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary-700 group-hover:bg-primary-800 px-4 py-2 text-xs font-bold text-white shadow-2xs transition active:scale-95 shrink-0"
+                      className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs cursor-pointer shrink-0"
                     >
                       View Photos <ArrowRight size={13} />
                     </button>

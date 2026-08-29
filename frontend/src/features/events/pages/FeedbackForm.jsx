@@ -273,13 +273,13 @@ export default function FeedbackForm() {
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <button
             onClick={() => navigate(`/events/${id}`)}
-            className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98]"
+            className="skeuo-btn-primary w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-bold cursor-pointer"
           >
             <ArrowLeft size={15} /> Return to Event Details
           </button>
           <button
-            onClick={() => navigate('/student/my-feedback')}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 active:scale-[0.98]"
+            onClick={() => navigate('/student/my-feedback?tab=submitted')}
+            className="skeuo-btn-secondary w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-bold cursor-pointer"
           >
             View All Feedback Submissions
           </button>
@@ -352,7 +352,7 @@ export default function FeedbackForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Overall Rating Section */}
-        <div className="rounded-[22px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+        <div className="skeuo-card rounded-[22px] p-5 sm:p-6">
           <label className="block text-sm font-bold text-slate-900 mb-1">
             Overall Experience Rating <span className="text-red-500">*</span>
           </label>
@@ -394,7 +394,7 @@ export default function FeedbackForm() {
         {form.questions.map((q, idx) => (
           <div
             key={q.id}
-            className="rounded-[22px] border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 space-y-3"
+            className="skeuo-card rounded-[22px] p-5 sm:p-6 space-y-3"
           >
             <div className="flex items-start gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-[11px] font-bold text-primary-800">
@@ -419,7 +419,7 @@ export default function FeedbackForm() {
                   value={answers[q.id] || ''}
                   onChange={(e) => setAnswer(q.id, e.target.value)}
                   placeholder="Type your answer here..."
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-2.5 text-sm text-slate-900 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="skeuo-input w-full rounded-xl px-4 py-2.5 text-sm text-slate-900"
                 />
               )}
 
@@ -429,7 +429,7 @@ export default function FeedbackForm() {
                   value={answers[q.id] || ''}
                   onChange={(e) => setAnswer(q.id, e.target.value)}
                   placeholder="Share your detailed feedback or suggestions..."
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-sm text-slate-900 transition focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="skeuo-input w-full rounded-xl p-3.5 text-sm text-slate-900"
                 />
               )}
 
@@ -448,7 +448,7 @@ export default function FeedbackForm() {
                         className={
                           n <= (answers[q.id] || 0)
                             ? 'fill-amber-400 text-amber-400'
-                            : 'fill-slate-200 text-slate-300'
+                            : 'fill-slate-200 text-slate-200'
                         }
                       />
                     </button>
@@ -459,17 +459,17 @@ export default function FeedbackForm() {
                 </div>
               )}
 
-              {q.question_type === 'multiple_choice' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {(q.options || []).map((opt) => {
+              {q.question_type === 'multiple_choice' && q.options && (
+                <div className="space-y-2">
+                  {(q.options || []).map((opt, oi) => {
                     const isSelected = answers[q.id] === opt;
                     return (
                       <label
-                        key={opt}
-                        className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-xs font-semibold transition ${
+                        key={oi}
+                        className={`flex items-center gap-3 rounded-xl border p-3 text-xs font-medium cursor-pointer transition ${
                           isSelected
-                            ? 'border-primary-500 bg-primary-50 text-primary-900 shadow-2xs'
-                            : 'border-slate-200 bg-slate-50/70 text-slate-700 hover:bg-slate-100/70'
+                            ? 'border-primary-500 bg-primary-50/50 text-primary-900 font-semibold'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                         }`}
                       >
                         <input
@@ -493,7 +493,7 @@ export default function FeedbackForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-700 py-3 text-sm font-bold text-white shadow-md shadow-primary-700/20 transition hover:bg-primary-600 active:scale-[0.98] disabled:opacity-50"
+            className="skeuo-btn-primary flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm disabled:opacity-50 cursor-pointer"
           >
             {submitting ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
             {submitting ? 'Submitting Feedback...' : 'Submit Feedback'}

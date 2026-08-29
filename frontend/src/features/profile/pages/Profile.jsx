@@ -232,7 +232,7 @@ export default function Profile() {
         {/* Left 2 Columns: Academic and Contact Information */}
         <div className="md:col-span-2 space-y-5">
           {/* Academic & Institutional Details Card */}
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
+          <div className="skeuo-card rounded-2xl p-5 sm:p-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
               <div className="flex items-center gap-2.5 text-slate-900 font-bold text-base">
                 <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
@@ -240,7 +240,7 @@ export default function Profile() {
                 </div>
                 Academic & Institutional Details
               </div>
-              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+              <span className={`skeuo-badge-embossed text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                 isGuest ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-700'
               }`}>
                 {profile?.role === 'student' ? (isGuest ? 'Guest Profile' : 'Student Profile') : profile?.role === 'faculty' ? 'Faculty Profile' : 'Admin Profile'}
@@ -365,7 +365,7 @@ export default function Profile() {
           </div>
 
           {/* Contact & Authentication Security Card */}
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
+          <div className="skeuo-card rounded-2xl p-5 sm:p-6">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-base border-b border-slate-100 pb-3.5 mb-4">
               <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <ShieldCheck size={18} />
@@ -419,7 +419,7 @@ export default function Profile() {
 
         {/* Right 1 Column: Stats & Institutional Recognition */}
         <div className="space-y-5">
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
+          <div className="skeuo-card rounded-2xl p-5 sm:p-6">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
               Activity & Engagement
             </h3>
@@ -455,7 +455,7 @@ export default function Profile() {
                     <div>
                       <span className="text-xs text-primary-900 font-semibold block">Feedback Received</span>
                       <span className="text-2xl font-black text-primary-950">
-                        {profile?.stats?.feedbackReceived || 0}
+                        {profile?.stats?.feedbackCount || 0}
                       </span>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
@@ -463,13 +463,13 @@ export default function Profile() {
                     </div>
                   </div>
                 </>
-              ) : profile?.role === 'admin' ? (
+              ) : profile?.role === 'student' ? (
                 <>
                   <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-primary-900 font-semibold block">Total Events</span>
+                      <span className="text-xs text-primary-900 font-semibold block">Registered Events</span>
                       <span className="text-2xl font-black text-primary-950">
-                        {profile?.stats?.totalEvents || 0}
+                        {profile?.stats?.registeredCount || 0}
                       </span>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
@@ -479,27 +479,13 @@ export default function Profile() {
 
                   <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
                     <div>
-                      <span className="text-xs text-primary-900 font-semibold block">Total Users</span>
+                      <span className="text-xs text-primary-900 font-semibold block">Events Attended</span>
                       <span className="text-2xl font-black text-primary-950">
-                        {profile?.stats?.totalUsers || 0}
+                        {profile?.stats?.attendedCount || 0}
                       </span>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
-                      <Users size={18} />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="p-4 rounded-xl bg-primary-50/70 border border-primary-100 flex items-center justify-between">
-                    <div>
-                      <span className="text-xs text-primary-900 font-semibold block">Events Registered</span>
-                      <span className="text-2xl font-black text-primary-950">
-                        {profile?.stats?.totalRegistrations || 0}
-                      </span>
-                    </div>
-                    <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
-                      <Calendar size={18} />
+                      <Award size={18} />
                     </div>
                   </div>
 
@@ -507,7 +493,7 @@ export default function Profile() {
                     <div>
                       <span className="text-xs text-primary-900 font-semibold block">Feedback Submitted</span>
                       <span className="text-2xl font-black text-primary-950">
-                        {profile?.stats?.totalFeedback || 0}
+                        {profile?.stats?.feedbackCount || 0}
                       </span>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-primary-700 text-white flex items-center justify-center shadow-xs">
@@ -515,27 +501,24 @@ export default function Profile() {
                     </div>
                   </div>
                 </>
+              ) : (
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-600 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-slate-900">
+                    <ShieldCheck size={16} className="text-emerald-600" /> Super Administrator
+                  </div>
+                  <p>Full governance privileges across all platform events, faculties, and participants.</p>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Institutional Badge Card */}
-          <div className="rounded-2xl p-5 bg-gradient-to-b from-slate-50 to-slate-100 border border-slate-200 text-center">
-            <div className="w-12 h-12 rounded-full bg-white shadow-md mx-auto flex items-center justify-center text-primary-600 mb-3 border border-slate-200">
-              <Award size={24} />
-            </div>
-            <h4 className="text-xs font-bold text-slate-900 mb-1">
-              {profile?.role === 'admin'
-                ? 'System Administrator'
-                : profile?.role === 'faculty'
-                ? 'Faculty Event Organizer'
-                : isAffiliated
-                ? 'Wolverhampton Partner College'
-                : 'Campus Event Explorer'}
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-5 text-xs text-slate-600">
+            <h4 className="font-bold text-slate-900 mb-1 flex items-center gap-1.5">
+              <CheckCircle2 size={14} className="text-emerald-600" /> Platform Role Access
             </h4>
-            <p className="text-[11px] text-slate-600 leading-relaxed">
+            <p className="leading-relaxed">
               {profile?.role === 'admin'
-                ? 'Oversee campus event governance, review faculty approvals, and monitor platform analytics.'
+                ? 'Authorized administrator permissions for system monitoring, approvals, and report generation.'
                 : profile?.role === 'faculty'
                 ? 'Publish academic workshops, hackathons, seminars, and gather student feedback on Evently.'
                 : isAffiliated
@@ -550,7 +533,7 @@ export default function Profile() {
       {editing &&
         createPortal(
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100">
+            <div className="skeuo-card w-full max-w-md rounded-2xl p-6 shadow-2xl">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <Edit3 size={16} className="text-primary-600" />
@@ -558,7 +541,7 @@ export default function Profile() {
                 </h2>
                 <button
                   onClick={() => { setEditing(false); setEditError(''); }}
-                  className="text-slate-400 hover:text-slate-600 p-1"
+                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -582,7 +565,7 @@ export default function Profile() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Nasad Mansuri"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium"
+                    className="skeuo-input w-full rounded-xl px-3 py-2 text-xs font-semibold text-slate-800"
                   />
                 </div>
 
@@ -596,7 +579,7 @@ export default function Profile() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     placeholder="98XXXXXXXX"
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="skeuo-input w-full rounded-xl px-3 py-2 text-xs font-semibold text-slate-800"
                   />
                 </div>
 
@@ -607,7 +590,7 @@ export default function Profile() {
                       <select
                         value={academicSemester}
                         onChange={(e) => setAcademicSemester(e.target.value)}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="skeuo-input w-full rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 cursor-pointer"
                       >
                         <option value="1">Semester 1</option>
                         <option value="2">Semester 2</option>
@@ -619,7 +602,7 @@ export default function Profile() {
                       <select
                         value={academicGroup}
                         onChange={(e) => setAcademicGroup(e.target.value)}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="skeuo-input w-full rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 cursor-pointer"
                       >
                         {GROUPS.map((g) => (
                           <option key={g} value={g}>{g}</option>
@@ -633,14 +616,14 @@ export default function Profile() {
                   <button
                     type="button"
                     onClick={() => { setEditing(false); setEditError(''); }}
-                    className="text-xs text-slate-500 hover:text-slate-800 font-medium px-3 py-2"
+                    className="skeuo-btn-secondary px-3.5 py-2 rounded-xl text-xs cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="bg-primary-600 hover:bg-primary-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+                    className="skeuo-btn-primary px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                   >
                     {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
                     Save Changes

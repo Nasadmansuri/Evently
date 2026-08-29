@@ -207,7 +207,7 @@ export default function EventDetail() {
     : null;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-2 sm:px-4">
+    <div className="space-y-6 max-w-7xl mx-auto px-2 sm:px-4 pb-24 lg:pb-12">
       {/* Top Breadcrumb / Back Bar */}
       <div className="flex items-center justify-between pb-2">
         <Link
@@ -217,7 +217,7 @@ export default function EventDetail() {
           <span>← Back to all events</span>
         </Link>
         <span className="text-xs font-semibold text-slate-400">
-          Campus Portal • Event #{event.id}
+          Campus Events • {[event.organizing_community || event.organizing_department, event.category].filter(Boolean).join(' • ') || 'Campus Event'}
         </span>
       </div>
 
@@ -251,7 +251,7 @@ export default function EventDetail() {
               event.status === 'cancelled'
                 ? 'bg-rose-600/90 text-white'
                 : liveStatus === 'ongoing'
-                ? 'bg-emerald-500/90 text-white animate-pulse'
+                ? 'bg-emerald-600/95 text-white'
                 : isPastEvent
                 ? 'bg-slate-900/80 text-slate-200'
                 : 'bg-white/90 text-slate-900'
@@ -295,34 +295,55 @@ export default function EventDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Event Body & Tabs (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
-          {/* Cancelled Alert Banner */}
+          {/* Cancelled Alert Banner (World-Class Skeuomorphic Warning Card) */}
           {event.status === 'cancelled' && (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50/90 p-4.5 text-xs text-rose-900 shadow-xs space-y-1.5">
-              <div className="flex items-center gap-2 font-bold text-sm text-rose-800">
-                <AlertTriangle size={17} className="text-rose-600" />
-                <span>Event Cancelled</span>
+            <div className="skeuo-card rounded-2xl border border-rose-200/90 bg-gradient-to-br from-rose-50/95 via-rose-50/60 to-white p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between gap-2 border-b border-rose-100/90 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 text-rose-700 border border-rose-200/80 shadow-2xs">
+                    <AlertTriangle size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-rose-900 leading-tight">Official Cancellation Notice</h3>
+                    <p className="text-[11px] text-rose-600 font-medium">This campus event has been cancelled and will not take place</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-rose-600 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-2xs">
+                  Event Cancelled
+                </span>
               </div>
-              <p className="text-slate-700">
-                <strong>Reason:</strong> {event.cancellation_reason || 'This event was cancelled following administrative review.'}
-              </p>
+              <div className="rounded-xl border border-rose-100 bg-white/90 p-3.5 text-xs space-y-1 shadow-2xs">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-500 block">Reason for Cancellation:</span>
+                <p className="font-semibold text-slate-800 leading-relaxed text-xs sm:text-sm">
+                  {event.cancellation_reason || 'This event was cancelled following administrative review.'}
+                </p>
+              </div>
             </div>
           )}
 
           {/* Pending Deletion Request Notice */}
           {event.deletion_request_id && event.status !== 'cancelled' && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold flex items-center gap-1.5 text-amber-800 text-sm">
-                  <AlertTriangle size={16} className="text-amber-600 shrink-0" />
-                  Event Deletion Requested
-                </span>
-                <span className="rounded-full bg-amber-200/90 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-900">
+            <div className="skeuo-card rounded-2xl border border-amber-200/90 bg-gradient-to-br from-amber-50/95 via-amber-50/60 to-white p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between gap-2 border-b border-amber-100/90 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-800 border border-amber-200/80 shadow-2xs">
+                    <AlertTriangle size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-amber-900 leading-tight">Deletion Request Under Review</h3>
+                    <p className="text-[11px] text-amber-700 font-medium">Faculty organizer requested deletion of this event</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-amber-500 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-2xs">
                   Under Review
                 </span>
               </div>
-              <p className="text-xs text-amber-800 font-medium">
-                <strong>Reason:</strong> {event.deletion_reason || 'Administrative conflict'}
-              </p>
+              <div className="rounded-xl border border-amber-100 bg-white/90 p-3.5 text-xs space-y-1 shadow-2xs">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 block">Organizer's Stated Reason:</span>
+                <p className="font-semibold text-slate-800 leading-relaxed">
+                  {event.deletion_reason || 'Administrative conflict'}
+                </p>
+              </div>
             </div>
           )}
 
@@ -452,7 +473,7 @@ export default function EventDetail() {
                     <span className="text-xs font-bold text-slate-900">
                       {images.length} {images.length === 1 ? 'Photo' : 'Photos'}
                     </span>
-                    <span className="text-[11px] text-slate-400">• Click any photo to expand in HD</span>
+                    <span className="text-[11px] text-slate-400">• Click any image to view in full resolution</span>
                   </div>
 
                   {isOrganizerOrAdmin && (
@@ -487,7 +508,7 @@ export default function EventDetail() {
 
                     <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/70 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-white shadow-lg group-hover:bg-black/90 transition">
                       <Maximize2 size={13} className="text-emerald-300" />
-                      <span>Click to view full size</span>
+                      <span>View Full Resolution</span>
                     </div>
                   </div>
                 ) : (
@@ -641,16 +662,30 @@ export default function EventDetail() {
                   </div>
                 </div>
               ) : feedbackSubmitted ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <CheckCircle2 className="mb-3 text-emerald-500" size={32} />
-                  <p className="text-sm font-semibold text-slate-700">Feedback Submitted ✓</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Thank you for sharing your feedback on this event.</p>
-                  <button
-                    onClick={() => navigate('/student/my-feedback')}
-                    className="mt-3 text-xs font-medium text-primary-600 hover:underline"
-                  >
-                    View in My Feedback →
-                  </button>
+                <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-slate-900">Feedback Submitted ✓</p>
+                    <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                      Thank you for sharing your feedback on this event. You can review your submitted questions and responses anytime.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                    <button
+                      onClick={() => navigate(`/events/${id}/feedback`)}
+                      className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
+                    >
+                      <CheckCircle2 size={13} /> View Your Submitted Response
+                    </button>
+                    <button
+                      onClick={() => navigate('/student/my-feedback?tab=submitted')}
+                      className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
+                    >
+                      All My Feedback →
+                    </button>
+                  </div>
                 </div>
               ) : !event.is_registered ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -836,6 +871,68 @@ export default function EventDetail() {
                 </>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Mobile Sticky Bottom Registration & Action Bar (Viewports < 1024px) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-slate-200/90 bg-white/95 backdrop-blur-md px-4 py-3 shadow-[0_-8px_20px_-6px_rgba(0,0,0,0.1)]">
+        <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 truncate">
+              {event.is_team_event ? 'Team Event' : 'Individual'} · {event.registered_count ?? event.registration_count ?? 0}/{event.max_participants || '∞'} Seats
+            </p>
+            <p className="text-xs font-bold text-slate-900 truncate">
+              {new Date(event.event_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · {formatTime12hr(event.event_time)}
+            </p>
+          </div>
+
+          <div className="shrink-0">
+            {event.status === 'cancelled' ? (
+              <span className="inline-flex items-center px-4 py-2 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
+                Cancelled
+              </span>
+            ) : user?.role === 'student' ? (
+              event.is_registered ? (
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shadow-2xs">
+                  <CheckCircle2 size={14} className="text-emerald-600" />
+                  <span>Registered</span>
+                </span>
+              ) : liveStatus === 'ended' ? (
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
+                  Concluded
+                </span>
+              ) : event.max_participants && (event.registered_count ?? event.registration_count ?? 0) >= event.max_participants ? (
+                <span className="inline-flex items-center px-4 py-2 rounded-full bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200">
+                  Full
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/events/${id}/register`)}
+                  className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-full px-4.5 py-2 text-xs font-bold shadow-md cursor-pointer active:scale-95"
+                >
+                  <span>{liveStatus === 'ongoing' ? 'Join Now' : 'Register'}</span>
+                  <ArrowRight size={13} />
+                </button>
+              )
+            ) : !user ? (
+              <Link
+                to={`/login?redirect=/events/${id}/register`}
+                className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-full px-4.5 py-2 text-xs font-bold shadow-md cursor-pointer active:scale-95"
+              >
+                <span>Register</span>
+                <ArrowRight size={13} />
+              </Link>
+            ) : isOrganizerOrAdmin ? (
+              <button
+                type="button"
+                onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
+                className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold cursor-pointer"
+              >
+                <Edit3 size={13} /> Edit
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

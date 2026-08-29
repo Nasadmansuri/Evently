@@ -121,7 +121,7 @@ async function getAllEvents({ category } = {}, userId) {
     FROM events e
     JOIN users u ON u.id = e.created_by
     LEFT JOIN registrations r ON r.event_id = e.id AND r.user_id = ?
-    WHERE e.status != 'cancelled' AND (e.status != 'scheduled' OR (e.publish_at IS NOT NULL AND e.publish_at <= NOW()))
+    WHERE (e.status != 'scheduled' OR (e.publish_at IS NOT NULL AND e.publish_at <= NOW()))
   `;
   const params = [userId || null];
   if (category) {
@@ -136,7 +136,7 @@ async function getAllEvents({ category } = {}, userId) {
 async function getAllEventsAdmin() {
   await autoPublishScheduledEvents();
   const [rows] = await pool.query(
-    `SELECT e.id, e.title, e.category, e.location, e.event_date, e.event_time,
+    `SELECT e.id, e.title, e.description, e.category, e.location, e.event_date, e.event_time,
             e.status, e.publish_at, e.created_by, e.organizing_department, e.organizing_community, e.is_team_event,
             e.max_participants,
             e.cancellation_reason, e.cancelled_at,

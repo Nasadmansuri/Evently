@@ -52,6 +52,9 @@ export default function ManageEvents() {
   const [reviewRequestEvent, setReviewRequestEvent] = useState(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [resolvingRequest, setResolvingRequest] = useState(false);
+  const [directDeleteEvent, setDirectDeleteEvent] = useState(null);
+  const [directDeleteReason, setDirectDeleteReason] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function loadEvents() {
     setLoading(true);
@@ -191,6 +194,29 @@ export default function ManageEvents() {
       showToast.error(err.response?.data?.message || 'Failed to resolve deletion request');
     } finally {
       setResolvingRequest(false);
+    }
+  }
+
+  async function handleDirectDelete(e) {
+    if (e) e.preventDefault();
+    if (!directDeleteEvent) return;
+    if (!directDeleteReason.trim()) {
+      return showToast.error('Please provide a reason for deleting this event');
+    }
+
+    setIsDeleting(true);
+    try {
+      await api.delete(`/events/${directDeleteEvent.id}`, {
+        data: { reason: directDeleteReason.trim() },
+      });
+      setEvents((prev) => prev.filter((ev) => ev.id !== directDeleteEvent.id));
+      showToast.success(`"${directDeleteEvent.title}" deleted and organizer notified.`);
+      setDirectDeleteEvent(null);
+      setDirectDeleteReason('');
+    } catch (err) {
+      showToast.error(err.response?.data?.message || 'Failed to delete event');
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -355,10 +381,7 @@ export default function ManageEvents() {
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className={`relative inline-flex h-2 w-2 rounded-full ${statusTab === 'ongoing' ? 'bg-white' : 'bg-emerald-500'}`} />
-                  </span>
+                  <span className={`inline-block h-2 w-2 rounded-full ${statusTab === 'ongoing' ? 'bg-white' : 'bg-emerald-500'}`} />
                   <span>Live Now ({ongoingEventsCount})</span>
                 </span>
               </button>
@@ -397,10 +420,7 @@ export default function ManageEvents() {
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
-                    <span className={`relative inline-flex h-2 w-2 rounded-full ${statusTab === 'deletion_requests' ? 'bg-white' : 'bg-rose-500'}`} />
-                  </span>
+                  <span className={`inline-block h-2 w-2 rounded-full ${statusTab === 'deletion_requests' ? 'bg-white' : 'bg-rose-500'}`} />
                   <span>Deletion Requests ({pendingRequests.length})</span>
                 </span>
               </button>
@@ -637,35 +657,17 @@ export default function ManageEvents() {
                       </button>
                     </div>
 
-                    {isConfirming ? (
-                      <div className="flex items-center gap-2 animate-in fade-in duration-100">
-                        <button
-                          type="button"
-                          disabled={isDeleting}
-                          onClick={(e) => handleDelete(ev.id, e)}
-                          className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-red-600 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-red-700 disabled:opacity-50"
-                        >
-                          {isDeleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-                          Confirm Permanent Delete
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmId(null)}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setConfirmId(ev.id)}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50/70 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-100/80 active:scale-95"
-                        title="Permanently remove event from database"
-                      >
-                        <Trash2 size={13} /> Delete Event Permanently
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDirectDeleteEvent(ev);
+                        setDirectDeleteReason('');
+                      }}
+                      className="skeuo-btn-secondary inline-flex items-center justify-center gap-1.5 rounded-xl !border-rose-200 !bg-rose-50/70 py-1.5 text-xs font-bold !text-rose-700 cursor-pointer"
+                      title="Permanently remove event and notify organizer"
+                    >
+                      <Trash2 size={13} /> Delete Event Permanently
+                    </button>
                   </div>
                 </div>
               </motion.div>
@@ -674,7 +676,7 @@ export default function ManageEvents() {
         </div>
       )}
 
-      {/* Review Event Deletion Request Modal */}
+      {/* 1. Review Event Deletion Request Modal */}
       {reviewRequestEvent &&
         createPortal(
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
@@ -730,7 +732,7 @@ export default function ManageEvents() {
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   placeholder="Optional notes explaining your decision..."
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:border-primary-500 focus:bg-white focus:outline-hidden"
+                  className="skeuo-input w-full rounded-xl p-2.5 text-xs text-slate-900"
                 />
               </div>
 
@@ -738,27 +740,102 @@ export default function ManageEvents() {
                 <button
                   type="button"
                   onClick={() => setReviewRequestEvent(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  className="skeuo-btn-secondary rounded-xl px-4 py-2.5 text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   disabled={resolvingRequest}
-                  onClick={() => handleResolveDeletionRequest('rejected')}
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 active:scale-95 disabled:opacity-50"
+                  onClick={() => handleResolveRequest(false)}
+                  className="skeuo-btn-secondary flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold cursor-pointer disabled:opacity-50"
                 >
                   Reject Request
                 </button>
                 <button
                   type="button"
                   disabled={resolvingRequest}
-                  onClick={() => handleResolveDeletionRequest('approved')}
-                  className="flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 disabled:opacity-50"
+                  onClick={() => handleResolveRequest(true)}
+                  className="skeuo-btn-primary !bg-rose-700 !border-rose-900 flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-sm cursor-pointer disabled:opacity-50"
                   title="Soft deletes / cancels event with documented reason"
                 >
                   {resolvingRequest ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />}
                   Approve & Cancel Event
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* 2. Direct Permanent Event Deletion Modal with Reason */}
+      {directDeleteEvent &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700">
+                    <Trash2 size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Delete Event Permanently</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Organized by <strong className="text-slate-800">{directDeleteEvent.organizer_name || 'Faculty Organizer'}</strong>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDirectDeleteEvent(null)}
+                  className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="rounded-xl border border-rose-100 bg-rose-50/40 p-3.5 space-y-2 text-xs">
+                <p className="font-bold text-rose-950 text-sm">{directDeleteEvent.title}</p>
+                <div className="flex items-center gap-2 text-slate-600">
+                  <span>{directDeleteEvent.category}</span>
+                  <span>•</span>
+                  <span>{directDeleteEvent.registration_count || 0} Registered Attendees</span>
+                </div>
+                <p className="text-[11px] text-rose-700 font-medium">
+                  ⚠️ Deleting this event is permanent. The faculty organizer and all registered attendees will receive an automated notification explaining why this event was removed.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Reason for Deletion <span className="text-rose-500 font-bold">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={directDeleteReason}
+                  onChange={(e) => setDirectDeleteReason(e.target.value)}
+                  placeholder="Explain why this event is being removed (e.g., Content policy violation, venue unavailable, duplicate submission)..."
+                  className="skeuo-input w-full rounded-xl p-3 text-xs text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setDirectDeleteEvent(null)}
+                  className="skeuo-btn-secondary rounded-xl px-4 py-2.5 text-xs font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting || !directDeleteReason.trim()}
+                  onClick={handleDirectDelete}
+                  className="skeuo-btn-primary !bg-rose-700 !border-rose-900 flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-sm cursor-pointer disabled:opacity-50"
+                >
+                  {isDeleting ? <Loader2 className="animate-spin" size={14} /> : <Trash2 size={14} />}
+                  Confirm Permanent Delete
                 </button>
               </div>
             </div>

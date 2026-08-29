@@ -169,8 +169,36 @@ async function deleteEvent(req, res) {
       return res.status(403).json({ message: 'You can only delete events you created' });
     }
 
+    const { reason, adminNotes } = req.body || {};
+    const deletionReason = reason || adminNotes || (isAdmin ? 'Administrative decision / policy removal' : 'Removed by organizer');
+
+    // 1. Notify the faculty organizer if deleted by Admin or another user
+    if (event.created_by) {
+      const isSelfDelete = event.created_by === req.user.id;
+      if (!isSelfDelete) {
+        await notificationsModel.create(event.created_by, {
+          title: `Event Removed by Administration: "${event.title}"`,
+          message: `Your event "${event.title}" has been removed by campus administration. Reason: ${deletionReason}`,
+          eventId: null,
+          link: '/faculty/my-events',
+        }).catch((err) => console.error('Faculty deletion notification failed:', err.message));
+      }
+    }
+
+    // 2. Notify all registered students
+    const [regs] = await pool.query('SELECT user_id FROM registrations WHERE event_id = ?', [event.id]);
+    const studentIds = regs.map((r) => r.user_id).filter((uid) => uid !== req.user.id && uid !== event.created_by);
+    if (studentIds.length > 0) {
+      await notificationsModel.createForUsers(studentIds, {
+        title: `Event Cancelled & Removed: "${event.title}"`,
+        message: `Please note that "${event.title}" has been cancelled and removed from the campus schedule. Reason: ${deletionReason}`,
+        eventId: null,
+        link: '/events',
+      }).catch((err) => console.error('Student deletion notification failed:', err.message));
+    }
+
     await eventsModel.deleteEvent(req.params.id);
-    res.json({ message: 'Event deleted' });
+    res.json({ message: 'Event deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete event', error: err.message });
   }
@@ -857,7 +885,11 @@ async function getDeletionRequests(req, res) {
 async function resolveDeletionRequest(req, res) {
   try {
     const { requestId } = req.params;
-    const { status, adminNotes } = req.body;
+    let { status, approved, adminNotes } = req.body;
+
+    if (approved !== undefined && !status) {
+      status = approved ? 'approved' : 'rejected';
+    }
 
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ message: 'Status must be approved or rejected' });
@@ -873,6 +905,8 @@ async function resolveDeletionRequest(req, res) {
       return res.status(404).json({ message: 'Deletion request not found' });
     }
 
+    const facultyRecipients = Array.from(new Set([resolved.requested_by, resolved.event_owner_id].filter(Boolean)));
+
     if (status === 'approved') {
       const reasonText = resolved.reason_category + (adminNotes ? ` — ${adminNotes}` : (resolved.problem_statement ? ` — ${resolved.problem_statement}` : ''));
 
@@ -882,16 +916,18 @@ async function resolveDeletionRequest(req, res) {
         [reasonText, resolved.event_id]
       );
 
-      await notificationsModel.create(resolved.requested_by, {
-        title: 'Event Cancellation Approved',
-        message: `Your request to cancel "${resolved.event_title}" has been approved by administration. The event is now marked as Cancelled with the reason displayed.`,
-        eventId: resolved.event_id,
-        link: `/events/${resolved.event_id}`,
-      });
+      for (const fId of facultyRecipients) {
+        await notificationsModel.create(fId, {
+          title: `Event Cancellation Approved: "${resolved.event_title}"`,
+          message: `Your request to cancel "${resolved.event_title}" has been approved by administration. Note: ${adminNotes || 'Approved'}. The event is now officially marked as Cancelled.`,
+          eventId: resolved.event_id,
+          link: '/faculty/my-events',
+        }).catch((err) => console.error('Faculty cancellation notification failed:', err.message));
+      }
 
       pool.query('SELECT user_id FROM registrations WHERE event_id = ?', [resolved.event_id])
         .then(([regs]) => {
-          const studentIds = regs.map((r) => r.user_id);
+          const studentIds = regs.map((r) => r.user_id).filter((uid) => !facultyRecipients.includes(uid));
           if (studentIds.length > 0) {
             return notificationsModel.createForUsers(studentIds, {
               title: `Event Cancelled: ${resolved.event_title}`,
@@ -905,12 +941,14 @@ async function resolveDeletionRequest(req, res) {
 
       res.json({ message: 'Deletion request approved. Event has been marked as cancelled with the reason preserved.' });
     } else {
-      await notificationsModel.create(resolved.requested_by, {
-        title: 'Event Deletion Request Rejected',
-        message: `Your request to delete "${resolved.event_title}" was not approved. Administration Note: ${adminNotes || 'Please contact the administration office for details.'}`,
-        eventId: resolved.event_id,
-        link: `/events/${resolved.event_id}`,
-      });
+      for (const fId of facultyRecipients) {
+        await notificationsModel.create(fId, {
+          title: `Event Deletion Request Declined: "${resolved.event_title}"`,
+          message: `Your request to delete "${resolved.event_title}" was not approved by administration. Administration Note: ${adminNotes || 'Please contact administration for details.'}`,
+          eventId: resolved.event_id,
+          link: '/faculty/my-events',
+        }).catch((err) => console.error('Faculty decline notification failed:', err.message));
+      }
 
       res.json({ message: 'Deletion request rejected. Requester has been notified.' });
     }

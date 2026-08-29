@@ -90,57 +90,56 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Header Profile & Welcome Banner (Enclosed in uniform container card box) */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-2xs">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
+      {/* 1. Signature Deep Teal Academic Hero Banner */}
+      <div className="evently-hero-banner rounded-2xl p-6 sm:p-7 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-1/4 w-72 h-72 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 right-10 w-80 h-80 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div className="space-y-2.5 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-teal-100 border border-white/20">
                 Admin Portal
               </span>
-              <span className="text-xs font-semibold text-slate-300">·</span>
-              <span className="text-xs font-medium text-slate-500">
+              <span className="text-xs text-teal-200/60">·</span>
+              <span className="text-xs font-semibold text-teal-100/90">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
               </span>
             </div>
 
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
                 Welcome back, {user?.full_name || 'Admin'}!
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-slate-600">
-                Platform governance, faculty onboarding approvals, event monitoring, and analytics.
+              <p className="mt-1 text-xs sm:text-sm text-teal-100/90 leading-relaxed">
+                Platform governance, faculty onboarding approvals, event monitoring, and system analytics.
               </p>
             </div>
 
             {/* Academic & Platform Badges */}
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                <Building2 size={13} className="text-slate-500 shrink-0" />
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-xs font-semibold text-white shadow-2xs">
+                <Building2 size={13} className="text-teal-200 shrink-0" />
                 Biratnagar International College
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-50 border border-primary-100 px-2.5 py-1 text-xs font-bold text-primary-800">
-                <ShieldCheck size={14} className="text-primary-700 shrink-0" />
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-400/20 backdrop-blur-md border border-emerald-300/30 px-3 py-1 text-xs font-bold text-emerald-200 shadow-2xs">
+                <ShieldCheck size={14} className="text-emerald-300 shrink-0" />
                 System Governance & Administration
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1 text-xs font-medium text-slate-600">
-                <Mail size={13} className="text-slate-400 shrink-0" />
-                {user?.email || 'admin@bic.edu.np'}
               </span>
             </div>
           </div>
 
           <button
             onClick={() => navigate('/admin/create-event')}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-3 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all shrink-0 self-start sm:self-center"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-50 text-primary-900 active:scale-95 px-5 py-3 text-xs font-bold shadow-md hover:shadow-lg transition-all shrink-0 self-start sm:self-center cursor-pointer"
           >
-            <Plus size={16} /> Create Campus Event
+            <Plus size={16} className="text-primary-700" /> Create Campus Event <ArrowRight size={14} className="text-primary-700" />
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="flex items-center justify-between gap-2 text-xs text-rose-700 bg-rose-50 border border-rose-100 rounded-2xl px-4 py-3 shadow-xs">
+        <div className="flex items-center justify-between gap-2 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-2xl px-4 py-3 shadow-xs">
           <span className="flex items-center gap-2 font-medium">
             <AlertCircle size={16} className="shrink-0 text-rose-600" />
             {error}
@@ -154,58 +153,59 @@ export default function AdminDashboard() {
       {/* 2. Sophisticated 4-KPI Metric Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Metric 1: Total Events */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Events</p>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-100/80">
-              <CalendarDays size={18} />
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Events</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs">
+              <CalendarDays size={16} />
             </div>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalEvents || 0}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">All published events</p>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalEvents || 0}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Published campus events</p>
+          </div>
         </div>
 
         {/* Metric 2: Total Students */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Students</p>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
-              <Users size={18} />
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Students</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-200/60 shadow-2xs">
+              <Users size={16} />
             </div>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalStudents || 0}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Registered students</p>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalStudents || 0}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Registered student accounts</p>
+          </div>
         </div>
 
         {/* Metric 3: Total Faculty */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Faculty</p>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700 border border-violet-100">
-              <GraduationCap size={18} />
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Faculty</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-700 border border-violet-200/60 shadow-2xs">
+              <GraduationCap size={16} />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <p className="text-3xl font-black tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalFaculty || 0}</p>
-            {!statsLoading && stats?.pendingFaculty > 0 && (
-              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                {stats.pendingFaculty} pending
-              </span>
-            )}
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalFaculty || 0}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Verified faculty accounts</p>
           </div>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Registered faculty members</p>
         </div>
 
         {/* Metric 4: Total Registrations */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all duration-150">
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Registrations</p>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
-              <BarChart3 size={18} />
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Registrations</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs">
+              <TrendingUp size={16} />
             </div>
           </div>
-          <p className="mt-3 text-3xl font-black tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalParticipants || 0}</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Total event registrations</p>
+          <div className="mt-3">
+            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{statsLoading ? '—' : stats?.totalRegistrations || 0}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Total student signups</p>
+          </div>
         </div>
       </div>
 

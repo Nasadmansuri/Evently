@@ -186,7 +186,7 @@ export default function LandingEventsGrid() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
           <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-              Everything you need <span className="text-[#7c3aed]">to excel.</span>
+              Everything you need <span className="bg-gradient-to-r from-primary-700 via-primary-600 to-violet-600 bg-clip-text text-transparent">to excel.</span>
             </h2>
             <p className="mt-2 text-sm sm:text-base text-slate-500 font-medium max-w-xl">
               From flagship hackathons and tech workshops to cultural celebrations, discover every campus event happening at BIC.
@@ -327,7 +327,7 @@ export default function LandingEventsGrid() {
                               : 'bg-slate-900/80 text-slate-300 backdrop-blur-xs'
                           }`}
                         >
-                          {liveStatus === 'ongoing' && <PlayCircle size={10} className="animate-pulse" />}
+                          {liveStatus === 'ongoing' && <PlayCircle size={10} />}
                           {liveStatus === 'ongoing' ? 'Live Now' : liveStatus === 'upcoming' ? 'Upcoming' : 'Ended'}
                         </span>
                       </div>
@@ -387,7 +387,7 @@ export default function LandingEventsGrid() {
                           <span className="text-slate-400 font-medium">Event Ended</span>
                         ) : (
                           <span className="text-emerald-700 font-semibold flex items-center gap-1.5">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
                             <span>Registrations Open</span>
                           </span>
                         )}
