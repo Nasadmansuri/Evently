@@ -107,10 +107,7 @@ async function sendSignupOtp(req, res) {
         `,
       });
     } catch (mailErr) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Could not send signup verification email via SMTP (will log code to console):', mailErr.message);
-        console.log(`[SIGNUP OTP] ${normalizedEmail} -> ${otp}`);
-      }
+      console.error('Could not send signup verification email:', mailErr.message);
     }
 
     res.json({
@@ -593,10 +590,7 @@ async function forgotPassword(req, res) {
         `,
       });
     } catch (mailErr) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Could not send reset email via SMTP (will log code to console):', mailErr.message);
-        console.log(`[PASSWORD RESET OTP] ${normalizedEmail} -> ${otp}`);
-      }
+      console.error('Could not send password reset email:', mailErr.message);
     }
 
     res.json({
