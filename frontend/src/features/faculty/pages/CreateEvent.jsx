@@ -63,7 +63,7 @@ export default function CreateEvent() {
   const [showLocationPreview, setShowLocationPreview] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
 
-  // Restore unsaved draft on mount for new events, or pre-populate from logged-in user profile
+  // Restore unsaved draft on mount for new events
   useEffect(() => {
     if (isEditMode) return;
     try {
@@ -83,18 +83,11 @@ export default function CreateEvent() {
         if (d.maxParticipants) setMaxParticipants(d.maxParticipants);
         if (d.isTeamEvent !== undefined) setIsTeamEvent(d.isTeamEvent);
         setDraftRestored(true);
-      } else if (user) {
-        if (user.department === 'DevCorps') {
-          setOrganizingDepartment('DevCorps');
-          setOrganizingCommunity(user.community || 'DevCorps Core');
-        } else if (user.department) {
-          setOrganizingDepartment(user.department);
-        }
       }
     } catch (e) {
       console.error('Failed to restore draft:', e);
     }
-  }, [isEditMode, user]);
+  }, [isEditMode]);
 
   // Real-time auto-save draft to localStorage
   useEffect(() => {
@@ -588,20 +581,12 @@ export default function CreateEvent() {
 
             {organizingDepartment === 'DevCorps' && (
               <div>
-                <label className={labelClass}>DevCorps Chapter / Community *</label>
+                <label className={labelClass}>DevCorps Community *</label>
                 <div className="relative">
                   <Users className={iconClass} size={15} />
-                  <select
-                    value={organizingCommunity}
-                    onChange={(e) => setOrganizingCommunity(e.target.value)}
-                    className={selectClass}
-                  >
-                    <option value="">Select chapter / community</option>
-                    {COMMUNITIES.filter((c) => c !== 'N/A').map((c) => (
-                      <option key={c} value={c}>
-                        {c === 'DevCorps Core' ? 'DevCorps Core (Main Campus Chapter)' : c}
-                      </option>
-                    ))}
+                  <select value={organizingCommunity} onChange={(e) => setOrganizingCommunity(e.target.value)} className={selectClass}>
+                    <option value="">Select community</option>
+                    {COMMUNITIES.filter((c) => c !== 'N/A').map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                   <ChevronDown className={chevronClass} size={14} />
                 </div>

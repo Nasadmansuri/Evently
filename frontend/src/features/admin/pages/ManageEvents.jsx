@@ -93,10 +93,8 @@ export default function ManageEvents() {
     if (activeCategory !== 'All') list = list.filter((ev) => ev.category === activeCategory);
     if (activeDepartment !== 'All') {
       if (activeDepartment.startsWith('community:')) {
-        const targetCommunity = activeDepartment.slice('community:'.length).trim().toLowerCase();
-        list = list.filter((ev) => (ev.organizing_community || '').trim().toLowerCase() === targetCommunity);
-      } else if (activeDepartment === 'DevCorps') {
-        list = list.filter((ev) => ev.organizing_department === 'DevCorps');
+        const community = activeDepartment.slice('community:'.length);
+        list = list.filter((ev) => ev.organizing_community === community);
       } else {
         list = list.filter((ev) => ev.organizing_department === activeDepartment);
       }
@@ -106,7 +104,7 @@ export default function ManageEvents() {
     if (statusTab === 'upcoming') {
       list = list.filter((ev) => {
         const st = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
-        return st === 'upcoming' || st === 'ongoing';
+        return st === 'upcoming' || st === 'ongoing' || st === 'scheduled';
       });
       list = [...list].sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
     } else if (statusTab === 'ongoing') {
@@ -118,9 +116,11 @@ export default function ManageEvents() {
         return st === 'ended';
       });
       list = [...list].sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
-    } else if (statusTab === 'cancelled') {
-      list = list.filter((ev) => ev.status === 'cancelled');
+    } else if (statusTab === 'deletion_requests') {
+      list = list.filter((ev) => ev.deletion_request_id);
       list = [...list].sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
+    } else {
+      list = [...list].sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
     }
 
     return list;
@@ -131,12 +131,11 @@ export default function ManageEvents() {
       ev.title?.toLowerCase().includes(search.toLowerCase()) ||
       ev.description?.toLowerCase().includes(search.toLowerCase())
     );
+    if (activeCategory !== 'All') list = list.filter((ev) => ev.category === activeCategory);
     if (activeDepartment !== 'All') {
       if (activeDepartment.startsWith('community:')) {
-        const targetCommunity = activeDepartment.slice('community:'.length).trim().toLowerCase();
-        list = list.filter((ev) => (ev.organizing_community || '').trim().toLowerCase() === targetCommunity);
-      } else if (activeDepartment === 'DevCorps') {
-        list = list.filter((ev) => ev.organizing_department === 'DevCorps');
+        const community = activeDepartment.slice('community:'.length);
+        list = list.filter((ev) => ev.organizing_community === community);
       } else {
         list = list.filter((ev) => ev.organizing_department === activeDepartment);
       }
@@ -313,14 +312,12 @@ export default function ManageEvents() {
               className="skeuo-input w-full rounded-xl px-3 py-2 text-xs font-medium text-slate-800"
             >
               <option value="All">All Departments</option>
-              {Array.from(new Set(ORGANIZING_DEPARTMENTS.filter((dept) => dept !== 'All'))).map((dept) => (
-                <option key={dept} value={dept}>{dept === 'DevCorps' ? 'DevCorps (All Chapters & Main)' : dept}</option>
+              {ORGANIZING_DEPARTMENTS.filter((dept) => dept !== 'All').map((dept) => (
+                <option key={dept} value={dept}>{dept}</option>
               ))}
-              <optgroup label="DevCorps Chapters & Communities">
+              <optgroup label="DevCorps Communities">
                 {COMMUNITIES.filter((c) => c !== 'N/A').map((c) => (
-                  <option key={c} value={`community:${c}`}>
-                    {c === 'DevCorps Core' ? 'DevCorps Core (Main Campus Chapter)' : c}
-                  </option>
+                  <option key={c} value={`community:${c}`}>{c}</option>
                 ))}
               </optgroup>
             </select>
