@@ -142,10 +142,10 @@ export default function FacultySignup() {
   return (
     <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#edf0f5] p-2.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
       {/* Master Dual-Column Container */}
-      <div className="w-full max-w-[1340px] h-auto lg:h-[calc(100vh-2.5rem)] max-h-[840px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      <div className="w-full max-w-[1400px] h-auto lg:h-[calc(100vh-2.5rem)] max-h-[860px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
-        {/* Left Column: SheKunj Floating Inset Card */}
-        <div className="lg:col-span-6 m-2.5 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
+        {/* Left Column: Wider Evently Brand Showcase Inset Card (lg:col-span-7) */}
+        <div className="lg:col-span-7 m-2.5 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-7 sm:p-9 lg:p-12 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
           {/* Flashlight Beam Sweep Effect - Only on Sign In / Join Us navigation */}
           {!isRoleSwitch && <div className="animate-flashlight" />}
 
@@ -155,7 +155,7 @@ export default function FacultySignup() {
 
           {/* 1. Top Header: Logo + Navigation Pills (Stays solid & constant) */}
           <div className="relative z-10 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 group">
+            <Link to="/" className="flex items-center gap-2.5 group">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
                 <CalendarHeart size={18} className="text-emerald-300" />
               </div>
@@ -167,49 +167,49 @@ export default function FacultySignup() {
             <div className="flex items-center gap-1 rounded-full bg-white/10 p-0.5 border border-white/15 backdrop-blur-md">
               <Link
                 to="/login"
-                className="rounded-full px-3 py-1 text-xs font-medium text-slate-200 hover:text-white transition"
+                className="rounded-full px-3.5 py-1 text-xs font-medium text-slate-200 hover:text-white transition"
               >
                 Sign In
               </Link>
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 shadow-xs">
+              <span className="rounded-full bg-white px-3.5 py-1 text-xs font-bold text-slate-900 shadow-xs">
                 Join Us
               </span>
             </div>
           </div>
 
           {/* 2. Middle Content: Faculty Value Propositions (Slides up from bottom) */}
-          <div className="relative z-10 my-auto py-4 sm:py-6 space-y-4">
-            <div className="space-y-1.5 animate-slide-up">
-              <span className="inline-block text-[10px] font-extrabold tracking-widest uppercase text-emerald-300/90 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-500/30 mb-2">
+          <div className="relative z-10 my-auto py-6 sm:py-8 space-y-5">
+            <div className="space-y-2 animate-slide-up">
+              <span className="inline-block text-[10.5px] font-extrabold tracking-widest uppercase text-emerald-300 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-500/30">
                 Faculty & Organizer Desk
               </span>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white">
+              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black tracking-tight leading-tight text-white mt-2">
                 Empower Campus.<br />Publish & Lead.
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md mt-1">
+              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md mt-2">
                 Register your faculty credentials to organize hackathons, coordinate academic workshops, and manage DevCorps student communities.
               </p>
             </div>
 
             {/* Feature Checklist */}
-            <div className="space-y-2.5 pt-1 animate-slide-up-delay-1">
-              <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
-                <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <CheckCircle2 size={12} />
+            <div className="space-y-3 pt-2 animate-slide-up-delay-1">
+              <div className="flex items-center gap-3 text-xs sm:text-[13.5px] text-slate-200 font-medium">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={13} />
                 </div>
                 <span>Direct campus event publishing & scheduling</span>
               </div>
 
-              <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
-                <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <CheckCircle2 size={12} />
+              <div className="flex items-center gap-3 text-xs sm:text-[13.5px] text-slate-200 font-medium">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={13} />
                 </div>
                 <span>Live attendee rosters & PDF / CSV analytics export</span>
               </div>
 
-              <div className="flex items-center gap-2.5 text-xs sm:text-[13px] text-slate-200 font-medium">
-                <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <CheckCircle2 size={12} />
+              <div className="flex items-center gap-3 text-xs sm:text-[13.5px] text-slate-200 font-medium">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 size={13} />
                 </div>
                 <span>Custom dynamic post-event feedback survey builder</span>
               </div>
@@ -217,24 +217,24 @@ export default function FacultySignup() {
           </div>
 
           {/* 3. Bottom Metric Stats Bar */}
-          <div className="relative z-10 pt-4 border-t border-white/15 grid grid-cols-3 gap-3 animate-slide-up-delay-2">
+          <div className="relative z-10 pt-5 border-t border-white/15 grid grid-cols-3 gap-4 animate-slide-up-delay-2">
             <div>
-              <p className="text-lg sm:text-xl font-black text-white">Instant</p>
-              <p className="text-[10.5px] text-slate-300 font-medium">Setup</p>
+              <p className="text-xl sm:text-2xl font-black text-white">Instant</p>
+              <p className="text-[11px] text-slate-300 font-medium mt-0.5">Setup</p>
             </div>
             <div>
-              <p className="text-lg sm:text-xl font-black text-white">Verified</p>
-              <p className="text-[10.5px] text-slate-300 font-medium">Faculty Queue</p>
+              <p className="text-xl sm:text-2xl font-black text-white">Verified</p>
+              <p className="text-[11px] text-slate-300 font-medium mt-0.5">Faculty Queue</p>
             </div>
             <div>
-              <p className="text-lg sm:text-xl font-black text-white">Prestige</p>
-              <p className="text-[10.5px] text-slate-300 font-medium">Governance</p>
+              <p className="text-xl sm:text-2xl font-black text-white">Prestige</p>
+              <p className="text-[11px] text-slate-300 font-medium mt-0.5">Governance</p>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Clean Form Container with Smooth Slide-Up Entrance */}
-        <div className="lg:col-span-6 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-4 sm:py-6 h-full max-w-lg mx-auto w-full overflow-y-auto no-scrollbar">
+        {/* Right Column: Clean Form Container (lg:col-span-5) */}
+        <div className="lg:col-span-5 flex flex-col justify-center px-6 sm:px-8 lg:px-10 py-4 sm:py-6 h-full max-w-[480px] mx-auto w-full overflow-y-auto no-scrollbar">
           <div className="w-full max-w-lg mx-auto">
             {/* Header */}
             <div className="mb-4 animate-slide-up">
