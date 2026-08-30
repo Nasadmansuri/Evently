@@ -11,5 +11,4 @@ export const DEPARTMENT_DESIGNATIONS = {
 
 // BIC DevCorps community — optional field on Faculty Signup, also used as
 // "Organizing Community" on Create Event and the Browse Events filter.
-// Confirmed final at 4 — no 5th community.
-export const COMMUNITIES = ['Devsphere', 'AI Horizon', 'BIC Converge', 'Incognitus', 'N/A'];
+export const COMMUNITIES = ['DevCorps Core', 'Devsphere', 'AI Horizon', 'BIC Converge', 'Incognitus', 'N/A'];
