@@ -43,6 +43,8 @@ export default function FeedbackBuilder() {
   const isOrganizerOrAdmin = user?.role === 'admin' || (event && event.created_by === user?.id);
 
   useEffect(() => {
+    // Guard: don't fire if eventId is not yet resolved from the route params
+    if (!eventId) return;
     async function load() {
       setLoading(true);
       try {

@@ -128,6 +128,7 @@ export default function EventDetail() {
   const [imagesLoading, setImagesLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) return;
     async function loadEvent() {
       setLoading(true);
       setNotFound(false);
@@ -144,6 +145,7 @@ export default function EventDetail() {
   }, [id]);
 
   useEffect(() => {
+    if (!id) return;
     async function loadFeedbackForm() {
       setFeedbackLoading(true);
       try {
@@ -161,6 +163,7 @@ export default function EventDetail() {
   }, [id]);
 
   useEffect(() => {
+    if (!id) return;
     async function loadImages() {
       setImagesLoading(true);
       try {

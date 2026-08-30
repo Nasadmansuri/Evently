@@ -35,6 +35,8 @@ export default function FeedbackForm() {
   const [answers, setAnswers] = useState({});
 
   useEffect(() => {
+    // Guard: don't fire if id is not yet resolved from the route params
+    if (!id) return;
     async function load() {
       setLoading(true);
       setError('');
