@@ -380,17 +380,20 @@ export default function FacultySignup() {
                 </div>
               </div>
 
-              {/* Optional DevCorps Community Selection */}
+              {/* DevCorps Community Chapter Selection */}
               {department === 'DevCorps' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Tech Community</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    DevCorps Chapter / Community *
+                  </label>
                   <div className="relative">
                     <select
+                      required
                       value={community}
                       onChange={(e) => setCommunity(e.target.value)}
-                      className="skeuo-input w-full appearance-none rounded-xl px-3.5 pr-8 py-2 text-sm text-slate-900 disabled:opacity-50"
+                      className="skeuo-input w-full appearance-none rounded-xl px-3.5 pr-8 py-2 text-sm text-slate-900"
                     >
-                      <option value="">Select Community (Optional)</option>
+                      <option value="">Select Chapter / Community</option>
                       {COMMUNITIES.map((c) => (
                         <option key={c} value={c}>{c}</option>
                       ))}

@@ -581,12 +581,20 @@ export default function CreateEvent() {
 
             {organizingDepartment === 'DevCorps' && (
               <div>
-                <label className={labelClass}>DevCorps Community *</label>
+                <label className={labelClass}>DevCorps Chapter / Community *</label>
                 <div className="relative">
                   <Users className={iconClass} size={15} />
-                  <select value={organizingCommunity} onChange={(e) => setOrganizingCommunity(e.target.value)} className={selectClass}>
-                    <option value="">Select community</option>
-                    {COMMUNITIES.filter((c) => c !== 'N/A').map((c) => <option key={c} value={c}>{c}</option>)}
+                  <select
+                    value={organizingCommunity}
+                    onChange={(e) => setOrganizingCommunity(e.target.value)}
+                    className={selectClass}
+                  >
+                    <option value="">Select chapter / community</option>
+                    {COMMUNITIES.filter((c) => c !== 'N/A').map((c) => (
+                      <option key={c} value={c}>
+                        {c === 'DevCorps Core' ? 'DevCorps Core (Main Campus Chapter)' : c}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className={chevronClass} size={14} />
                 </div>

@@ -31,8 +31,8 @@ export default function BrowseEvents() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [activeDepartment, setActiveDepartment] = useState('All');
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'All');
+  const [activeDepartment, setActiveDepartment] = useState(searchParams.get('department') || 'All');
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'calendar'
   const [dateFilter, setDateFilter] = useState(null);
   const [statusTab, setStatusTab] = useState('upcoming'); // 'upcoming' | 'ongoing' | 'concluded' | 'all'
@@ -68,8 +68,10 @@ export default function BrowseEvents() {
     );
     if (activeDepartment !== 'All') {
       if (activeDepartment.startsWith('community:')) {
-        const community = activeDepartment.slice('community:'.length);
-        list = list.filter((ev) => ev.organizing_community === community);
+        const communityTarget = activeDepartment.slice('community:'.length).trim().toLowerCase();
+        list = list.filter((ev) => (ev.organizing_community || '').trim().toLowerCase() === communityTarget);
+      } else if (activeDepartment === 'DevCorps') {
+        list = list.filter((ev) => ev.organizing_department === 'DevCorps');
       } else {
         list = list.filter((ev) => ev.organizing_department === activeDepartment);
       }
@@ -237,12 +239,14 @@ export default function BrowseEvents() {
               className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer"
             >
               <option value="All">All Departments & Communities</option>
-              {ORGANIZING_DEPARTMENTS.filter((dept) => dept !== 'All').map((dept) => (
-                <option key={dept} value={dept}>{dept}</option>
+              {Array.from(new Set(ORGANIZING_DEPARTMENTS.filter((dept) => dept !== 'All'))).map((dept) => (
+                <option key={dept} value={dept}>{dept === 'DevCorps' ? 'DevCorps (All Chapters & Main)' : dept}</option>
               ))}
-              <optgroup label="DevCorps Student Communities">
+              <optgroup label="DevCorps Chapters & Communities">
                 {COMMUNITIES.filter((c) => c !== 'N/A').map((c) => (
-                  <option key={c} value={`community:${c}`}>{c}</option>
+                  <option key={c} value={`community:${c}`}>
+                    {c === 'DevCorps Core' ? 'DevCorps Core (Main Campus Chapter)' : c}
+                  </option>
                 ))}
               </optgroup>
             </select>
