@@ -40,6 +40,12 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// ─── Uptime / liveness probe — no DB queries, no auth, no middleware ──────────
+// Pinged by UptimeRobot every 5 min to keep the Render free instance warm.
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
