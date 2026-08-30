@@ -107,10 +107,11 @@ async function sendSignupOtp(req, res) {
         `,
       });
     } catch (mailErr) {
-      console.warn('Could not send signup verification email via SMTP (will log code to console):', mailErr.message);
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Could not send signup verification email via SMTP (will log code to console):', mailErr.message);
+        console.log(`[SIGNUP OTP] ${normalizedEmail} -> ${otp}`);
+      }
     }
-
-    console.log(`[SIGNUP OTP] ${normalizedEmail} -> ${otp}`);
 
     res.json({
       message: 'A 6-digit verification code has been sent to your email.',
@@ -592,10 +593,11 @@ async function forgotPassword(req, res) {
         `,
       });
     } catch (mailErr) {
-      console.warn('Could not send reset email via SMTP (will log code to console):', mailErr.message);
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Could not send reset email via SMTP (will log code to console):', mailErr.message);
+        console.log(`[PASSWORD RESET OTP] ${normalizedEmail} -> ${otp}`);
+      }
     }
-
-    console.log(`[PASSWORD RESET OTP] ${normalizedEmail} -> ${otp}`);
 
     res.json({
       message: 'A 6-digit verification code has been sent to your email.',

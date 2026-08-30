@@ -103,7 +103,7 @@ app.listen(PORT, () => {
         console.log(`Auto-purged ${purgedEvents.length} cancelled event(s) after 10-minute retention`);
       }
     } catch (err) {
-      console.error('Background worker error:', err.message);
+      console.error('Background worker error:', err?.message || String(err));
     }
   }, 30000);
 });

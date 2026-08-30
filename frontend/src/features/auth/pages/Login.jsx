@@ -366,9 +366,9 @@ export default function Login() {
   const labelClass = 'block text-xs font-semibold text-slate-700 mb-1';
 
   return (
-    <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#edf0f5] p-2.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
+    <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#edf0f5] p-1.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
       {/* Master Dual-Column Container */}
-      <div className="w-full max-w-[1400px] h-auto lg:h-[calc(100vh-2.5rem)] max-h-[860px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      <div className="w-full max-w-[1400px] h-auto lg:h-[calc(100vh-2.5rem)] max-h-[860px] bg-white rounded-[20px] sm:rounded-[28px] md:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
         {/* Left Column: Wider Evently Brand Showcase Inset Card (lg:col-span-7) */}
         <div className="lg:col-span-7 m-2.5 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-7 sm:p-9 lg:p-12 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">

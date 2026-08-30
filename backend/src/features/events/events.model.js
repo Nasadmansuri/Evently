@@ -79,7 +79,7 @@ async function autoPublishScheduledEvents() {
     }
     return [];
   } catch (err) {
-    console.error('Auto-publish check error:', err.message);
+    console.error('Auto-publish check error:', err?.message || String(err));
     return [];
   }
 }
@@ -389,7 +389,7 @@ async function autoPurgeCancelledEvents() {
     }
     return rows;
   } catch (err) {
-    console.error('autoPurgeCancelledEvents error:', err.message);
+    console.error('autoPurgeCancelledEvents error:', err?.message || String(err));
     return [];
   }
 }

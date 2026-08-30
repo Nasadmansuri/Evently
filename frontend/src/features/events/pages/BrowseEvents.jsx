@@ -272,8 +272,8 @@ export default function BrowseEvents() {
 
       {/* 3. Event Status Tabs in Tactile Segmented Tray */}
       {viewMode === 'list' && (
-        <div className="flex items-center justify-between gap-3 flex-wrap border-b border-slate-200/80 pb-3">
-          <div className="skeuo-tray flex items-center gap-1 p-1 rounded-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 pb-3">
+          <div className="skeuo-tray flex items-center gap-1 p-1 rounded-xl overflow-x-auto scrollbar-none w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setStatusTab('upcoming')}

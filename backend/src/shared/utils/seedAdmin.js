@@ -47,7 +47,7 @@ async function seedAdminUser() {
     console.log(`  Role:  admin`);
     console.log(`========================================================`);
   } catch (err) {
-    console.error('[BOOTSTRAP] Admin seeder check error:', err.message);
+    console.error('[BOOTSTRAP] Admin seeder check error:', err?.message || String(err));
   }
 }
 

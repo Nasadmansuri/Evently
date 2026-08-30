@@ -231,7 +231,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-[-40px] sm:right-0 mt-2.5 w-[320px] sm:w-[380px] rounded-[22px] border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/15 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 sm:right-0 mt-2.5 w-[calc(100vw-2rem)] sm:w-[380px] max-w-[380px] rounded-[22px] border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/15 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150" style={{ right: 'max(-40px, calc(-50vw + 50%))' }}>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-slate-50/90 border-b border-slate-100">
             <div className="flex items-center gap-2">

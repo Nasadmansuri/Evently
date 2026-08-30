@@ -74,7 +74,7 @@ export default function LandingNavbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full rounded-t-[32px] sm:rounded-t-[44px] transition-colors duration-200 py-5 sm:py-6 ${
+      className={`sticky top-0 z-50 w-full rounded-t-[20px] sm:rounded-t-[32px] md:rounded-t-[44px] transition-colors duration-200 py-5 sm:py-6 ${
         scrolled
           ? 'bg-white/85 backdrop-blur-md shadow-xs border-b border-slate-200/50'
           : 'bg-transparent'

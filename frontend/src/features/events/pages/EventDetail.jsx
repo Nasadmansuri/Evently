@@ -209,14 +209,14 @@ export default function EventDetail() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-2 sm:px-4 pb-24 lg:pb-12">
       {/* Top Breadcrumb / Back Bar */}
-      <div className="flex items-center justify-between pb-2">
+      <div className="flex items-center justify-between gap-2 pb-2 min-w-0">
         <Link
           to="/events"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition shrink-0"
         >
           <span>← Back to all events</span>
         </Link>
-        <span className="text-xs font-semibold text-slate-400">
+        <span className="text-xs font-semibold text-slate-400 truncate hidden sm:block">
           Campus Events • {[event.organizing_community || event.organizing_department, event.category].filter(Boolean).join(' • ') || 'Campus Event'}
         </span>
       </div>
@@ -245,7 +245,7 @@ export default function EventDetail() {
         )}
 
         {/* Floating Pills on Top of Banner */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 flex flex-wrap items-start justify-between gap-2 pointer-events-none">
           <span
             className={`pointer-events-auto rounded-full px-3.5 py-1 text-xs font-bold shadow-md backdrop-blur-md ${
               event.status === 'cancelled'
