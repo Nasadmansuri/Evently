@@ -68,6 +68,18 @@ async function createEvent(req, res) {
       return res.status(400).json({ message: 'Event date cannot be in the past' });
     }
 
+    // Role & Department Boundary Gate: Only DevCorps faculty or admin can publish for DevCorps / communities
+    if (organizingDepartment === 'DevCorps' || organizingCommunity) {
+      if (req.user.role !== 'admin') {
+        const creatorProfile = await usersModel.getProfile(req.user.id);
+        if (creatorProfile.department !== 'DevCorps') {
+          return res.status(403).json({
+            message: 'Only DevCorps faculty or administrators can create events on behalf of DevCorps and its communities.',
+          });
+        }
+      }
+    }
+
     let publishAt = null;
     if (publishType === 'scheduled' && publishDate && publishTime) {
       const scheduledDateTime = new Date(`${publishDate}T${publishTime}`);
@@ -263,6 +275,17 @@ async function updateEvent(req, res) {
     const finalDescription = (description && String(description).trim()) ? String(description).trim() : event.description;
     const finalLocation = (location && String(location).trim()) ? String(location).trim() : event.location;
     const finalOrganizingDept = (organizingDepartment && String(organizingDepartment).trim()) ? String(organizingDepartment).trim() : event.organizing_department;
+
+    if (finalOrganizingDept === 'DevCorps' || (organizingCommunity && organizingCommunity !== 'N/A')) {
+      if (req.user.role !== 'admin') {
+        const updaterProfile = await usersModel.getProfile(req.user.id);
+        if (updaterProfile.department !== 'DevCorps') {
+          return res.status(403).json({
+            message: 'Only DevCorps faculty or administrators can create or update events on behalf of DevCorps and its communities.',
+          });
+        }
+      }
+    }
 
     await eventsModel.updateEvent(req.params.id, {
       title: finalTitle,

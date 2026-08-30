@@ -69,6 +69,10 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Evently API Server running on http://localhost:${PORT}`);
 
+  // Automatically bootstrap primary admin user if not exists
+  const { seedAdminUser } = require('./shared/utils/seedAdmin');
+  seedAdminUser();
+
   // Background auto-publisher & auto-cleanup for cancelled events (runs every 30 seconds)
   const { autoPublishScheduledEvents, autoPurgeCancelledEvents } = require('./features/events/events.model');
   const notificationsModel = require('./features/notifications/notifications.model');

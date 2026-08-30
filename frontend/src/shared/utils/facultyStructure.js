@@ -7,6 +7,7 @@ export const DEPARTMENT_DESIGNATIONS = {
   'Registry, Timetable & Examination Department': ['Manager', 'Officer'],
   'IT Academics': ['Module Leader', 'Lecturer', 'Tutor', 'GTA'],
   'Business Academics': ['Module Leader', 'Lecturer', 'Tutor', 'GTA'],
+  'DevCorps': ['DevCorps Head'],
 };
 
 // BIC DevCorps community — optional field on Faculty Signup, also used as

@@ -14,9 +14,10 @@ import { ALL_CATEGORIES } from '../../../shared/utils/categoryColors';
 const CATEGORIES = ['All', ...ALL_CATEGORIES];
 const ORGANIZING_DEPARTMENTS = [
   'All',
-  ...Object.keys(ACADEMIC_STRUCTURE),
-  ...Object.keys(DEPARTMENT_DESIGNATIONS),
-  'DevCorps',
+  ...new Set([
+    ...Object.keys(ACADEMIC_STRUCTURE),
+    ...Object.keys(DEPARTMENT_DESIGNATIONS),
+  ]),
 ];
 
 function dateKey(d) {

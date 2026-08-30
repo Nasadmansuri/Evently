@@ -7,6 +7,7 @@ import {
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { fireCelebrationConfetti } from '../../../shared/utils/confetti';
+import { useAuth } from '../../../shared/context/AuthContext';
 
 const QUESTION_TYPES = [
   { value: 'short_text', label: 'Short Text' },
@@ -28,6 +29,7 @@ function newQuestion() {
 export default function FeedbackBuilder() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState(null);
@@ -37,6 +39,8 @@ export default function FeedbackBuilder() {
   const [questions, setQuestions] = useState([newQuestion()]);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const isOrganizerOrAdmin = user?.role === 'admin' || (event && event.created_by === user?.id);
 
   useEffect(() => {
     async function load() {
@@ -173,6 +177,28 @@ export default function FeedbackBuilder() {
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs transition cursor-pointer"
           >
             My Events
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isOrganizerOrAdmin) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100">
+          <AlertCircle size={28} />
+        </div>
+        <h2 className="text-lg font-black text-slate-900">Access Restricted</h2>
+        <p className="mt-1.5 text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
+          Feedback form creation and management is restricted to the event organizer ({event?.organizer_name || 'Organizer'}) and administrators.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Link
+            to={`/events/${eventId}`}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition cursor-pointer"
+          >
+            <ArrowLeft size={14} /> Back to Event Details
           </Link>
         </div>
       </div>

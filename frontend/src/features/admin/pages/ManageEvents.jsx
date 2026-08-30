@@ -23,9 +23,10 @@ const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 const CATEGORIES = ['All', ...ALL_CATEGORIES];
 const ORGANIZING_DEPARTMENTS = [
   'All',
-  ...Object.keys(ACADEMIC_STRUCTURE),
-  ...Object.keys(DEPARTMENT_DESIGNATIONS),
-  'DevCorps',
+  ...new Set([
+    ...Object.keys(ACADEMIC_STRUCTURE),
+    ...Object.keys(DEPARTMENT_DESIGNATIONS),
+  ]),
 ];
 
 function dateKey(d) {

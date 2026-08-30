@@ -82,7 +82,7 @@ async function runQATests() {
     );
     await pool.query(
       `INSERT INTO faculty_profiles (user_id, faculty_id_code, department, designation, community, approval_status)
-       VALUES (?, 'BIC-FAC-0901', 'IT Academics', 'Senior Lecturer', 'AI Horizon', 'approved')`,
+       VALUES (?, 'BIC-FAC-0901', 'DevCorps', 'DevCorps Head', 'N/A', 'approved')`,
       [facultyARes.insertId]
     );
     const facultyA = { id: facultyARes.insertId, email: 'qa_test_faculty_a@bic.edu.np', role: 'faculty' };
@@ -158,7 +158,7 @@ async function runQATests() {
       location: 'Wulfruna Hall',
       eventDate: '2026-09-10',
       eventTime: '14:00',
-      organizingDepartment: 'School of Architecture, Computing and Engineering',
+      organizingDepartment: 'DevCorps',
       organizingCommunity: 'AI Horizon',
     });
     assert(res1_3_create.status === 201, 'Faculty A can create an event (201 Created)');

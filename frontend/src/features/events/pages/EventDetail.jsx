@@ -4,7 +4,7 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import {
   Calendar, CalendarDays, Clock, MapPin, User, FileX, Images, MessageSquare, CheckCircle2,
   Loader2, BarChart3, Navigation, Landmark, Edit3, FileDown, Star,
-  Trash2, AlertTriangle, ShieldAlert, X, Send, ArrowRight, Trophy, Award,
+  Trash2, AlertTriangle, ShieldAlert, X, Send, ArrowRight, ArrowLeft, Lock, Trophy, Award,
   ClipboardCheck, PlayCircle, Maximize2, Camera
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -250,6 +250,8 @@ export default function EventDetail() {
             className={`pointer-events-auto rounded-full px-3.5 py-1 text-xs font-bold shadow-md backdrop-blur-md ${
               event.status === 'cancelled'
                 ? 'bg-rose-600/90 text-white'
+                : liveStatus === 'scheduled'
+                ? 'bg-amber-500/95 text-white'
                 : liveStatus === 'ongoing'
                 ? 'bg-emerald-600/95 text-white'
                 : isPastEvent
@@ -259,6 +261,8 @@ export default function EventDetail() {
           >
             {event.status === 'cancelled'
               ? 'Cancelled'
+              : liveStatus === 'scheduled'
+              ? 'Scheduled'
               : liveStatus === 'ongoing'
               ? '● Live Now'
               : isPastEvent
@@ -353,17 +357,53 @@ export default function EventDetail() {
             </div>
           )}
 
+          {/* Scheduled Release Notice */}
+          {liveStatus === 'scheduled' && event.status !== 'cancelled' && (
+            <div className="skeuo-card rounded-2xl border border-amber-200/90 bg-gradient-to-br from-amber-50/95 via-amber-50/60 to-white p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between gap-2 border-b border-amber-100/90 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-800 border border-amber-200/80 shadow-2xs">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-amber-900 leading-tight">Scheduled Event Release</h3>
+                    <p className="text-[11px] text-amber-700 font-medium">This event is scheduled for automatic publication</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-amber-500 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-2xs">
+                  Scheduled
+                </span>
+              </div>
+              <div className="rounded-xl border border-amber-100 bg-white/90 p-3.5 text-xs space-y-1 shadow-2xs">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 block">Publication Schedule:</span>
+                <p className="font-semibold text-slate-800 leading-relaxed">
+                  This event will automatically be published to the campus event catalog on{' '}
+                  <strong className="text-slate-900 font-bold">{new Date(event.publish_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</strong> at{' '}
+                  <strong className="text-slate-900 font-bold">{new Date(event.publish_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Tabs Navigation */}
           <div className="flex border-b border-slate-200 gap-6 text-sm font-bold">
-            {(event.status === 'cancelled' ? ['Details', 'Gallery'] : TABS).map((tab) => (
+            {(event.status === 'cancelled'
+              ? ['Details', 'Gallery']
+              : ['Details', 'Gallery', 'Feedback']
+            ).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 relative transition-colors ${
+                className={`pb-3 relative transition-colors inline-flex items-center gap-1.5 cursor-pointer ${
                   activeTab === tab ? 'text-primary-700 font-black' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <span>{tab}</span>
+                {tab === 'Feedback' && user?.role === 'faculty' && !isOrganizerOrAdmin && (
+                  <span className="inline-flex items-center justify-center rounded-full bg-slate-100 text-slate-400 p-0.5" title="Restricted to organizer">
+                    <Lock size={10} />
+                  </span>
+                )}
                 {activeTab === tab && (
                   <motion.div
                     layoutId="activeTabUnderline"
@@ -553,31 +593,131 @@ export default function EventDetail() {
 
           {activeTab === 'Feedback' && (
             <div>
-              {feedbackLoading ? (
+              {user?.role === 'faculty' && !isOrganizerOrAdmin ? (
+                <div className="skeuo-card rounded-[24px] border border-amber-200/70 bg-gradient-to-br from-amber-50/60 via-amber-50/20 to-white p-6 sm:p-7 shadow-xs space-y-5">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-800 border border-amber-200/80 shadow-2xs">
+                      <ShieldAlert size={22} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-200/70 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider">
+                          Organizer Privacy
+                        </span>
+                        <span className="rounded-full bg-slate-100 text-slate-600 border border-slate-200/60 px-2 py-0.5 text-[10px] font-bold">
+                          Confidential Section
+                        </span>
+                      </div>
+                      <h3 className="text-base font-black text-slate-900 leading-snug">
+                        Feedback is Confidential to the Event Organizer
+                      </h3>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-600 font-normal">
+                        Student ratings, individual questionnaires, and survey analytics are strictly private to this event's organizer (<span className="font-bold text-slate-800">{event?.organizer_name || 'Event Organizer'}</span>) and campus administration.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-2xs flex items-start gap-2.5">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700 border border-amber-100">
+                        <Lock size={13} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900">Protected Submissions</h4>
+                        <p className="mt-0.5 text-[11px] text-slate-500 leading-relaxed">
+                          Student responses remain private to encourage authentic, candid feedback.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-2xs flex items-start gap-2.5">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700 border border-primary-100">
+                        <FileDown size={13} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900">Institutional Reports</h4>
+                        <p className="mt-0.5 text-[11px] text-slate-500 leading-relaxed">
+                          Summary analytics are compiled into official PDF reports for the organizing lead.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('Details')}
+                      className="skeuo-btn-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold cursor-pointer"
+                    >
+                      <ArrowLeft size={14} /> Back to Event Details
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/faculty/my-events')}
+                      className="skeuo-btn-secondary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold cursor-pointer"
+                    >
+                      View My Created Events
+                    </button>
+                  </div>
+                </div>
+              ) : feedbackLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="animate-spin text-primary-600" size={28} />
                 </div>
               ) : !feedbackForm && isOrganizerOrAdmin ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mb-3">
+                <div className="skeuo-card rounded-[24px] border border-primary-100 bg-gradient-to-br from-primary-50/50 via-white to-white p-6 sm:p-8 text-center space-y-3">
+                  <div className="mx-auto w-12 h-12 rounded-2xl bg-primary-100/80 text-primary-700 flex items-center justify-center border border-primary-200/80 shadow-2xs">
                     <MessageSquare size={24} />
                   </div>
-                  <p className="text-sm font-bold text-slate-800">No feedback form created yet</p>
-                  <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
-                    Create a customized feedback survey for students to evaluate this event.
-                  </p>
-                  <button
-                    onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/feedback`)}
-                    className="rounded-xl bg-primary-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-700"
-                  >
-                    + Create Feedback Form
-                  </button>
+                  <div>
+                    <span className="inline-block rounded-full bg-primary-100 text-primary-900 border border-primary-200/70 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider mb-1.5">
+                      Organizer Action Required
+                    </span>
+                    <h3 className="text-base font-black text-slate-900">
+                      {isPastEvent ? 'Create Post-Event Feedback Survey' : 'No Feedback Form Created Yet'}
+                    </h3>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 leading-relaxed">
+                      {isPastEvent
+                        ? 'Collect student evaluations and participant ratings by creating a post-event questionnaire anytime.'
+                        : 'Create a customized feedback survey for registered attendees to evaluate this session once it begins.'}
+                    </p>
+                  </div>
+                  <div className="pt-2">
+                    <button
+                      onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/feedback`)}
+                      className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold cursor-pointer"
+                    >
+                      <span>+ Create Feedback Form</span>
+                    </button>
+                  </div>
                 </div>
               ) : !feedbackForm ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <MessageSquare className="mb-3 text-slate-300" size={28} />
-                  <p className="text-sm font-semibold text-slate-700">Feedback isn't open for this event yet</p>
-                  <p className="text-xs text-slate-400 mt-0.5">The organizer has not published a feedback form.</p>
+                <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 border border-slate-200">
+                    <MessageSquare size={24} />
+                  </div>
+                  <div>
+                    <span className="inline-block rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider mb-1.5">
+                      Pending Organizer Release
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900">Feedback Form Not Published Yet</h3>
+                    <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
+                      {event.is_registered
+                        ? "The event organizer has not published a feedback survey for this event yet. Organizers can release post-event surveys anytime—check back soon or check your Feedback dashboard."
+                        : "The event organizer has not published a feedback survey yet. Once released, feedback collection is reserved for registered attendees."}
+                    </p>
+                  </div>
+                  {event.is_registered && (
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => navigate('/student/my-feedback')}
+                        className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
+                      >
+                        <span>Check My Feedback Hub →</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : user?.role !== 'student' ? (
                 /* Rich Faculty & Admin Feedback Analytics View */
@@ -673,9 +813,12 @@ export default function EventDetail() {
                     <CheckCircle2 size={24} />
                   </div>
                   <div>
-                    <p className="text-base font-bold text-slate-900">Feedback Submitted ✓</p>
-                    <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                      Thank you for sharing your feedback on this event. You can review your submitted questions and responses anytime.
+                    <span className="inline-block rounded-full bg-emerald-50 text-emerald-800 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider mb-1.5 border border-emerald-100">
+                      Feedback Completed ✓
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900">Feedback Submitted</h3>
+                    <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                      Thank you for sharing your feedback on this event. You can review your submitted responses anytime.
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -694,27 +837,106 @@ export default function EventDetail() {
                   </div>
                 </div>
               ) : !event.is_registered ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <MessageSquare className="mb-3 text-slate-300" size={28} />
-                  <p className="text-sm font-medium text-slate-700">Registration Required</p>
-                  <p className="mt-1 text-xs text-slate-500">You must be registered for this event to leave feedback.</p>
-                </div>
+                isPastEvent ? (
+                  /* Ended Event & Unregistered Student */
+                  <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 border border-slate-200">
+                      <ShieldAlert size={24} />
+                    </div>
+                    <div>
+                      <span className="inline-block rounded-full bg-slate-100 text-slate-700 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider mb-1.5 border border-slate-200">
+                        Attendee Verification
+                      </span>
+                      <h3 className="text-base font-bold text-slate-900">Feedback Restricted to Registered Attendees</h3>
+                      <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
+                        This campus event has concluded. Post-event feedback surveys are reserved for verified participants who registered and attended the session.
+                      </p>
+                    </div>
+                    <div className="pt-2">
+                      <Link
+                        to="/events"
+                        className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold"
+                      >
+                        Browse Upcoming Events →
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  /* Upcoming/Ongoing Event & Unregistered Student */
+                  <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-50 text-primary-600 border border-primary-100">
+                      <MessageSquare size={24} />
+                    </div>
+                    <div>
+                      <span className="inline-block rounded-full bg-primary-50 text-primary-700 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider mb-1.5 border border-primary-100">
+                        Registration Required
+                      </span>
+                      <h3 className="text-base font-bold text-slate-900">Register to Leave Feedback</h3>
+                      <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
+                        You must be registered for this event to participate and submit post-event feedback.
+                      </p>
+                    </div>
+                    {event.status !== 'cancelled' && (
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const regSection = document.getElementById('registration-card');
+                            if (regSection) regSection.scrollIntoView({ behavior: 'smooth' });
+                            else navigate(`/events/${id}/register`);
+                          }}
+                          className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
+                        >
+                          Register for Event →
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
               ) : !hasEventStarted ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <MessageSquare className="mb-3 text-slate-300" size={28} />
-                  <p className="text-sm font-medium text-slate-700">Feedback opens once the event begins</p>
-                  <p className="mt-1 text-xs text-slate-500">Come back once the event is underway to share your thoughts.</p>
+                /* Registered Student & Event Has Not Started */
+                <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-50 text-primary-700 border border-primary-100">
+                    <Clock size={24} />
+                  </div>
+                  <div>
+                    <span className="inline-block rounded-full bg-primary-50 text-primary-800 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider mb-1.5 border border-primary-100">
+                      Registered Attendee ✓
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900">Feedback Opens When Event Begins</h3>
+                    <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
+                      You are registered for this event. Feedback collection will activate automatically once the session begins on{' '}
+                      <strong className="text-slate-700 font-semibold">{new Date(event.event_date).toLocaleDateString()}</strong> at{' '}
+                      <strong className="text-slate-700 font-semibold">{formatTime12hr(event.event_time)}</strong>.
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <MessageSquare className="mb-3 text-primary-400" size={28} />
-                  <p className="mb-3 text-sm font-medium text-slate-700">Share your thoughts on this event</p>
-                  <button
-                    onClick={() => navigate(`/events/${id}/feedback`)}
-                    className="mt-3 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98]"
-                  >
-                    Give Feedback
-                  </button>
+                /* Registered Student & Event Started / Ended -> Ready to Give Feedback */
+                <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                    <Star size={24} className="fill-emerald-600" />
+                  </div>
+                  <div>
+                    <span className="inline-block rounded-full bg-emerald-50 text-emerald-800 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider mb-1.5 border border-emerald-100">
+                      {isPastEvent ? 'Post-Event Feedback Open' : 'Feedback Open'}
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900">
+                      {isPastEvent ? 'How was your experience at this event?' : 'Share Your Thoughts on this Event'}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
+                      Your ratings and suggestions help organizers evaluate the session quality and improve future campus activities.
+                    </p>
+                  </div>
+                  <div className="pt-2">
+                    <button
+                      onClick={() => navigate(`/events/${id}/feedback`)}
+                      className="skeuo-btn-primary inline-flex items-center gap-2 rounded-xl px-6 py-3 text-xs font-bold cursor-pointer"
+                    >
+                      <Star size={14} className="fill-amber-400 text-amber-400" />
+                      <span>{isPastEvent ? 'Submit Post-Event Feedback' : 'Give Feedback'}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -793,6 +1015,11 @@ export default function EventDetail() {
                         <CheckCircle2 size={15} className="text-emerald-600" />
                         <span>You're registered. See you there!</span>
                       </div>
+                    ) : liveStatus === 'scheduled' ? (
+                      <div className="w-full text-center py-2.5 px-4 rounded-full bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200 flex items-center justify-center gap-1.5">
+                        <Clock size={14} className="text-amber-600" />
+                        <span>Registration Opens on Release ({new Date(event.publish_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })})</span>
+                      </div>
                     ) : liveStatus === 'ended' ? (
                       <div className="w-full text-center py-2.5 px-4 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
                         Event Completed
@@ -813,7 +1040,11 @@ export default function EventDetail() {
                   )}
 
                   {!user && (
-                    liveStatus === 'ended' ? (
+                    liveStatus === 'scheduled' ? (
+                      <div className="w-full text-center py-2.5 px-4 rounded-full bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200">
+                        Event Scheduled for Release
+                      </div>
+                    ) : liveStatus === 'ended' ? (
                       <div className="w-full text-center py-2.5 px-4 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
                         Event Completed
                       </div>

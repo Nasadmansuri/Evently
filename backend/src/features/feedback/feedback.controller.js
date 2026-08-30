@@ -33,6 +33,9 @@ async function createForm(req, res) {
     if (event.status === 'cancelled') {
       return res.status(400).json({ message: 'Cannot create a feedback form for a cancelled event' });
     }
+    if (req.user.role !== 'admin' && event.created_by !== req.user.id) {
+      return res.status(403).json({ message: 'Only the event organizer or an administrator can create a feedback form for this event' });
+    }
 
     const formId = await feedbackModel.createForm({
       eventId, title, description, createdBy: req.user.id, questions,
@@ -63,14 +66,27 @@ async function getFormByEvent(req, res) {
     let myResponse = null;
     let responses = [];
 
+    const isOwnerOrAdmin = req.user?.role === 'admin' || (event && event.created_by === req.user?.id);
+
     if (req.user?.role === 'student') {
       myResponse = await feedbackModel.getMyResponse(form.id, req.user.id);
       alreadySubmitted = !!myResponse;
-    } else {
+    } else if (isOwnerOrAdmin) {
       responses = await feedbackModel.getResponsesForForm(form.id);
+    } else {
+      // Non-owner faculty cannot access other faculty's feedback forms, question configs, or student submissions
+      return res.json({
+        form: null,
+        alreadySubmitted: false,
+        myResponse: null,
+        responses: [],
+        isOwnerOrAdmin: false,
+        isRestricted: true,
+        message: 'Feedback details and responses are restricted to the event organizer and administrators.',
+      });
     }
 
-    res.json({ form, alreadySubmitted, myResponse, responses });
+    res.json({ form, alreadySubmitted, myResponse, responses, isOwnerOrAdmin });
   } catch (err) {
     console.error('getFormByEvent error:', err);
     res.status(500).json({ message: 'Failed to load feedback form', error: err.message });

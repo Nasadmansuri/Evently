@@ -8,7 +8,7 @@ import {
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
 import { useAuth } from '../../../shared/context/AuthContext';
-import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facultyStructure';
+import { DEPARTMENT_DESIGNATIONS } from '../../../shared/utils/facultyStructure';
 
 export default function FacultySignup() {
   const navigate = useNavigate();
@@ -22,7 +22,6 @@ export default function FacultySignup() {
   const [facultyIdCode, setFacultyIdCode] = useState('');
   const [department, setDepartment] = useState('');
   const [designation, setDesignation] = useState('');
-  const [community, setCommunity] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -47,9 +46,6 @@ export default function FacultySignup() {
   function handleDepartmentChange(dep) {
     setDepartment(dep);
     setDesignation('');
-    if (dep !== 'DevCorps') {
-      setCommunity('');
-    }
   }
 
   function isValidEmail(value) {
@@ -117,7 +113,7 @@ export default function FacultySignup() {
         facultyIdCode: facultyIdCode.trim().toUpperCase(),
         department,
         designation,
-        community: community || 'N/A',
+        community: 'N/A',
         password,
         otp: otp.trim(),
       });
@@ -379,26 +375,6 @@ export default function FacultySignup() {
                   )}
                 </div>
               </div>
-
-              {/* Optional DevCorps Community Selection */}
-              {department === 'DevCorps' && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Tech Community</label>
-                  <div className="relative">
-                    <select
-                      value={community}
-                      onChange={(e) => setCommunity(e.target.value)}
-                      className="skeuo-input w-full appearance-none rounded-xl px-3.5 pr-8 py-2 text-sm text-slate-900 disabled:opacity-50"
-                    >
-                      <option value="">Select Community (Optional)</option>
-                      {COMMUNITIES.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className={chevronClass} size={14} />
-                  </div>
-                </div>
-              )}
 
               {/* Row: Password & Confirm */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-0.5">

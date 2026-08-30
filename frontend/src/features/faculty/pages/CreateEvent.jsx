@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Type, AlignLeft, Tag, MapPin, CalendarDays, Clock, Landmark, Users,
@@ -16,9 +16,10 @@ import { fireCelebrationConfetti } from '../../../shared/utils/confetti';
 import VenueLocationModal from '../../../shared/components/VenueLocationModal';
 import { ALL_CATEGORIES as CATEGORIES } from '../../../shared/utils/categoryColors';
 const ORGANIZING_DEPARTMENTS = [
-  ...Object.keys(ACADEMIC_STRUCTURE),
-  ...Object.keys(DEPARTMENT_DESIGNATIONS),
-  'DevCorps',
+  ...new Set([
+    ...Object.keys(ACADEMIC_STRUCTURE),
+    ...Object.keys(DEPARTMENT_DESIGNATIONS),
+  ]),
 ];
 const MAX_IMAGES = 10;
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -33,6 +34,14 @@ export default function CreateEvent() {
   const [loadingEvent, setLoadingEvent] = useState(isEditMode);
   const [isConcludedEvent, setIsConcludedEvent] = useState(false);
   const todayString = new Date().toISOString().split('T')[0];
+
+  const isDevCorpsAuthorized = user?.role === 'admin' || user?.department === 'DevCorps';
+  const availableDepartments = useMemo(() => {
+    if (isDevCorpsAuthorized) {
+      return ORGANIZING_DEPARTMENTS;
+    }
+    return ORGANIZING_DEPARTMENTS.filter((d) => d !== 'DevCorps');
+  }, [isDevCorpsAuthorized]);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -571,12 +580,29 @@ export default function CreateEvent() {
                   className={selectClass}
                 >
                   <option value="">Select department</option>
-                  {ORGANIZING_DEPARTMENTS.map((dept) => (
-                    <option key={dept} value={dept}>{dept}</option>
-                  ))}
+                  {ORGANIZING_DEPARTMENTS.map((dept) => {
+                    const isDevCorps = dept === 'DevCorps';
+                    const isDisabled = isDevCorps && !isDevCorpsAuthorized;
+                    return (
+                      <option
+                        key={dept}
+                        value={dept}
+                        disabled={isDisabled}
+                        className={isDisabled ? 'text-slate-400 bg-slate-50' : ''}
+                      >
+                        {dept}{isDisabled ? ' 🔒 (DevCorps Head only)' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
                 <ChevronDown className={chevronClass} size={14} />
               </div>
+              {!isDevCorpsAuthorized && (
+                <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                  <Info size={12} className="shrink-0 text-slate-400" />
+                  DevCorps events require DevCorps Head or Admin authorization.
+                </p>
+              )}
             </div>
 
             {organizingDepartment === 'DevCorps' && (

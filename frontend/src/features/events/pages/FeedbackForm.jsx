@@ -152,6 +152,37 @@ export default function FeedbackForm() {
     );
   }
 
+  if (event && !event.is_registered) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100">
+          <AlertCircle size={28} />
+        </div>
+        <span className="inline-block rounded-full bg-amber-100 text-amber-800 px-3 py-1 text-xs font-bold uppercase tracking-wider mb-2">
+          Attendee Verification Required
+        </span>
+        <h2 className="text-lg font-black text-slate-900">Registration Required for Feedback</h2>
+        <p className="mt-1.5 text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
+          Feedback submission for "{event.title}" is restricted to verified attendees who registered for this event.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => navigate(`/events/${id}`)}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition cursor-pointer"
+          >
+            <ArrowLeft size={14} /> Back to Event Details
+          </button>
+          <button
+            onClick={() => navigate('/events')}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs transition cursor-pointer"
+          >
+            Browse Other Events
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const categoryStyle = event ? getCategoryStyle(event.category) : null;
   const currentRatingDesc = RATING_DESCRIPTIONS[hoverRating || starRating] || 'Click on a star to rate';
 
