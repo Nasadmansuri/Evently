@@ -17,16 +17,9 @@ export default function TopBar({ onMenuClick }) {
     .join('')
     .toUpperCase();
 
-  const roleRingClass =
-    user?.role === 'admin'
-      ? 'ring-violet-400 hover:ring-violet-600'
-      : user?.role === 'faculty'
-      ? 'ring-primary-400 hover:ring-primary-600'
-      : 'ring-teal-400 hover:ring-teal-600';
-
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white/95 backdrop-blur-sm px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-colors">
-      {/* Left: Mobile Menu Toggle & Institutional Partner Branding */}
+      {/* Left: Mobile Menu Toggle Button */}
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
@@ -35,25 +28,28 @@ export default function TopBar({ onMenuClick }) {
         >
           <Menu size={20} />
         </button>
+      </div>
 
-        {/* Institutional Partner Branding Badge (Responsive on Mobile) */}
-        <div className="flex items-center gap-2 sm:gap-3 rounded-xl border border-slate-200/90 bg-slate-50/70 px-2.5 sm:px-3 py-1.5 shadow-2xs shrink-0">
+      {/* Right: Institutional Partner Branding, Notification Bell & Profile Avatar */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Institutional Partner Branding (Borderless, High-Legibility Lockup) */}
+        <div className="hidden sm:flex items-center gap-3.5 pr-2">
           <img
             src={bicLogo}
             alt="Biratnagar International College"
-            className="h-6 sm:h-7 w-auto object-contain transition-transform hover:scale-105 shrink-0"
+            className="h-8 sm:h-9 w-auto object-contain transition-transform hover:opacity-95 shrink-0"
           />
-          <div className="hidden sm:block h-4 w-px bg-slate-200 shrink-0" />
+          <div className="h-5 w-px bg-slate-200 shrink-0" />
           <img
             src={wolverhamptonLogo}
             alt="University of Wolverhampton"
-            className="hidden sm:block h-4.5 sm:h-5 w-auto object-contain transition-transform hover:scale-105 shrink-0"
+            className="h-6 sm:h-7 w-auto object-contain transition-transform hover:opacity-95 shrink-0"
           />
         </div>
-      </div>
 
-      {/* Right: Notification Bell & Direct Profile Avatar Link */}
-      <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="hidden sm:block h-6 w-px bg-slate-200/80 shrink-0" />
+
+        {/* Notifications & Profile */}
         <NotificationBell />
 
         {/* Minimalist Profile Avatar Button (Links directly to /profile) */}

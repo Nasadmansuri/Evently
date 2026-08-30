@@ -9,7 +9,6 @@ import api from '../../../shared/services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { showToast } from '../../../shared/utils/toast';
 import { suggestEmailCorrection } from '../../../shared/utils/emailTypo';
-import { getDashboardPath } from '../../../shared/utils/navigation';
 import {
   ACADEMIC_STRUCTURE,
   GROUPS,
@@ -382,7 +381,7 @@ export default function Login() {
 
           {/* 1. Top Header: Logo + Navigation Pills (Stays solid & constant) */}
           <div className="relative z-10 flex items-center justify-between">
-            <Link to={getDashboardPath(user)} className="flex items-center gap-2 group">
+            <Link to="/" className="flex items-center gap-2 group">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-md border border-white/20 shadow-xs group-hover:scale-105 transition-transform">
                 <CalendarHeart size={18} className="text-emerald-300" />
               </div>

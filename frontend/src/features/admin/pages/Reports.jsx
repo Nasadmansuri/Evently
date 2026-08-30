@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  BarChart3, Calendar, AlertCircle, Inbox, Loader2, FileDown, FileText,
-  Clock, Search, CheckCircle2, History, Trash2, ArrowRight, ShieldCheck
+  Calendar, AlertCircle, Inbox, Loader2, FileDown, FileText,
+  Search, CheckCircle2, History, Trash2, PlayCircle, AlertTriangle, X, Clock
 } from 'lucide-react';
 import api from '../../../shared/services/api';
 import { showToast } from '../../../shared/utils/toast';
@@ -18,7 +18,7 @@ export default function Reports() {
   const [error, setError] = useState('');
   const [generatingId, setGeneratingId] = useState(null);
   const [search, setSearch] = useState('');
-  const [filterTab, setFilterTab] = useState('all'); // 'all' | 'concluded' | 'upcoming'
+  const [filterTab, setFilterTab] = useState('all'); // 'all' | 'concluded' | 'upcoming' | 'cancelled'
   const [recentReports, setRecentReports] = useState(() => {
     try {
       const saved = localStorage.getItem(RECENT_REPORTS_STORAGE_KEY);
@@ -55,9 +55,8 @@ export default function Reports() {
     };
 
     setRecentReports((prev) => {
-      // Remove any existing entry for same event to push new to top
       const filtered = prev.filter((r) => r.eventId !== ev.id);
-      const updated = [newEntry, ...filtered].slice(0, 5); // Keep top 5
+      const updated = [newEntry, ...filtered].slice(0, 6);
       try {
         localStorage.setItem(RECENT_REPORTS_STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {
@@ -99,101 +98,145 @@ export default function Reports() {
     }
   }
 
-  const { concludedCount, upcomingCount, filteredEvents } = useMemo(() => {
-    const concluded = events.filter((e) => isEventPast(e.event_date, e.event_time) || e.status === 'ended');
-    const upcoming = events.filter((e) => !isEventPast(e.event_date, e.event_time) && e.status !== 'ended');
+  const { concludedCount, upcomingCount, scheduledCount, cancelledCount, filteredEvents } = useMemo(() => {
+    const concluded = events.filter((e) => {
+      const st = getEventStatus(e.event_date, e.event_time, e.status, e.publish_at);
+      return st === 'ended';
+    });
+    const scheduled = events.filter((e) => {
+      const st = getEventStatus(e.event_date, e.event_time, e.status, e.publish_at);
+      return st === 'scheduled';
+    });
+    const upcoming = events.filter((e) => {
+      const st = getEventStatus(e.event_date, e.event_time, e.status, e.publish_at);
+      return st === 'upcoming' || st === 'ongoing';
+    });
+    const cancelled = events.filter((e) => {
+      const st = getEventStatus(e.event_date, e.event_time, e.status, e.publish_at);
+      return st === 'cancelled';
+    });
 
     let list = events;
     if (filterTab === 'concluded') list = concluded;
     if (filterTab === 'upcoming') list = upcoming;
+    if (filterTab === 'scheduled') list = scheduled;
+    if (filterTab === 'cancelled') list = cancelled;
 
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter((e) =>
-        e.title.toLowerCase().includes(q) ||
+        e.title?.toLowerCase().includes(q) ||
         (e.organizer_name && e.organizer_name.toLowerCase().includes(q)) ||
         (e.category && e.category.toLowerCase().includes(q)) ||
-        (e.organizing_department && e.organizing_department.toLowerCase().includes(q))
+        (e.organizing_department && e.organizing_department.toLowerCase().includes(q)) ||
+        (e.organizing_community && e.organizing_community.toLowerCase().includes(q))
       );
     }
 
     return {
       concludedCount: concluded.length,
       upcomingCount: upcoming.length,
+      scheduledCount: scheduled.length,
+      cancelledCount: cancelled.length,
       filteredEvents: list,
     };
   }, [events, filterTab, search]);
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      {/* Clean Authentic Header */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Event Report Generator</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Event Reports</h1>
           <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-            Generate and export official PDF participant rosters, registration statistics, and feedback summaries.
+            Export official PDF participant rosters, attendance statistics, and feedback summaries
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="flex items-center justify-between gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-700">
-          <span className="flex items-center gap-2 font-medium">
-            <AlertCircle size={15} className="shrink-0 text-rose-600" />
+        <div className="flex items-center justify-between gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700 shadow-xs">
+          <span className="flex items-center gap-2 font-semibold">
+            <AlertCircle size={16} className="shrink-0 text-rose-600" />
             {error}
           </span>
-          <button onClick={loadEvents} className="font-bold underline shrink-0">Retry</button>
+          <button onClick={loadEvents} className="font-bold underline hover:text-rose-900 cursor-pointer">
+            Retry
+          </button>
         </div>
       )}
 
-      {/* KPI Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+      {/* KPI Metric Cards */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {/* Total Events */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between min-h-[110px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">Total Events</p>
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Events</p>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80 shadow-2xs">
               <Calendar size={15} />
-            </span>
+            </div>
           </div>
-          <p className="mt-2 text-2xl font-black text-slate-900">{loading ? '—' : events.length}</p>
-          <p className="mt-0.5 text-[11.5px] text-slate-500">Across all campus departments</p>
+          <div className="mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : events.length}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Across all departments</p>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 shadow-xs">
+        {/* Concluded Events */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between min-h-[110px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-emerald-800">Concluded Events</p>
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Concluded</p>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
               <CheckCircle2 size={15} />
-            </span>
+            </div>
           </div>
-          <p className="mt-2 text-2xl font-black text-emerald-950">{loading ? '—' : concludedCount}</p>
-          <p className="mt-0.5 text-[11.5px] text-emerald-700">Ready for complete post-event reporting</p>
+          <div className="mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : concludedCount}</p>
+            <p className="mt-1 text-xs text-emerald-700 font-medium">Ready for report export</p>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-primary-100 bg-primary-50/40 p-4 shadow-xs">
+        {/* Active & Upcoming */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between min-h-[110px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary-800">Recently Exported</p>
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-100 text-primary-700">
-              <History size={15} />
-            </span>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-primary-800">Upcoming / Live</p>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-200/80 shadow-2xs">
+              <PlayCircle size={15} />
+            </div>
           </div>
-          <p className="mt-2 text-2xl font-black text-primary-950">{recentReports.length}</p>
-          <p className="mt-0.5 text-[11.5px] text-primary-700">Saved in recent report session history</p>
+          <div className="mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : upcomingCount}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Scheduled on campus</p>
+          </div>
+        </div>
+
+        {/* Recent Exports */}
+        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between min-h-[110px]">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Recent Exports</p>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80 shadow-2xs">
+              <History size={15} />
+            </div>
+          </div>
+          <div className="mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{recentReports.length}</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Generated in this session</p>
+          </div>
         </div>
       </div>
 
       {/* Recently Generated Reports Tray */}
       {recentReports.length > 0 && (
-        <div className="rounded-2xl border border-primary-200/80 bg-gradient-to-r from-primary-50/70 via-white to-primary-50/30 p-5 shadow-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-primary-100">
-            <div className="flex items-center gap-2 text-xs font-bold text-primary-950">
-              <History size={16} className="text-primary-700" />
-              <span>Recently Generated Reports ({recentReports.length})</span>
+        <div className="skeuo-card rounded-2xl p-5">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <History size={15} className="text-primary-700" />
+              <span>Recent Report Session History ({recentReports.length})</span>
             </div>
             <button
               onClick={clearRecentReports}
-              className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-rose-600 transition"
-              title="Clear recent history"
+              className="flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-rose-600 transition cursor-pointer"
+              title="Clear recent report history"
             >
               <Trash2 size={12} /> Clear History
             </button>
@@ -203,24 +246,24 @@ export default function Reports() {
             {recentReports.map((rec) => (
               <div
                 key={rec.eventId}
-                className="flex items-center justify-between gap-2 rounded-xl border border-primary-100/90 bg-white p-3 shadow-2xs hover:shadow-xs transition"
+                className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 hover:border-slate-300 transition"
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-bold text-slate-900">{rec.title}</p>
-                  <p className="text-[10.5px] text-slate-500 truncate">
+                  <p className="text-[10.5px] text-slate-500 truncate mt-0.5">
                     {new Date(rec.generatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {rec.category}
                   </p>
                 </div>
                 <button
                   onClick={() => handleGenerate({ id: rec.eventId, title: rec.title })}
                   disabled={generatingId === rec.eventId}
-                  className="flex shrink-0 items-center gap-1 rounded-lg bg-primary-50 border border-primary-200 px-2.5 py-1.5 text-[11px] font-bold text-primary-700 hover:bg-primary-100 active:scale-95 transition"
-                  title="Re-download PDF"
+                  className="skeuo-btn-secondary flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold cursor-pointer disabled:opacity-50"
+                  title="Re-download PDF report"
                 >
                   {generatingId === rec.eventId ? (
-                    <Loader2 size={12} className="animate-spin" />
+                    <Loader2 size={12} className="animate-spin text-primary-700" />
                   ) : (
-                    <FileDown size={12} />
+                    <FileDown size={12} className="text-primary-700" />
                   )}
                   <span>Re-download</span>
                 </button>
@@ -230,57 +273,36 @@ export default function Reports() {
         </div>
       )}
 
-      {/* Main Event Table Section */}
+      {/* Main Event Table Card */}
       <div className="skeuo-card overflow-hidden rounded-[24px]">
         {/* Controls Toolbar */}
-        <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* Tabs in Skeuomorphic Tray */}
-          <div className="skeuo-tray flex items-center gap-1 rounded-xl p-1">
-            <button
-              onClick={() => setFilterTab('all')}
-              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                filterTab === 'all' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {filterTab === 'all' && (
-                <motion.div
-                  layoutId="reportsFilterPill"
-                  className="absolute inset-0 rounded-lg skeuo-pill-active"
-                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                />
-              )}
-              <span className="relative z-10">All Events ({events.length})</span>
-            </button>
-            <button
-              onClick={() => setFilterTab('concluded')}
-              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                filterTab === 'concluded' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {filterTab === 'concluded' && (
-                <motion.div
-                  layoutId="reportsFilterPill"
-                  className="absolute inset-0 rounded-lg skeuo-pill-active"
-                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                />
-              )}
-              <span className="relative z-10">Concluded ({concludedCount})</span>
-            </button>
-            <button
-              onClick={() => setFilterTab('upcoming')}
-              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                filterTab === 'upcoming' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {filterTab === 'upcoming' && (
-                <motion.div
-                  layoutId="reportsFilterPill"
-                  className="absolute inset-0 rounded-lg skeuo-pill-active"
-                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                />
-              )}
-              <span className="relative z-10">Upcoming ({upcomingCount})</span>
-            </button>
+        <div className="flex flex-col gap-3.5 border-b border-slate-100 p-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between bg-slate-50/40">
+          {/* Status Tabs */}
+          <div className="skeuo-tray flex flex-wrap items-center gap-1 rounded-xl p-1">
+            {[
+              { id: 'all', label: `All Events (${events.length})` },
+              { id: 'concluded', label: `Concluded (${concludedCount})` },
+              { id: 'upcoming', label: `Upcoming & Live (${upcomingCount})` },
+              ...(scheduledCount > 0 ? [{ id: 'scheduled', label: `Scheduled (${scheduledCount})` }] : []),
+              ...(cancelledCount > 0 ? [{ id: 'cancelled', label: `Cancelled (${cancelledCount})` }] : []),
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setFilterTab(tab.id)}
+                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  filterTab === tab.id ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {filterTab === tab.id && (
+                  <motion.div
+                    layoutId="reportsFilterPill"
+                    className="absolute inset-0 rounded-lg skeuo-pill-active"
+                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10">{tab.label}</span>
+              </button>
+            ))}
           </div>
 
           {/* Search Box */}
@@ -289,84 +311,135 @@ export default function Reports() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search event title, organizer..."
-              className="skeuo-input w-full rounded-xl py-2 pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400"
+              placeholder="Search event title, organizer, dept..."
+              className="skeuo-input w-full rounded-xl py-2 pl-9 pr-8 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none"
             />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-md cursor-pointer"
+                title="Clear search"
+              >
+                <X size={13} />
+              </button>
+            )}
           </div>
         </div>
 
+        {/* Table Content */}
         {loading ? (
-          <div className="space-y-3 p-5">
-            {[1, 2, 3, 4].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-slate-100" />)}
+          <div className="space-y-3 p-6">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-16 animate-pulse rounded-xl bg-slate-100" />
+            ))}
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <Inbox className="mb-3 text-slate-300" size={32} />
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+              <Inbox size={22} />
+            </div>
             <p className="text-sm font-bold text-slate-800">No events found</p>
             <p className="text-xs text-slate-500 mt-1 max-w-sm">
-              {search ? 'No events matched your search query. Try clearing the search box.' : 'There are no events in this category yet.'}
+              {search
+                ? `No event matches "${search}". Try clearing your search query.`
+                : 'There are no events matching this filter.'}
             </p>
+            {(search || filterTab !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setFilterTab('all');
+                }}
+                className="skeuo-btn-secondary mt-3.5 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
         ) : (
           <>
-            <div className="hidden grid-cols-[2fr_1.2fr_1fr_1.3fr] gap-3 border-b border-slate-100 bg-slate-50/80 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 sm:grid">
+            {/* Desktop Table Headers */}
+            <div className="hidden grid-cols-[2.2fr_1.2fr_1.1fr_1.4fr] gap-3 border-b border-slate-100 bg-slate-50/80 px-6 py-3.5 text-[10.5px] font-bold uppercase tracking-wider text-slate-400 sm:grid">
               <span>Event & Organizer</span>
-              <span>Date & Time</span>
+              <span>Date & Schedule</span>
               <span>Category & Status</span>
-              <span className="text-right">Export Actions</span>
+              <span className="text-right">Export Action</span>
             </div>
 
+            {/* Event List Items */}
             <div className="divide-y divide-slate-100">
               {filteredEvents.map((ev) => {
                 const style = getCategoryStyle(ev.category);
+                const liveStatus = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
                 const isPast = isEventPast(ev.event_date, ev.event_time) || ev.status === 'ended';
+                const isGenerating = generatingId === ev.id;
+
                 return (
                   <div
                     key={ev.id}
-                    className="grid grid-cols-1 gap-3 px-5 py-4 sm:grid-cols-[2fr_1.2fr_1fr_1.3fr] sm:items-center hover:bg-slate-50/60 transition"
+                    className="grid grid-cols-1 gap-3 px-6 py-4 sm:grid-cols-[2.2fr_1.2fr_1.1fr_1.4fr] sm:items-center hover:bg-slate-50/70 transition"
                   >
-                    <div>
-                      <p className="text-sm font-bold text-slate-900 line-clamp-1">{ev.title}</p>
-                      <p className="text-xs text-slate-500 line-clamp-1">
-                        By {ev.organizing_community ? `${ev.organizing_department} · ${ev.organizing_community}` : (ev.organizing_department || ev.organizer_name || 'Campus Faculty')}
+                    {/* Event & Organizer */}
+                    <div className="min-w-0 pr-2">
+                      <p className="text-sm font-bold text-slate-900 line-clamp-1">
+                        {ev.title}
+                      </p>
+                      <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
+                        By {ev.organizing_community ? `${ev.organizing_department} · ${ev.organizing_community}` : (ev.organizing_department || ev.organizer_name || 'Faculty')}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                      <Calendar size={13} className="text-primary-700 shrink-0" />
-                      <span>
+                    {/* Date & Schedule */}
+                    <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                      <Calendar size={14} className="text-primary-700 shrink-0" />
+                      <span className="truncate">
                         {new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        {ev.event_time ? ` · ${ev.event_time}` : ''}
+                        {ev.event_time ? ` · ${formatTime12hr(ev.event_time)}` : ''}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`skeuo-badge-embossed inline-flex items-center rounded-md px-2 py-0.5 text-[10.5px] font-bold ${style.bg} ${style.text}`}>
+                    {/* Category & Status */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`skeuo-badge-embossed inline-flex items-center rounded-md px-2.5 py-0.5 text-[10px] font-bold ${style.bg} ${style.text}`}>
                         {ev.category || 'General'}
                       </span>
-                      {isPast ? (
-                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-600">
-                          Ended
+                      {ev.status === 'cancelled' || liveStatus === 'cancelled' ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-bold text-rose-700">
+                          <AlertTriangle size={10} /> Cancelled
+                        </span>
+                      ) : liveStatus === 'scheduled' ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                          <Clock size={10} /> Scheduled
+                        </span>
+                      ) : liveStatus === 'ongoing' ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                          <PlayCircle size={10} /> Live
+                        </span>
+                      ) : isPast || liveStatus === 'ended' ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                          <CheckCircle2 size={10} /> Concluded
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700">
-                          Active
+                        <span className="inline-flex items-center rounded-md bg-primary-50 border border-primary-200 px-2 py-0.5 text-[10px] font-semibold text-primary-700">
+                          Upcoming
                         </span>
                       )}
                     </div>
 
+                    {/* Export Action */}
                     <div className="flex justify-start sm:justify-end">
                       <button
                         onClick={() => handleGenerate(ev)}
-                        disabled={generatingId === ev.id}
-                        className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs cursor-pointer disabled:opacity-50"
+                        disabled={isGenerating}
+                        className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer disabled:opacity-50 shadow-2xs active:scale-95 transition"
+                        title={`Generate PDF Report for ${ev.title}`}
                       >
-                        {generatingId === ev.id ? (
-                          <Loader2 size={13} className="animate-spin" />
+                        {isGenerating ? (
+                          <Loader2 size={13} className="animate-spin text-white" />
                         ) : (
-                          <FileText size={13} />
+                          <FileText size={13} className="text-white" />
                         )}
-                        <span>{generatingId === ev.id ? 'Generating...' : 'Generate PDF Report'}</span>
+                        <span>{isGenerating ? 'Generating...' : 'Generate PDF Report'}</span>
                       </button>
                     </div>
                   </div>

@@ -129,12 +129,15 @@ export default function CreateEvent() {
   useEffect(() => {
     if (!isEditMode) return;
     async function loadEvent() {
+      setLoadingEvent(true);
       try {
         const res = await api.get(`/events/${eventId}`);
         const ev = res.data;
         setTitle(ev.title || '');
         setDescription(ev.description || '');
-        setCategory(ev.category || '');
+        const rawCat = (ev.category || '').trim();
+        const matchedCat = CATEGORIES.find((c) => c.toLowerCase() === rawCat.toLowerCase());
+        setCategory(matchedCat || rawCat);
         setLocation(ev.location || '');
         setEventDate(ev.event_date ? ev.event_date.slice(0, 10) : '');
         setEventTime(ev.event_time ? ev.event_time.slice(0, 5) : '');
@@ -156,7 +159,7 @@ export default function CreateEvent() {
       }
     }
     loadEvent();
-  }, [eventId]);
+  }, [eventId, isEditMode]);
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -355,6 +358,15 @@ export default function CreateEvent() {
   const chevronClass = 'absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none';
   const labelClass = 'block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5';
 
+  if (isEditMode && loadingEvent) {
+    return (
+      <div className="mx-auto max-w-3xl pb-16 flex flex-col items-center justify-center min-h-[350px]">
+        <Loader2 size={32} className="animate-spin text-primary-700" />
+        <p className="mt-3 text-xs font-bold text-slate-600">Loading event details...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-3xl pb-16">
       <div className="skeuo-card rounded-2xl p-6 sm:p-8">
@@ -421,19 +433,15 @@ export default function CreateEvent() {
           </div>
         )}
 
-        {loadingEvent && (
-          <div className="mt-5 h-40 animate-pulse rounded-2xl bg-slate-100" />
-        )}
-
         {error && (
-          <div className="mt-5 flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700 shadow-xs">
-            <AlertCircle size={16} className="shrink-0 text-rose-600" />
-            <span className="font-semibold">{error}</span>
+          <div className="mt-5 flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-xs font-medium text-rose-800 shadow-2xs">
+            <AlertCircle size={18} className="text-rose-600 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-7">
-          {/* 1. Basic Information */}
+        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+          {/* 1. Essential Information */}
           <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 text-[10px] text-white font-black">1</span>
@@ -473,6 +481,9 @@ export default function CreateEvent() {
                 <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectClass}>
                   <option value="">Select category</option>
                   {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {category && !CATEGORIES.includes(category) && (
+                    <option value={category}>{category}</option>
+                  )}
                 </select>
                 <ChevronDown className={chevronClass} size={14} />
               </div>

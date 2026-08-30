@@ -69,12 +69,13 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Evently API Server running on http://localhost:${PORT}`);
 
-  // Background auto-publisher for scheduled events (runs every 30 seconds)
-  const { autoPublishScheduledEvents } = require('./features/events/events.model');
+  // Background auto-publisher & auto-cleanup for cancelled events (runs every 30 seconds)
+  const { autoPublishScheduledEvents, autoPurgeCancelledEvents } = require('./features/events/events.model');
   const notificationsModel = require('./features/notifications/notifications.model');
 
   setInterval(async () => {
     try {
+      // 1. Auto-publish scheduled events whose publish_at has passed
       const newlyPublished = await autoPublishScheduledEvents();
       if (newlyPublished && newlyPublished.length > 0) {
         console.log(`Auto-published ${newlyPublished.length} scheduled event(s)`);
@@ -91,8 +92,14 @@ app.listen(PORT, () => {
           }
         }
       }
+
+      // 2. Auto-purge cancelled events past the 10-minute retention window
+      const purgedEvents = await autoPurgeCancelledEvents();
+      if (purgedEvents && purgedEvents.length > 0) {
+        console.log(`Auto-purged ${purgedEvents.length} cancelled event(s) after 10-minute retention`);
+      }
     } catch (err) {
-      console.error('Auto-publisher background job error:', err.message);
+      console.error('Background worker error:', err.message);
     }
   }, 30000);
 });

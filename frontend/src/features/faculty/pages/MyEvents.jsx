@@ -336,8 +336,8 @@ export default function MyEvents() {
                           </>
                         ) : (
                           <>
-                            <span className="text-xs font-bold text-rose-600">
-                              Cancelled
+                            <span className="text-[11px] font-bold text-rose-600">
+                              Cancelled · Auto-deletes in 10m
                             </span>
                             <button
                               onClick={(e) => {

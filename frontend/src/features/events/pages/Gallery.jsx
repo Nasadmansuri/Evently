@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Images, AlertCircle, Camera, Search, Calendar, ArrowRight, X
+  Images, AlertCircle, Camera, Search, Calendar, ArrowRight, X, Tag, ChevronDown, Filter, RotateCcw
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../../../shared/services/api';
@@ -47,7 +47,7 @@ export default function Gallery() {
       }
     });
 
-    const list = [{ id: 'All', label: 'All Albums', count: events.length }];
+    const list = [{ id: 'All', label: 'All Categories', count: events.length }];
     Object.entries(counts)
       .sort((a, b) => b[1] - a[1]) // Sort most popular categories first
       .forEach(([cat, count]) => {
@@ -68,10 +68,17 @@ export default function Gallery() {
     });
   }, [events, search, activeCategory]);
 
+  function resetFilters() {
+    setSearch('');
+    setActiveCategory('All');
+  }
+
+  const hasActiveFilters = activeCategory !== 'All' || !!search.trim();
+
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Header Row */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* 1. Header & Unified Filter Toolbar */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800 border border-primary-100/80">
@@ -86,57 +93,86 @@ export default function Gallery() {
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative w-full sm:w-80">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search albums, hackathons, seminars..."
-            className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-semibold text-slate-800 placeholder:text-slate-400"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
-              title="Clear search"
+        {/* Unified Search & Category Controls Toolbar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+          {/* Category Dropdown */}
+          <div className="relative w-full sm:w-56">
+            <Tag size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <select
+              value={activeCategory}
+              onChange={(e) => setActiveCategory(e.target.value)}
+              className="skeuo-input w-full appearance-none rounded-xl py-2.5 pl-9 pr-8 text-xs font-semibold text-slate-800 cursor-pointer shadow-2xs"
             >
-              <X size={13} />
-            </button>
-          )}
+              {availableCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.id === 'All' ? `All Categories (${c.count})` : `${c.label} (${c.count})`}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          </div>
+
+          {/* Search Input */}
+          <div className="relative w-full sm:w-72">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search albums, hackathons..."
+              className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-semibold text-slate-800 placeholder:text-slate-400 shadow-2xs"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+                title="Clear search"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 2. Dynamic Category Filter Pills in a Recessed Skeuomorphic Tray */}
-      {!loading && availableCategories.length > 1 && (
-        <div className="skeuo-tray flex flex-wrap gap-1 p-1 w-fit rounded-xl">
-          {availableCategories.map((cat) => {
-            const isActive = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                  isActive ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="galleryCategoryPill"
-                    className="absolute inset-0 rounded-lg skeuo-pill-active"
-                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                  />
-                )}
-                <span className="relative z-10">{cat.label}</span>
-                <span className={`relative z-10 rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
-                }`}>
-                  {cat.count}
-                </span>
-              </button>
-            );
-          })}
+      {/* Active Filter Chips & Results Count Strip */}
+      {hasActiveFilters && (
+        <div className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-bold text-slate-500">Active Filters:</span>
+            {activeCategory !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-50 border border-primary-200/80 px-2.5 py-1 text-xs font-bold text-primary-800">
+                <Tag size={12} />
+                <span>{activeCategory}</span>
+                <button
+                  onClick={() => setActiveCategory('All')}
+                  className="hover:bg-primary-100 rounded p-0.5 text-primary-600 cursor-pointer"
+                  title="Remove category filter"
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            )}
+            {search.trim() && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700">
+                <span>"{search}"</span>
+                <button
+                  onClick={() => setSearch('')}
+                  className="hover:bg-slate-200 rounded p-0.5 text-slate-500 cursor-pointer"
+                  title="Clear search keyword"
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            )}
+          </div>
+          <button
+            onClick={resetFilters}
+            className="flex items-center gap-1 font-bold text-primary-700 hover:underline shrink-0 cursor-pointer"
+          >
+            <RotateCcw size={12} />
+            <span>Reset All</span>
+          </button>
         </div>
       )}
 

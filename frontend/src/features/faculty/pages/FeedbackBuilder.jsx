@@ -30,6 +30,7 @@ export default function FeedbackBuilder() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
+  const [event, setEvent] = useState(null);
   const [existingForm, setExistingForm] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -41,8 +42,12 @@ export default function FeedbackBuilder() {
     async function load() {
       setLoading(true);
       try {
-        const res = await api.get(`/feedback/forms/event/${eventId}`);
-        setExistingForm(res.data.form);
+        const [formRes, eventRes] = await Promise.all([
+          api.get(`/feedback/forms/event/${eventId}`),
+          api.get(`/events/${eventId}`).catch(() => ({ data: null })),
+        ]);
+        setExistingForm(formRes.data?.form || null);
+        if (eventRes?.data) setEvent(eventRes.data);
       } catch (err) {
         console.error('Failed to check existing form:', err);
       } finally {
@@ -139,6 +144,37 @@ export default function FeedbackBuilder() {
     return (
       <div className="mx-auto max-w-2xl">
         <div className="h-64 animate-pulse rounded-[24px] border border-slate-200 bg-slate-100" />
+      </div>
+    );
+  }
+
+  if (event?.status === 'cancelled') {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 border border-rose-100">
+          <AlertCircle size={28} />
+        </div>
+        <span className="inline-block rounded-full bg-rose-100 text-rose-800 px-3 py-1 text-xs font-bold uppercase tracking-wider mb-2">
+          Event Cancelled
+        </span>
+        <h2 className="text-lg font-black text-slate-900">Form Builder Disabled</h2>
+        <p className="mt-1.5 text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
+          "{event?.title || 'This event'}" was cancelled. Feedback forms cannot be published or configured for cancelled events.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            to={`/events/${eventId}`}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition cursor-pointer"
+          >
+            <ArrowLeft size={14} /> Back to Event Details
+          </Link>
+          <Link
+            to="/faculty/my-events"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs transition cursor-pointer"
+          >
+            My Events
+          </Link>
+        </div>
       </div>
     );
   }

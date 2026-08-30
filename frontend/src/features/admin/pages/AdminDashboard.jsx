@@ -331,7 +331,7 @@ export default function AdminDashboard() {
               <div className="space-y-3">
                 {recentEvents.map((ev, idx) => {
                   const isPast = isEventPast(ev.event_date);
-                  const liveStatus = getEventStatus(ev.event_date, ev.event_time);
+                  const liveStatus = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
                   const style = getCategoryStyle(ev.category);
                   const dateObj = new Date(ev.event_date);
                   const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });

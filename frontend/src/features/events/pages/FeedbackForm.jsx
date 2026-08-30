@@ -99,6 +99,37 @@ export default function FeedbackForm() {
     );
   }
 
+  if (event?.status === 'cancelled') {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 border border-rose-100">
+          <AlertCircle size={28} />
+        </div>
+        <span className="inline-block rounded-full bg-rose-100 text-rose-800 px-3 py-1 text-xs font-bold uppercase tracking-wider mb-2">
+          Event Cancelled
+        </span>
+        <h2 className="text-lg font-black text-slate-900">Feedback Unavailable</h2>
+        <p className="mt-1.5 text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
+          "{event?.title || 'This event'}" was cancelled and did not take place. Feedback submission is disabled for cancelled events.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => navigate(`/events/${id}`)}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition cursor-pointer"
+          >
+            <ArrowLeft size={14} /> Back to Event Details
+          </button>
+          <button
+            onClick={() => navigate('/student/my-feedback')}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs transition cursor-pointer"
+          >
+            My Feedback
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!form) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">

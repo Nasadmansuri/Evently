@@ -279,13 +279,13 @@ export default function EventDetail() {
         </div>
 
         {/* Bottom Banner Title Overlay */}
-        <div className="absolute bottom-4 left-4 right-4 text-white z-10">
+        <div className="absolute bottom-6 sm:bottom-7 md:bottom-8 left-6 sm:left-8 md:left-9 right-6 sm:right-8 md:right-9 text-white z-10">
           {event.organizing_community && (
-            <span className="inline-block mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-amber-300/30">
+            <span className="inline-block mb-2 text-[11px] font-bold uppercase tracking-wider text-amber-300 bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-amber-300/30">
               {event.organizing_community}
             </span>
           )}
-          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight drop-shadow-md line-clamp-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight drop-shadow-md line-clamp-2 leading-[1.25] pb-1.5">
             {event.title}
           </h1>
         </div>
@@ -318,6 +318,12 @@ export default function EventDetail() {
                   {event.cancellation_reason || 'This event was cancelled following administrative review.'}
                 </p>
               </div>
+              {isOrganizerOrAdmin && (
+                <div className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-rose-700/80 pt-1 border-t border-rose-100/70">
+                  <Clock size={13} className="shrink-0 text-rose-500" />
+                  <span>Organizer Notice: This cancelled event will be automatically permanently deleted after 10 minutes.</span>
+                </div>
+              )}
             </div>
           )}
 

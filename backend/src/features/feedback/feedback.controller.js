@@ -26,6 +26,14 @@ async function createForm(req, res) {
       return res.status(409).json({ message: 'A feedback form already exists for this event' });
     }
 
+    const event = await eventsModel.getEventById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    if (event.status === 'cancelled') {
+      return res.status(400).json({ message: 'Cannot create a feedback form for a cancelled event' });
+    }
+
     const formId = await feedbackModel.createForm({
       eventId, title, description, createdBy: req.user.id, questions,
     });
@@ -39,6 +47,15 @@ async function createForm(req, res) {
 
 async function getFormByEvent(req, res) {
   try {
+    const event = await eventsModel.getEventById(req.params.eventId);
+    if (event && event.status === 'cancelled') {
+      return res.json({
+        form: null,
+        isCancelled: true,
+        message: 'This event was cancelled. Feedback collection is disabled.',
+      });
+    }
+
     const form = await feedbackModel.getFormByEvent(req.params.eventId);
     if (!form) return res.json({ form: null });
 
@@ -84,6 +101,9 @@ async function submitResponse(req, res) {
     const event = await eventsModel.getEventById(eventId);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
+    }
+    if (event.status === 'cancelled') {
+      return res.status(400).json({ message: 'Feedback cannot be submitted for a cancelled event.' });
     }
     const eventStart = new Date(`${String(event.event_date).slice(0, 10)}T${event.event_time}`);
     if (new Date() < eventStart) {

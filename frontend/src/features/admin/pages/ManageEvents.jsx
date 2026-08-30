@@ -177,7 +177,7 @@ export default function ManageEvents() {
               : ev
           )
         );
-        showToast.success(`Deletion request approved. "${reviewRequestEvent.title}" is now marked as Cancelled.`);
+        showToast.success(`Deletion request approved. "${reviewRequestEvent.title}" is now marked as Cancelled and will be deleted after 10 minutes.`);
       } else {
         setEvents((prev) =>
           prev.map((ev) =>

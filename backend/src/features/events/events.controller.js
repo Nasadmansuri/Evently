@@ -258,11 +258,25 @@ async function updateEvent(req, res) {
       }
     }
 
+    const finalCategory = (category && String(category).trim()) ? String(category).trim() : event.category;
+    const finalTitle = (title && String(title).trim()) ? String(title).trim() : event.title;
+    const finalDescription = (description && String(description).trim()) ? String(description).trim() : event.description;
+    const finalLocation = (location && String(location).trim()) ? String(location).trim() : event.location;
+    const finalOrganizingDept = (organizingDepartment && String(organizingDepartment).trim()) ? String(organizingDepartment).trim() : event.organizing_department;
+
     await eventsModel.updateEvent(req.params.id, {
-      title, description, category, location,
+      title: finalTitle,
+      description: finalDescription,
+      category: finalCategory,
+      location: finalLocation,
       eventDate: finalEventDate,
       eventTime: finalEventTime,
-      organizingDepartment, organizingCommunity, rulesEligibility, prizeInfo, maxParticipants, isTeamEvent
+      organizingDepartment: finalOrganizingDept,
+      organizingCommunity: organizingCommunity !== undefined ? organizingCommunity : event.organizing_community,
+      rulesEligibility: rulesEligibility !== undefined ? rulesEligibility : event.rules_eligibility,
+      prizeInfo: prizeInfo !== undefined ? prizeInfo : event.prize_info,
+      maxParticipants: maxParticipants !== undefined ? maxParticipants : event.max_participants,
+      isTeamEvent: isTeamEvent !== undefined ? isTeamEvent : event.is_team_event,
     });
 
     res.json({ message: 'Event updated successfully' });
@@ -681,11 +695,14 @@ function drawFooters(doc, left, right, generatedAt, reportId) {
   const total = range.count;
   for (let i = range.start; i < range.start + total; i++) {
     doc.switchToPage(i);
+    const oldBottom = doc.page.margins.bottom;
+    doc.page.margins.bottom = 0;
     const footerY = doc.page.height - 34;
     doc.moveTo(left, footerY).lineTo(right, footerY).lineWidth(0.5).strokeColor(BORDER).stroke();
     doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_MUTED)
-      .text(`${reportId}  ·  Generated ${generatedAt}`, left, footerY + 6, { width: (right - left) / 2, align: 'left' });
-    doc.text(`Page ${i - range.start + 1} of ${total}`, left + (right - left) / 2, footerY + 6, { width: (right - left) / 2, align: 'right' });
+      .text(`${reportId}  ·  Generated ${generatedAt}`, left, footerY + 6, { width: (right - left) / 2, align: 'left', lineBreak: false });
+    doc.text(`Page ${i - range.start + 1} of ${total}`, left + (right - left) / 2, footerY + 6, { width: (right - left) / 2, align: 'right', lineBreak: false });
+    doc.page.margins.bottom = oldBottom;
   }
 }
 
@@ -919,7 +936,7 @@ async function resolveDeletionRequest(req, res) {
       for (const fId of facultyRecipients) {
         await notificationsModel.create(fId, {
           title: `Event Cancellation Approved: "${resolved.event_title}"`,
-          message: `Your request to cancel "${resolved.event_title}" has been approved by administration. Note: ${adminNotes || 'Approved'}. The event is now officially marked as Cancelled.`,
+          message: `Your request to cancel "${resolved.event_title}" has been approved by administration. Note: ${adminNotes || 'Approved'}. The event is now officially marked as Cancelled and will be automatically deleted after 10 minutes.`,
           eventId: resolved.event_id,
           link: '/faculty/my-events',
         }).catch((err) => console.error('Faculty cancellation notification failed:', err.message));
@@ -931,7 +948,7 @@ async function resolveDeletionRequest(req, res) {
           if (studentIds.length > 0) {
             return notificationsModel.createForUsers(studentIds, {
               title: `Event Cancelled: ${resolved.event_title}`,
-              message: `Please be advised that "${resolved.event_title}" has been cancelled by administration. Reason: ${resolved.reason_category}.`,
+              message: `Please be advised that "${resolved.event_title}" has been cancelled. Reason: ${resolved.reason_category}.`,
               eventId: resolved.event_id,
               link: `/events/${resolved.event_id}`,
             });
@@ -939,7 +956,7 @@ async function resolveDeletionRequest(req, res) {
         })
         .catch((err) => console.error('Student cancellation notification failed:', err.message));
 
-      res.json({ message: 'Deletion request approved. Event has been marked as cancelled with the reason preserved.' });
+      res.json({ message: 'Deletion request approved. Event has been marked as cancelled and scheduled for automatic deletion after 10 minutes.' });
     } else {
       for (const fId of facultyRecipients) {
         await notificationsModel.create(fId, {

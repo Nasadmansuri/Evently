@@ -376,10 +376,28 @@ async function resolveDeletionRequest(requestId, { status, adminNotes, adminId }
   return reqData;
 }
 
+async function autoPurgeCancelledEvents() {
+  try {
+    const [rows] = await pool.query(
+      `SELECT id, title, created_by FROM events 
+       WHERE status = 'cancelled' AND cancelled_at IS NOT NULL AND cancelled_at <= NOW() - INTERVAL 10 MINUTE`
+    );
+    if (!rows || rows.length === 0) return [];
+
+    for (const ev of rows) {
+      await deleteEvent(ev.id);
+    }
+    return rows;
+  } catch (err) {
+    console.error('autoPurgeCancelledEvents error:', err.message);
+    return [];
+  }
+}
+
 module.exports = {
   getEventsByFaculty, getFacultyStats, createEvent, getAllEvents, getEventById,
   getRecommendedEvents, getAllEventsAdmin, deleteEvent, getAdminStats, updateEvent,
   addEventImages, getEventImages, getEventImageById, deleteEventImage, getGallerySummary,
-  setBannerImage, autoPublishScheduledEvents,
+  setBannerImage, autoPublishScheduledEvents, autoPurgeCancelledEvents,
   createDeletionRequest, getDeletionRequests, getDeletionRequestById, resolveDeletionRequest,
 };

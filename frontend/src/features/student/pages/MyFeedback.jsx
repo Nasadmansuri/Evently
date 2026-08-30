@@ -48,10 +48,12 @@ export default function MyFeedback() {
       const combined = [...allRegs, ...extraEvents];
 
       // 3. Events eligible for review:
+      // - Cancelled events are excluded because they never took place and cannot receive feedback
       // - Events that have started (start <= now)
       // - Events that have concluded / past
       // - Any event where feedback was submitted
       const eligible = combined.filter((r) => {
+        if (r.status === 'cancelled') return false;
         const dateStr = r.event_date ? String(r.event_date).slice(0, 10) : '';
         const timeStr = r.event_time ? String(r.event_time).slice(0, 5) : '00:00';
         const hasStarted = dateStr ? new Date() >= new Date(`${dateStr}T${timeStr}:00`) : false;

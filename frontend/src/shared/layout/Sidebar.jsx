@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   LayoutDashboard, CalendarDays, PlusSquare, ListChecks, Images,
   MessageSquare, X, CalendarHeart, Users, BarChart3, UserCircle, LogOut
 } from 'lucide-react';
-import { getDashboardPath } from '../utils/navigation';
 import { useAuth } from '../context/AuthContext';
 import { showToast } from '../utils/toast';
 
@@ -33,7 +33,6 @@ export default function Sidebar({ role, open, onClose }) {
   const [avatarError, setAvatarError] = useState(false);
 
   const items = NAV_ITEMS.filter((item) => item.roles.includes(role));
-  const dashboardUrl = getDashboardPath({ role });
 
   const initials = (user?.full_name || '')
     .split(' ')
@@ -60,7 +59,7 @@ export default function Sidebar({ role, open, onClose }) {
       >
         {/* Brand Header (Seamlessly aligned with TopBar at 64px / h-16) */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5">
-          <Link to={dashboardUrl} onClick={onClose} className="flex items-center gap-2.5 hover:opacity-90 transition group">
+          <Link to="/" onClick={onClose} className="flex items-center gap-2.5 hover:opacity-90 transition group" title="Go to Discover Page">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-600 shadow-xs group-hover:scale-105 transition-transform">
               <CalendarHeart className="text-white" size={18} />
             </div>
@@ -103,17 +102,26 @@ export default function Sidebar({ role, open, onClose }) {
                 end={to === '/events'}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-3.5 py-2.5 min-h-[44px] text-xs font-bold transition-all duration-150 ${
+                  `relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 min-h-[44px] text-xs font-bold transition-colors duration-150 ${
                     isActive
-                      ? 'bg-primary-600 text-white shadow-xs shadow-primary-200/50'
+                      ? 'text-white'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <Icon size={17} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-slate-400'} />
-                    <span>{label}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeSidebarTabPill"
+                        className="absolute inset-0 rounded-xl bg-primary-600 shadow-xs shadow-primary-200/50"
+                        transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3">
+                      <Icon size={17} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-slate-400'} />
+                      <span>{label}</span>
+                    </span>
                   </>
                 )}
               </NavLink>

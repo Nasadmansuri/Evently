@@ -268,7 +268,7 @@ export default function StudentDashboard() {
               <div className="space-y-3">
                 {displayedEvents.slice(0, 4).map((ev, idx) => {
                   const style = getCategoryStyle(ev.category);
-                  const status = getEventStatus(ev.event_date, ev.event_time);
+                  const status = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
                   const dateObj = new Date(ev.event_date);
                   const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
                   const dayNum = dateObj.toLocaleDateString('en-US', { day: 'numeric' });
