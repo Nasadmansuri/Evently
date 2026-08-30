@@ -63,7 +63,7 @@ export default function CreateEvent() {
   const [showLocationPreview, setShowLocationPreview] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
 
-  // Restore unsaved draft on mount for new events
+  // Restore unsaved draft on mount for new events, or pre-populate from logged-in user profile
   useEffect(() => {
     if (isEditMode) return;
     try {
@@ -83,11 +83,18 @@ export default function CreateEvent() {
         if (d.maxParticipants) setMaxParticipants(d.maxParticipants);
         if (d.isTeamEvent !== undefined) setIsTeamEvent(d.isTeamEvent);
         setDraftRestored(true);
+      } else if (user) {
+        if (user.department === 'DevCorps') {
+          setOrganizingDepartment('DevCorps');
+          setOrganizingCommunity(user.community || 'DevCorps Core');
+        } else if (user.department) {
+          setOrganizingDepartment(user.department);
+        }
       }
     } catch (e) {
       console.error('Failed to restore draft:', e);
     }
-  }, [isEditMode]);
+  }, [isEditMode, user]);
 
   // Real-time auto-save draft to localStorage
   useEffect(() => {
