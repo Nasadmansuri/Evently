@@ -12,9 +12,11 @@ async function sendMail({ to, subject, html }) {
       subject,
       html,
     });
-    console.log(`Email sent to ${to}: "${subject}"`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Email sent to ${to}: "${subject}"`);
+    }
   } catch (err) {
-    console.error(`Failed to send email to ${to}:`, err.message);
+    console.error(`Failed to send email:`, err.message);
   }
 }
 
