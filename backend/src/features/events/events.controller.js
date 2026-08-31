@@ -730,6 +730,17 @@ function drawFooters(doc, left, right, generatedAt, reportId) {
   }
 }
 
+async function fetchImageBuffer(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (e) {
+    return null;
+  }
+}
+
 // ---------- Main Report Handler ----------
 async function generateReport(req, res) {
   try {
@@ -748,6 +759,10 @@ async function generateReport(req, res) {
       feedbackModel.getFormByEvent(req.params.id),
     ]);
     const responses = form ? await feedbackModel.getResponsesForForm(form.id) : [];
+
+    const imageBuffers = images.length > 0
+      ? await Promise.all(images.map((img) => fetchImageBuffer(img.image_url)))
+      : [];
 
     const doc = new PDFDocument({ margin: 50, bufferPages: true });
     res.setHeader('Content-Type', 'application/pdf');
@@ -809,20 +824,20 @@ async function generateReport(req, res) {
       let x = left;
       let col = 0;
 
-      for (const img of images) {
-        const filePath = path.join(__dirname, '../../../uploads/events', path.basename(img.image_url));
-        if (!fs.existsSync(filePath)) continue;
+      images.forEach((img, idx) => {
+        const buffer = imageBuffers[idx];
+        if (!buffer) return;
         if (col === cols) { col = 0; x = left; y += imgHeight + gap; }
         const before = y;
         y = ensureSpace(doc, y, imgHeight);
         if (y !== before) { x = left; col = 0; }
         try {
           doc.roundedRect(x, y, imgWidth, imgHeight, 4).lineWidth(0.75).strokeColor(BORDER).stroke();
-          doc.image(filePath, x + 2, y + 2, { fit: [imgWidth - 4, imgHeight - 4], align: 'center', valign: 'center' });
+          doc.image(buffer, x + 2, y + 2, { fit: [imgWidth - 4, imgHeight - 4], align: 'center', valign: 'center' });
         } catch (e) {}
         x += imgWidth + gap;
         col++;
-      }
+      });
       y += imgHeight + gap + 6;
     }
 

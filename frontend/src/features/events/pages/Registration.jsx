@@ -321,7 +321,7 @@ export default function Registration() {
         {event.banner_image && (
           <div className="h-40 w-full">
             <img
-              src={`${ASSET_BASE_URL}${event.banner_image}`}
+              src={event.banner_image}
               alt=""
               className="h-full w-full object-cover"
               style={{ objectPosition: 'center 32%' }}
