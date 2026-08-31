@@ -121,8 +121,10 @@ async function submitResponse(req, res) {
     if (event.status === 'cancelled') {
       return res.status(400).json({ message: 'Feedback cannot be submitted for a cancelled event.' });
     }
-    const eventStart = new Date(`${String(event.event_date).slice(0, 10)}T${event.event_time}`);
-    if (new Date() < eventStart) {
+    const dateStr = String(event.event_date).slice(0, 10);
+    const timeStr = event.event_time ? String(event.event_time).slice(0, 8) : '00:00:00';
+    const eventStart = new Date(`${dateStr}T${timeStr}`);
+    if (!isNaN(eventStart.getTime()) && new Date() < eventStart) {
       return res.status(400).json({ message: 'Feedback opens once the event begins' });
     }
 

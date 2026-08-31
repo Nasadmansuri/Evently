@@ -230,10 +230,16 @@ export default function CreateEvent() {
   }
 
   async function handleDeleteExistingImage(imageId) {
+    if (deletingImageId) return;
     setDeletingImageId(imageId);
     try {
       await api.delete(`/events/${eventId}/images/${imageId}`);
-      setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
+      try {
+        const res = await api.get(`/events/${eventId}/images`);
+        setExistingImages(res.data || []);
+      } catch {
+        setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
+      }
       showToast.success('Photo removed');
     } catch (err) {
       showToast.error(err.response?.data?.message || 'Failed to delete image');
@@ -243,6 +249,7 @@ export default function CreateEvent() {
   }
 
   async function handleSetBanner(imageId) {
+    if (deletingImageId) return;
     try {
       await api.patch(`/events/${eventId}/images/${imageId}/banner`);
       setExistingImages((prev) =>
@@ -704,10 +711,8 @@ export default function CreateEvent() {
             {existingImages.length > 0 && (
               <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
                 {existingImages.map((img) => (
-                  <button
-                    type="button"
+                  <div
                     key={img.id}
-                    onClick={() => !img.is_banner && handleSetBanner(img.id)}
                     className={`group relative aspect-square overflow-hidden rounded-xl border-2 text-left transition ${
                       img.is_banner ? 'border-primary-600 ring-2 ring-primary-200' : 'border-slate-200 hover:border-slate-300'
                     }`}
@@ -715,21 +720,33 @@ export default function CreateEvent() {
                     <img
                       src={`${ASSET_BASE_URL}${img.image_url}`}
                       alt=""
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      onClick={() => !img.is_banner && !deletingImageId && handleSetBanner(img.id)}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200 cursor-pointer"
                     />
-                    {img.is_banner && (
-                      <span className="absolute bottom-1.5 left-1.5 rounded-md bg-primary-700 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-sm">
+                    {img.is_banner ? (
+                      <span className="pointer-events-none absolute bottom-1.5 left-1.5 rounded-md bg-primary-700 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-sm">
                         Cover
                       </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleSetBanner(img.id)}
+                        disabled={!!deletingImageId}
+                        className="absolute bottom-1.5 left-1.5 rounded-md bg-black/60 px-1.5 py-0.5 text-[9px] font-bold text-white opacity-0 transition group-hover:opacity-100 hover:bg-primary-700 cursor-pointer shadow-sm"
+                      >
+                        Set Cover
+                      </button>
                     )}
-                    <span
-                      onClick={(e) => { e.stopPropagation(); handleDeleteExistingImage(img.id); }}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteExistingImage(img.id)}
+                      disabled={deletingImageId === img.id}
                       title="Delete image"
-                      className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition hover:bg-rose-600 group-hover:opacity-100 shadow-xs"
+                      className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition hover:bg-rose-600 group-hover:opacity-100 shadow-xs cursor-pointer z-10"
                     >
                       {deletingImageId === img.id ? <Loader2 className="animate-spin" size={12} /> : <X size={12} />}
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 ))}
               </div>
             )}

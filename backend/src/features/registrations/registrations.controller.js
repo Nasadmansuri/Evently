@@ -53,6 +53,10 @@ async function register(req, res) {
     // so a slow/failed email never delays or breaks registration itself.
     usersModel.getProfile(req.user.id)
       .then((profile) => {
+        if (!profile || !profile.email) {
+          console.warn('[REGISTRATION]: No email found for user ID', req.user.id);
+          return;
+        }
         const html = buildRegistrationConfirmationEmail({
           studentName: profile.full_name,
           eventTitle: event.title,
@@ -70,7 +74,7 @@ async function register(req, res) {
           html,
         });
       })
-      .catch((err) => console.error('Registration confirmation email failed:', err.message));
+      .catch((err) => console.error('[REGISTRATION ERROR]: Confirmation email failed:', err.message));
   } catch (err) {
     res.status(500).json({ message: 'Registration failed', error: err.message });
   }

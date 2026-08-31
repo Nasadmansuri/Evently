@@ -4,6 +4,7 @@ const authModel = require('./auth.model');
 const pool = require('../../shared/config/db');
 const notificationsModel = require('../notifications/notifications.model');
 const { verifyEmailDomain } = require('../../shared/utils/verifyEmailDomain');
+const transporter = require('../../shared/config/mailer');
 
 function signToken(user) {
   return jwt.sign(
@@ -273,7 +274,6 @@ async function signupFaculty(req, res) {
 
 const { OAuth2Client } = require('google-auth-library');
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const transporter = require('../../shared/config/mailer');
 
 function resolveAffiliatedCollegeByEmail(email, hd) {
   const normalized = (email || '').toLowerCase().trim();

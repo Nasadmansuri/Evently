@@ -26,11 +26,17 @@ export default function MyFeedback() {
       // 1. Fetch user's registrations and all submitted feedback event IDs in parallel
       const [regRes, submittedRes] = await Promise.all([
         api.get('/registrations/my').catch(() => ({ data: [] })),
-        api.get('/feedback/forms/submitted/my').catch(() => ({ data: { eventIds: [] } })),
+        api.get('/feedback/my-submitted').catch(() => ({ data: { eventIds: [] } })),
       ]);
 
-      const allRegs = regRes.data || [];
-      const submittedEventIds = new Set(submittedRes.data?.eventIds || []);
+      const allRegs = (regRes.data || []).filter((r) => r && r.id);
+      const rawSubmittedIds = Array.isArray(submittedRes.data?.eventIds)
+        ? submittedRes.data.eventIds
+        : Array.isArray(submittedRes.data)
+        ? submittedRes.data
+        : [];
+      const validSubmittedIds = rawSubmittedIds.filter((id) => id !== null && id !== undefined && id !== 'undefined' && !isNaN(Number(id)));
+      const submittedEventIds = new Set(validSubmittedIds);
 
       // 2. Fetch any submitted events that might not be in registration list
       const registeredIds = new Set(allRegs.map((r) => r.id));
@@ -39,10 +45,10 @@ export default function MyFeedback() {
       if (missingSubmittedIds.length > 0) {
         const extraRes = await Promise.all(
           missingSubmittedIds.map((id) =>
-            api.get(`/events/${id}`).then((res) => res.data).catch(() => null)
+            id ? api.get(`/events/${id}`).then((res) => res.data).catch(() => null) : Promise.resolve(null)
           )
         );
-        extraEvents = extraRes.filter(Boolean);
+        extraEvents = extraRes.filter((ev) => ev && ev.id);
       }
 
       const combined = [...allRegs, ...extraEvents];
