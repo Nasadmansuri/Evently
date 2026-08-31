@@ -238,7 +238,7 @@ export default function Gallery() {
                 <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-100 ring-1 ring-black/5">
                   {ev.cover_image ? (
                     <img
-                      src={`${ASSET_BASE_URL}${ev.cover_image}`}
+                      src={ev.cover_image}
                       alt={ev.title}
                       loading="lazy"
                       referrerPolicy="no-referrer"

@@ -229,7 +229,7 @@ export default function EventDetail() {
         {event.banner_image && !imgError ? (
           <>
             <img
-              src={`${ASSET_BASE_URL}${event.banner_image}`}
+              src={event.banner_image}
               alt={event.title}
               onError={() => setImgError(true)}
               className="w-full h-full object-cover object-center"
@@ -543,7 +543,7 @@ export default function EventDetail() {
                     className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-xs hover:shadow-lg transition-all duration-300 max-h-[420px] flex items-center justify-center"
                   >
                     <img
-                      src={`${ASSET_BASE_URL}${images[0].image_url}`}
+                      src={images[0].image_url}
                       alt={event?.title || 'Event photo'}
                       className="max-h-[420px] w-full object-contain sm:object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                     />
@@ -570,7 +570,7 @@ export default function EventDetail() {
                         className="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 shadow-2xs hover:shadow-md hover:border-primary-300 hover:-translate-y-0.5 transition-all duration-200"
                       >
                         <img
-                          src={`${ASSET_BASE_URL}${img.image_url}`}
+                          src={img.image_url}
                           alt=""
                           loading="lazy"
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"

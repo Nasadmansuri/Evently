@@ -718,7 +718,7 @@ export default function CreateEvent() {
                     }`}
                   >
                     <img
-                      src={`${ASSET_BASE_URL}${img.image_url}`}
+                      src={img.image_url}
                       alt=""
                       onClick={() => !img.is_banner && !deletingImageId && handleSetBanner(img.id)}
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200 cursor-pointer"

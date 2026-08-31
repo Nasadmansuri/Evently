@@ -31,7 +31,7 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-950 border border-slate-900/10 shadow-inner">
           {hasBanner ? (
             <img
-              src={`${ASSET_BASE_URL}${event.banner_image}`}
+              src={event.banner_image}
               alt={event.title}
               loading="lazy"
               referrerPolicy="no-referrer"
