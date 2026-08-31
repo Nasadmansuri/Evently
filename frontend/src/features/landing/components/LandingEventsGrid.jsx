@@ -300,7 +300,7 @@ export default function LandingEventsGrid() {
                       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[18px] bg-slate-900 border border-slate-900/10 mb-3.5 shadow-inner group">
                         {event.banner_image ? (
                           <img
-                            src={`${ASSET_BASE_URL}${event.banner_image}`}
+                            src={event.banner_image}
                             alt={event.title}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
                           />
