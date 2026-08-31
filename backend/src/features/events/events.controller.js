@@ -332,7 +332,7 @@ async function uploadEventImages(req, res) {
       return res.status(400).json({ message: 'No images uploaded' });
     }
 
-    const imageUrls = req.files.map((f) => `/uploads/events/${f.filename}`);
+    const imageUrls = req.files.map((f) => f.path);
     await eventsModel.addEventImages(req.params.id, imageUrls);
 
     const images = await eventsModel.getEventImages(req.params.id);
@@ -360,8 +360,9 @@ async function deleteEventImage(req, res) {
 
     await eventsModel.deleteEventImage(req.params.imageId);
 
-    const filePath = path.join(__dirname, '../../../uploads/events', path.basename(image.image_url));
-    fs.unlink(filePath, () => {});
+    // NOTE: image_url is now a Cloudinary URL, not a local path — the DB
+    // record is removed above, but the file itself still lives on Cloudinary.
+    // Revisit with cloudinary.uploader.destroy() once public_id is tracked.
 
     res.json({ message: 'Image deleted' });
   } catch (err) {
