@@ -237,9 +237,8 @@ export default function ManageEvents() {
           <div className="skeuo-tray flex rounded-xl p-1">
             <button
               onClick={() => setViewMode('list')}
-              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'list' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${viewMode === 'list' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               {viewMode === 'list' && (
                 <motion.div
@@ -252,9 +251,8 @@ export default function ManageEvents() {
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'calendar' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${viewMode === 'calendar' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               {viewMode === 'calendar' && (
                 <motion.div
@@ -352,9 +350,8 @@ export default function ManageEvents() {
             <button
               type="button"
               onClick={() => setStatusTab('upcoming')}
-              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                statusTab === 'upcoming' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${statusTab === 'upcoming' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               {statusTab === 'upcoming' && (
                 <motion.div
@@ -370,9 +367,8 @@ export default function ManageEvents() {
               <button
                 type="button"
                 onClick={() => setStatusTab('ongoing')}
-                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                  statusTab === 'ongoing' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${statusTab === 'ongoing' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                  }`}
               >
                 {statusTab === 'ongoing' && (
                   <motion.div
@@ -391,9 +387,8 @@ export default function ManageEvents() {
             <button
               type="button"
               onClick={() => setStatusTab('concluded')}
-              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                statusTab === 'concluded' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${statusTab === 'concluded' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               {statusTab === 'concluded' && (
                 <motion.div
@@ -409,9 +404,8 @@ export default function ManageEvents() {
               <button
                 type="button"
                 onClick={() => setStatusTab('deletion_requests')}
-                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                  statusTab === 'deletion_requests' ? 'text-white' : 'text-rose-700 hover:text-rose-900'
-                }`}
+                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${statusTab === 'deletion_requests' ? 'text-white' : 'text-rose-700 hover:text-rose-900'
+                  }`}
               >
                 {statusTab === 'deletion_requests' && (
                   <motion.div
@@ -430,9 +424,8 @@ export default function ManageEvents() {
             <button
               type="button"
               onClick={() => setStatusTab('all')}
-              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                statusTab === 'all' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${statusTab === 'all' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               {statusTab === 'all' && (
                 <motion.div
@@ -534,18 +527,17 @@ export default function ManageEvents() {
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-5" />
 
                   {/* Live Status Badge */}
-                  <span className={`absolute right-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ${
-                    ev.status === 'cancelled'
+                  <span className={`absolute right-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ${ev.status === 'cancelled'
                       ? 'bg-rose-600 text-white'
                       : liveStatus === 'scheduled'
-                      ? 'bg-amber-600 text-white'
-                      : liveStatus === 'ended' || isPast
-                      ? 'bg-slate-800/90 text-white'
-                      : liveStatus === 'ongoing'
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-primary-700 text-white'
-                  }`}>
-                    {ev.status === 'cancelled' ? 'Cancelled' : liveStatus === 'scheduled' ? 'Scheduled' : liveStatus === 'ongoing' ? 'Live Now' : isPast ? 'Concluded' : 'Upcoming'}
+                        ? 'bg-amber-600 text-white'
+                        : liveStatus === 'ended'
+                          ? 'bg-slate-800/90 text-white'
+                          : liveStatus === 'ongoing'
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-primary-700 text-white'
+                    }`}>
+                    {ev.status === 'cancelled' ? 'Cancelled' : liveStatus === 'scheduled' ? 'Scheduled' : liveStatus === 'ongoing' ? 'Live Now' : liveStatus === 'ended' ? 'Concluded' : 'Upcoming'}
                   </span>
                 </div>
 
