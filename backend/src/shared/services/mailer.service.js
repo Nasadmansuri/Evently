@@ -1,24 +1,42 @@
-const transporter = require('../config/mailer');
+const { BREVO_API_URL, getApiKey, getDefaultSender } = require('../config/mailer');
 
 /**
- * Generic mail sender. Never throws — logs and swallows errors so that
+ * Generic mail sender using Brevo HTTPS REST API.
+ * Never throws — logs and swallows errors so that
  * a failed/slow email can never break or block the request that triggered it.
  */
 async function sendMail({ to, subject, html }) {
   try {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
-      console.warn('[MAILER]: EMAIL_USER or EMAIL_APP_PASSWORD not configured. Skipping email to', to);
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      console.warn(`[MAILER]: BREVO_API_KEY not configured. Skipped email to ${to}: "${subject}"`);
       return;
     }
-    await transporter.sendMail({
-      from: `"${process.env.EMAIL_FROM_NAME || 'Evently'}" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      html,
+
+    const sender = getDefaultSender();
+    const response = await fetch(BREVO_API_URL, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': apiKey,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender,
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+      }),
     });
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[MAILER]: Email sent to ${to}: "${subject}"`);
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      console.error(`[MAILER ERROR]: Brevo HTTP ${response.status} failed for ${to}:`, result.message || JSON.stringify(result));
+      return;
     }
+
+    console.log(`[MAILER]: Email delivered via Brevo to ${to}: "${subject}" (MessageID: ${result.messageId || 'OK'})`);
   } catch (err) {
     console.error(`[MAILER ERROR]: Failed to send email to ${to}:`, err.message);
   }

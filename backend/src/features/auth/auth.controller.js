@@ -4,7 +4,7 @@ const authModel = require('./auth.model');
 const pool = require('../../shared/config/db');
 const notificationsModel = require('../notifications/notifications.model');
 const { verifyEmailDomain } = require('../../shared/utils/verifyEmailDomain');
-const transporter = require('../../shared/config/mailer');
+const { sendMail } = require('../../shared/services/mailer.service');
 
 function signToken(user) {
   return jwt.sign(
@@ -80,10 +80,9 @@ async function sendSignupOtp(req, res) {
     const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes validity
     await authModel.saveEmailVerificationOtp(normalizedEmail, otp, expiresAt);
 
-    // Send email via nodemailer
+    // Send email via Brevo HTTPS API
     try {
-      await transporter.sendMail({
-        from: `"${process.env.EMAIL_FROM_NAME || 'Evently'}" <${process.env.EMAIL_USER}>`,
+      await sendMail({
         to: normalizedEmail,
         subject: `Evently — Email Verification Code: ${otp}`,
         html: `
@@ -562,10 +561,9 @@ async function forgotPassword(req, res) {
     const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes validity
     await authModel.savePasswordResetOtp(normalizedEmail, otp, expiresAt);
 
-    // Send email via nodemailer
+    // Send email via Brevo HTTPS API
     try {
-      await transporter.sendMail({
-        from: `"${process.env.EMAIL_FROM_NAME || 'Evently'}" <${process.env.EMAIL_USER}>`,
+      await sendMail({
         to: normalizedEmail,
         subject: `Evently — Password Reset Code: ${otp}`,
         html: `

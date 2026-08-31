@@ -1,31 +1,19 @@
-const nodemailer = require('nodemailer');
+// Brevo (formerly Sendinblue) HTTPS Email API Config
+// Uses standard HTTPS (Port 443) to bypass Render free-tier outbound SMTP port restrictions (25/465/587).
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
-// Use explicit SMTP config with port 587 (STARTTLS) instead of the 'gmail'
-// service shorthand which defaults to port 465 (implicit TLS / IPv6) —
-// port 465 is blocked on Render's free tier causing ENETUNREACH errors.
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,       // false = STARTTLS (upgraded after connection)
-  requireTLS: true,    // force TLS upgrade, reject plain connections
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD,
-  },
-  tls: {
-    // Allow modern TLS versions; keeps compatibility with Gmail servers
-    minVersion: 'TLSv1.2',
-  },
-});
+const apiKey = process.env.BREVO_API_KEY;
+if (!apiKey) {
+  console.warn('[MAILER]: BREVO_API_KEY is not configured in environment. Outbound emails will be skipped.');
+} else {
+  console.log('Brevo HTTPS Mailer initialized ✓');
+}
 
-// Fail fast at startup if credentials are missing/invalid, rather than
-// discovering it only when the first email silently fails to send.
-transporter.verify((err, success) => {
-  if (err) {
-    console.error('Mailer config error — emails will NOT send:', err.message);
-  } else {
-    console.log('Mailer ready to send emails ✓');
-  }
-});
-
-module.exports = transporter;
+module.exports = {
+  BREVO_API_URL,
+  getApiKey: () => process.env.BREVO_API_KEY,
+  getDefaultSender: () => ({
+    name: process.env.EMAIL_FROM_NAME || 'Evently',
+    email: process.env.EMAIL_FROM || 'evently.nexora@gmail.com',
+  }),
+};
