@@ -1,12 +1,6 @@
 export function isEventPast(eventDate, eventTime) {
   if (!eventDate) return false;
   const dateStr = String(eventDate).slice(0, 10);
-  if (eventTime) {
-    const timeStr = String(eventTime).slice(0, 5);
-    const start = new Date(`${dateStr}T${timeStr}:00`);
-    const endEstimate = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-    return new Date() > endEstimate;
-  }
   const d = new Date(`${dateStr}T23:59:59`);
   return d < new Date();
 }
@@ -27,11 +21,11 @@ export function getEventStatus(eventDate, eventTime, status, publishAt) {
   const start = new Date(`${dateStr}T${timeStr}:00`);
   const now = new Date();
 
-  // If start is in the past, treat as ended/concluded
+  // If start is in the past, treat as ongoing until midnight of the event's
+  // own date, then ended - not a fixed 2-hour window.
   if (now >= start) {
-    // If started within the last 2 hours, it's ongoing; afterwards, ended
-    const endEstimate = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-    if (now > endEstimate) return 'ended';
+    const endOfDay = new Date(`${dateStr}T23:59:59`);
+    if (now > endOfDay) return 'ended';
     return 'ongoing';
   }
   return 'upcoming';

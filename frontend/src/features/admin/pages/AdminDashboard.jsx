@@ -330,7 +330,6 @@ export default function AdminDashboard() {
             ) : (
               <div className="space-y-3">
                 {recentEvents.map((ev, idx) => {
-                  const isPast = isEventPast(ev.event_date);
                   const liveStatus = getEventStatus(ev.event_date, ev.event_time, ev.status, ev.publish_at);
                   const style = getCategoryStyle(ev.category);
                   const dateObj = new Date(ev.event_date);
@@ -365,11 +364,11 @@ export default function AdminDashboard() {
                           <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                             liveStatus === 'ongoing'
                               ? 'bg-emerald-100 text-emerald-800'
-                              : isPast
+                              : liveStatus === 'ended'
                               ? 'bg-slate-100 text-slate-700'
                               : 'bg-amber-100 text-amber-800'
                           }`}>
-                            {liveStatus === 'ongoing' ? '● Live Now' : isPast ? 'Ended' : 'Upcoming'}
+                            {liveStatus === 'ongoing' ? '● Live Now' : liveStatus === 'ended' ? 'Ended' : 'Upcoming'}
                           </span>
                         </div>
 

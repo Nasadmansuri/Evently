@@ -123,7 +123,7 @@ async function submitResponse(req, res) {
     }
     const dateStr = String(event.event_date).slice(0, 10);
     const timeStr = event.event_time ? String(event.event_time).slice(0, 8) : '00:00:00';
-    const eventStart = new Date(`${dateStr}T${timeStr}`);
+    const eventStart = new Date(`${dateStr}T${timeStr}+05:45`);
     if (!isNaN(eventStart.getTime()) && new Date() < eventStart) {
       return res.status(400).json({ message: 'Feedback opens once the event begins' });
     }
