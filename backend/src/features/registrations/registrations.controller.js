@@ -24,9 +24,7 @@ async function register(req, res) {
     }
 
     const eventDateStr = String(event.event_date).slice(0, 10);
-    const eventTimeStr = event.event_time ? String(event.event_time).slice(0, 5) : '00:00';
-    const eventStart = new Date(`${eventDateStr}T${eventTimeStr}:00+05:45`);
-    const eventEnd = new Date(eventStart.getTime() + 3 * 60 * 60 * 1000);
+    const eventEnd = new Date(`${eventDateStr}T23:59:59+05:45`);
     if (new Date() > eventEnd) {
       return res.status(400).json({ message: 'Registration is closed for past events.' });
     }

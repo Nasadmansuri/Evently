@@ -149,20 +149,27 @@ async function deleteUser(id) {
 }
 
 async function getUserStats(userId, role) {
-  const stats = { totalRegistrations: 0, totalFeedback: 0, createdEvents: 0, feedbackReceived: 0 };
+  const stats = { registeredCount: 0, attendedCount: 0, feedbackCount: 0, createdEvents: 0, totalRegistrations: 0 };
 
   if (role === 'student') {
     const [[regRow]] = await pool.query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ?', [userId]);
+    const [[attendedRow]] = await pool.query(
+      `SELECT COUNT(*) as count FROM registrations r
+       JOIN events e ON e.id = r.event_id
+       WHERE r.user_id = ? AND (e.status = 'ended' OR TIMESTAMP(e.event_date, COALESCE(e.event_time, '00:00:00')) < NOW())`,
+      [userId]
+    );
     const [[feedRow]] = await pool.query('SELECT COUNT(DISTINCT form_id) as count FROM feedback_responses WHERE user_id = ?', [userId]);
-    stats.totalRegistrations = regRow ? regRow.count : 0;
-    stats.totalFeedback = feedRow ? feedRow.count : 0;
+    stats.registeredCount = regRow ? regRow.count : 0;
+    stats.attendedCount = attendedRow ? attendedRow.count : 0;
+    stats.feedbackCount = feedRow ? feedRow.count : 0;
   } else if (role === 'faculty') {
     const [[eventsRow]] = await pool.query('SELECT COUNT(*) as count FROM events WHERE created_by = ?', [userId]);
     const [[regRow]] = await pool.query('SELECT COUNT(r.id) as count FROM registrations r JOIN events e ON e.id = r.event_id WHERE e.created_by = ?', [userId]);
     const [[feedRow]] = await pool.query('SELECT COUNT(fr.id) as count FROM feedback_responses fr JOIN events e ON e.id = fr.event_id WHERE e.created_by = ?', [userId]);
     stats.createdEvents = eventsRow ? eventsRow.count : 0;
     stats.totalRegistrations = regRow ? regRow.count : 0;
-    stats.feedbackReceived = feedRow ? feedRow.count : 0;
+    stats.feedbackCount = feedRow ? feedRow.count : 0;
   } else if (role === 'admin') {
     const [[usersRow]] = await pool.query('SELECT COUNT(*) as count FROM users');
     const [[eventsRow]] = await pool.query('SELECT COUNT(*) as count FROM events');
