@@ -74,13 +74,13 @@ export default function LandingNavbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full rounded-t-[20px] sm:rounded-t-[32px] md:rounded-t-[44px] transition-colors duration-200 py-5 sm:py-6 ${
+      className={`sticky top-0 z-50 w-full rounded-t-[20px] sm:rounded-t-[32px] md:rounded-t-[44px] transition-colors duration-200 py-4 sm:py-5 md:py-6 ${
         scrolled
           ? 'bg-white/85 backdrop-blur-md shadow-xs border-b border-slate-200/50'
           : 'bg-transparent'
       }`}
     >
-      <div className="mx-auto max-w-[1480px] px-6 sm:px-10 md:px-12 flex items-center justify-between">
+      <div className="mx-auto max-w-[1480px] px-3.5 xs:px-5 sm:px-8 md:px-12 flex items-center justify-between">
         {/* 1. Left: Sleek Brand Logo */}
         <Link
           to="/"
@@ -128,33 +128,34 @@ export default function LandingNavbar() {
         </nav>
 
         {/* 3. Right: Get Started Button & Mobile Menu Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <Link
             to={user ? getDashboardRoute() : '/login'}
-            className="rounded-full bg-[#0B0F19] hover:bg-slate-800 px-6 sm:px-7 py-2.5 text-xs font-bold text-white shadow-sm flex items-center gap-1.5 transition-all hover:shadow hover:scale-105 active:scale-95 cursor-pointer"
+            className="rounded-full bg-[#0B0F19] hover:bg-slate-800 px-3.5 xs:px-5 sm:px-7 py-2.5 min-h-[44px] text-xs sm:text-sm font-bold text-white shadow-sm flex items-center gap-1.5 transition-all hover:shadow hover:scale-105 active:scale-95 cursor-pointer"
           >
             {user ? (
               <>
                 <span>Dashboard</span>
-                <ArrowRight size={13} />
+                <ArrowRight size={14} />
               </>
             ) : (
               <span>Get Started</span>
             )}
           </Link>
 
-          {/* Mobile Menu Hamburger Button */}
+          {/* Mobile Menu Hamburger Button (44x44px ergonomic touch target) */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+            className="md:hidden flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 active:scale-95 transition cursor-pointer"
             aria-label="Toggle navigation menu"
+            data-testid="mobile-menu-toggle"
           >
-            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Dropdown Menu */}
+      {/* Mobile Dropdown Menu with 44px touch targets */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -162,33 +163,35 @@ export default function LandingNavbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden mx-4 mt-3 rounded-2xl bg-white border border-slate-200/90 shadow-xl p-4 space-y-1"
+            role="dialog"
+            aria-label="Navigation drawer"
+            className="md:hidden mx-4 mt-3 rounded-2xl bg-white border border-slate-200/90 shadow-xl p-3 space-y-1"
           >
             <a
               href="#about"
               onClick={(e) => handleNavClick(e, 'about')}
-              className="block rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+              className="flex items-center rounded-xl px-4 py-3 min-h-[44px] text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 transition"
             >
               About Us
             </a>
             <a
               href="#discover"
               onClick={(e) => handleNavClick(e, 'discover')}
-              className="block rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+              className="flex items-center rounded-xl px-4 py-3 min-h-[44px] text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 transition"
             >
               Discover
             </a>
             <a
               href="#devcorps"
               onClick={(e) => handleNavClick(e, 'devcorps')}
-              className="block rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+              className="flex items-center rounded-xl px-4 py-3 min-h-[44px] text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 transition"
             >
               DevCorps
             </a>
             <a
               href="#contact"
               onClick={(e) => handleNavClick(e, 'contact')}
-              className="block rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+              className="flex items-center rounded-xl px-4 py-3 min-h-[44px] text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 transition"
             >
               Contact Us
             </a>

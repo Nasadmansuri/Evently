@@ -10,7 +10,7 @@ export default function ContactPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#edf0f5] p-2.5 sm:p-4 md:p-6 selection:bg-primary-600 selection:text-white flex flex-col justify-between">
+    <div className="min-h-dvh bg-[#edf0f5] p-2.5 sm:p-4 md:p-6 selection:bg-primary-600 selection:text-white flex flex-col justify-between overflow-x-hidden">
       <div className="w-full max-w-[1580px] mx-auto bg-white rounded-[32px] sm:rounded-[44px] shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col flex-1">
         <div className="shekunj-hero-gradient relative">
           <LandingNavbar />

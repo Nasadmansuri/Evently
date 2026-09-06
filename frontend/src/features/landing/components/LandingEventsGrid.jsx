@@ -8,7 +8,7 @@ import api from '../../../shared/services/api';
 import { formatTime12hr } from '../../../shared/utils/formatTime';
 import { getEventStatus } from '../../../shared/utils/eventStatus';
 
-const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+const ASSET_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
 
 const CATEGORIES = ['All', 'Hackathons', 'Workshops', 'Technical', 'Cultural', 'Sports', 'DevCorps'];
 
@@ -195,7 +195,7 @@ export default function LandingEventsGrid() {
 
           <Link
             to="/events"
-            className="self-start md:self-end rounded-full bg-white hover:bg-slate-50 px-5 py-2.5 text-xs font-bold text-slate-800 border border-slate-200 shadow-2xs flex items-center gap-1.5 transition hover:shadow hover:border-slate-300 shrink-0"
+            className="self-start md:self-end rounded-full bg-white hover:bg-slate-50 px-5 py-2.5 min-h-[44px] text-xs font-bold text-slate-800 border border-slate-200 shadow-2xs flex items-center gap-1.5 transition hover:shadow hover:border-slate-300 shrink-0"
           >
             <span>View all</span>
             <ArrowRight size={13} className="text-slate-500" />
@@ -300,7 +300,7 @@ export default function LandingEventsGrid() {
                       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[18px] bg-slate-900 border border-slate-900/10 mb-3.5 shadow-inner group">
                         {event.banner_image ? (
                           <img
-                            src={event.banner_image}
+                            src={event.banner_image.startsWith('http') ? event.banner_image : `${ASSET_BASE_URL}${event.banner_image.startsWith('/') ? '' : '/'}${event.banner_image}`}
                             alt={event.title}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
                           />

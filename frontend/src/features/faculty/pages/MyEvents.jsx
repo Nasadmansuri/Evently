@@ -127,7 +127,7 @@ export default function MyEvents() {
 
         <button
           onClick={() => navigate('/faculty/create-event')}
-          className="skeuo-btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold shrink-0 self-start sm:self-auto cursor-pointer"
+          className="skeuo-btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold w-full sm:w-auto shrink-0 self-stretch sm:self-auto cursor-pointer min-h-[44px]"
         >
           <Plus size={16} /> Create New Event
         </button>
@@ -136,14 +136,14 @@ export default function MyEvents() {
       {/* 2. Filter & Search Controls in a Tactile Card */}
       <div className="skeuo-card flex flex-col sm:flex-row items-center justify-between gap-3.5 p-4 rounded-2xl">
         {/* Fluid Status Filter Pills in a Recessed Tray */}
-        <div className="skeuo-tray flex items-center gap-1 overflow-x-auto w-full sm:w-auto p-1 rounded-xl">
+        <div className="skeuo-tray flex items-center gap-1 overflow-x-auto scrollbar-none w-full sm:w-auto p-1 rounded-xl">
           {statusTabs.map((tab) => {
             const isActive = activeStatus === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveStatus(tab.id)}
-                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`relative rounded-lg px-3.5 py-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[38px] flex items-center ${
                   isActive
                     ? 'text-white'
                     : tab.isRed && tab.count > 0
@@ -182,15 +182,15 @@ export default function MyEvents() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search title, venue, category..."
-            className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-semibold text-slate-800 placeholder:text-slate-400"
+            className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-semibold text-slate-800 placeholder:text-slate-400 min-h-[44px]"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
               title="Clear search"
             >
-              <X size={13} />
+              <X size={14} />
             </button>
           )}
         </div>

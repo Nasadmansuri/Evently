@@ -10,7 +10,7 @@ import { getEventStatus } from '../../../shared/utils/eventStatus';
 import { getGoogleCalendarUrl, downloadIcsFile } from '../../../shared/utils/calendarIntegration';
 import { fireCelebrationConfetti } from '../../../shared/utils/confetti';
 
-const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+const ASSET_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
 
 export default function Registration() {
   const { id } = useParams();
@@ -321,7 +321,7 @@ export default function Registration() {
         {event.banner_image && (
           <div className="h-40 w-full">
             <img
-              src={event.banner_image}
+              src={event.banner_image.startsWith('http') ? event.banner_image : `${ASSET_BASE_URL}${event.banner_image.startsWith('/') ? '' : '/'}${event.banner_image}`}
               alt=""
               className="h-full w-full object-cover"
               style={{ objectPosition: 'center 32%' }}

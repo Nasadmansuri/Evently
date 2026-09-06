@@ -73,7 +73,7 @@ export default function LandingDevCorps() {
 
           <Link
             to="/events"
-            className="self-start md:self-end rounded-full bg-white hover:bg-slate-50 px-5 py-2.5 text-xs font-bold text-slate-800 border border-slate-200 shadow-2xs flex items-center gap-1.5 transition hover:shadow hover:border-slate-300 shrink-0"
+            className="self-start md:self-end rounded-full bg-white hover:bg-slate-50 px-5 py-2.5 min-h-[44px] text-xs font-bold text-slate-800 border border-slate-200 shadow-2xs flex items-center gap-1.5 transition hover:shadow hover:border-slate-300 shrink-0"
           >
             <span>Explore Events</span>
             <ArrowRight size={13} className="text-slate-500" />
@@ -128,7 +128,7 @@ export default function LandingDevCorps() {
                   </span>
                   <Link
                     to={`/events?department=community:${encodeURIComponent(club.name)}`}
-                    className="rounded-full bg-[#0B0F19] hover:bg-slate-800 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs flex items-center gap-1 transition-all hover:scale-105 active:scale-95 shrink-0"
+                    className="rounded-full bg-[#0B0F19] hover:bg-slate-800 px-3.5 py-2 text-xs font-bold text-white shadow-xs flex items-center gap-1 transition-all hover:scale-105 active:scale-95 shrink-0"
                   >
                     <span>Events</span>
                     <ArrowRight size={12} />

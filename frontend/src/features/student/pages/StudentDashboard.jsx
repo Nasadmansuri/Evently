@@ -124,64 +124,63 @@ export default function StudentDashboard() {
           </button>
         </div>
       )}
-
-      {/* 2. 4 Clean Tactile Metric Stat Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 2. 4 Clean Tactile Metric Stat Cards (2x2 on Mobile, 4-col on Desktop) */}
+      <div className="grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
         {/* Total Registered */}
-        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[115px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Registered</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs">
-              <CalendarCheck size={16} />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Registered</p>
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs shrink-0">
+              <CalendarCheck size={15} />
             </div>
           </div>
-          <div className="mt-3">
-            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : registrations.length}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">All-time registrations recorded</p>
+          <div className="mt-2.5 sm:mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : registrations.length}</p>
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-500 font-medium truncate">All-time registrations</p>
           </div>
         </div>
 
         {/* Upcoming Events */}
-        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[115px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Upcoming</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-200/60 shadow-2xs">
-              <Bookmark size={16} />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">Upcoming</p>
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-200/60 shadow-2xs shrink-0">
+              <Bookmark size={15} />
             </div>
           </div>
-          <div className="mt-3">
-            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : upcoming.length}</p>
-            <p className="mt-1 text-xs text-primary-700 font-semibold">Upcoming enrolled events</p>
+          <div className="mt-2.5 sm:mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : upcoming.length}</p>
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-primary-700 font-semibold truncate">Upcoming enrolled events</p>
           </div>
         </div>
 
         {/* Live / Ongoing */}
-        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[115px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Happening Now</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs">
-              <PlayCircle size={16} />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">Happening Now</p>
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs shrink-0">
+              <PlayCircle size={15} />
             </div>
           </div>
-          <div className="mt-3">
-            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : ongoing.length}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">
-              {ongoing.length > 0 ? `${ongoing.length} event in progress` : 'No active sessions right now'}
+          <div className="mt-2.5 sm:mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : ongoing.length}</p>
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-500 font-medium truncate">
+              {ongoing.length > 0 ? `${ongoing.length} in progress` : 'None active now'}
             </p>
           </div>
         </div>
 
         {/* Attended / Past */}
-        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[115px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Attended & Past</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 border border-slate-200/60 shadow-2xs">
-              <Award size={16} />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">Attended & Past</p>
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 border border-slate-200/60 shadow-2xs shrink-0">
+              <Award size={15} />
             </div>
           </div>
-          <div className="mt-3">
-            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : past.length}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">Completed & past events</p>
+          <div className="mt-2.5 sm:mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : past.length}</p>
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-500 font-medium truncate">Completed sessions</p>
           </div>
         </div>
       </div>

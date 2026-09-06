@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import api from '../../../shared/services/api';
 import { getCategoryStyle } from '../../../shared/utils/categoryColors';
 
-const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+const ASSET_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
 
 export default function Gallery() {
   const navigate = useNavigate();

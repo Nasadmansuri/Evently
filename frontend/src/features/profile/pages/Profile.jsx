@@ -219,7 +219,7 @@ export default function Profile() {
 
           <button
             onClick={() => setEditing(true)}
-            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2 shrink-0 shadow-md"
+            className="bg-white hover:bg-slate-100 active:scale-95 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-2 w-full sm:w-auto shrink-0 shadow-md min-h-[44px] cursor-pointer"
           >
             <Edit3 size={14} className="text-primary-600" />
             Edit Profile
@@ -612,18 +612,18 @@ export default function Profile() {
                   </div>
                 )}
 
-                <div className="pt-3 flex items-center justify-end gap-2">
+                <div className="pt-3 flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => { setEditing(false); setEditError(''); }}
-                    className="skeuo-btn-secondary px-3.5 py-2 rounded-xl text-xs cursor-pointer"
+                    className="skeuo-btn-secondary px-4 py-2.5 rounded-xl text-xs cursor-pointer min-h-[44px] flex items-center justify-center"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="skeuo-btn-primary px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                    className="skeuo-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer min-h-[44px]"
                   >
                     {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
                     Save Changes

@@ -23,7 +23,7 @@ export default function TopBar({ onMenuClick }) {
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 bg-white border border-slate-200 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 lg:hidden cursor-pointer"
+          className="flex h-10 w-10 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-slate-600 bg-white border border-slate-200 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 active:scale-95 lg:hidden cursor-pointer"
           aria-label="Open menu"
         >
           <Menu size={20} />

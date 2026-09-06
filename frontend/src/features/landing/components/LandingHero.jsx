@@ -124,14 +124,30 @@ export default function LandingHero() {
           </motion.p>
         </div>
 
-        {/* 2. Symmetrical Floating Badges & BIC Campus Building */}
-        <div className="relative mt-8 sm:mt-12 max-w-5xl mx-auto">
+        {/* Mobile Quick Highlight Chips (Displayed exclusively on mobile < 640px to prevent card collision) */}
+        <div className="flex sm:hidden items-center justify-center gap-1.5 flex-wrap pt-2 px-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/90 bg-amber-50/95 px-3 py-1 text-[11px] font-bold text-amber-900 shadow-2xs">
+            <Trophy size={13} className="text-amber-700 shrink-0" /> Hackathons
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/90 bg-blue-50/95 px-3 py-1 text-[11px] font-bold text-blue-900 shadow-2xs">
+            <Briefcase size={13} className="text-blue-700 shrink-0" /> Workshops
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50/95 px-3 py-1 text-[11px] font-bold text-emerald-900 shadow-2xs">
+            <Calendar size={13} className="text-emerald-700 shrink-0" /> Events
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200/90 bg-primary-50/95 px-3 py-1 text-[11px] font-bold text-primary-900 shadow-2xs">
+            <Users size={13} className="text-primary-700 shrink-0" /> DevCorps
+          </span>
+        </div>
+
+        {/* 2. Symmetrical Floating Badges & BIC Campus Building (Tablets & Desktops) */}
+        <div className="relative mt-6 sm:mt-12 max-w-5xl mx-auto">
           {/* Badge 1: Top-Left - Hackathons */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="absolute top-2 sm:top-6 left-0 sm:left-4 z-20 animate-float-slow"
+            className="absolute top-2 sm:top-6 left-0 sm:left-4 z-20 hidden sm:block animate-float-slow"
           >
             <div className="flex items-center gap-3 rounded-2xl border border-amber-200/80 bg-white/95 p-3 sm:p-3.5 shadow-xl backdrop-blur-md">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 shadow-2xs">
@@ -149,7 +165,7 @@ export default function LandingHero() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.35 }}
-            className="absolute top-2 sm:top-6 right-0 sm:right-4 z-20 animate-float-reverse"
+            className="absolute top-2 sm:top-6 right-0 sm:right-4 z-20 hidden sm:block animate-float-reverse"
           >
             <div className="flex items-center gap-3 rounded-2xl border border-blue-200/80 bg-white/95 p-3 sm:p-3.5 shadow-xl backdrop-blur-md">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-800 shadow-2xs">

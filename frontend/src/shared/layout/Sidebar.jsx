@@ -53,8 +53,8 @@ export default function Sidebar({ role, open, onClose }) {
     <>
       {open && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden" onClick={onClose} />}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-200/90 bg-white text-slate-800 transition-transform duration-200 ${
-          open ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 h-dvh max-h-dvh flex-col border-r border-slate-200/90 bg-white text-slate-800 transition-transform duration-200 ${
+          open ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         } lg:translate-x-0`}
       >
         {/* Brand Header (Seamlessly aligned with TopBar at 64px / h-16) */}
@@ -130,7 +130,7 @@ export default function Sidebar({ role, open, onClose }) {
         </nav>
 
         {/* Bottom User Profile & Dedicated Sign Out Section */}
-        <div className="border-t border-slate-200/90 p-3 bg-slate-50/70 space-y-2">
+        <div className="border-t border-slate-200/90 p-3 bg-slate-50/70 space-y-2 shrink-0">
           {/* User Profile Card */}
           <Link
             to="/profile"

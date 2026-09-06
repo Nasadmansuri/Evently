@@ -19,7 +19,7 @@ import AddToCalendarButton from '../../../shared/components/AddToCalendarButton'
 import ImageLightboxModal from '../../../shared/components/ImageLightboxModal';
 
 const TABS = ['Details', 'Gallery', 'Feedback'];
-const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+const ASSET_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
 
 const DELETION_REASONS = [
   'Venue or Logistics Conflict',
@@ -229,7 +229,7 @@ export default function EventDetail() {
         {event.banner_image && !imgError ? (
           <>
             <img
-              src={event.banner_image}
+              src={event.banner_image.startsWith('http') ? event.banner_image : `${ASSET_BASE_URL}${event.banner_image.startsWith('/') ? '' : '/'}${event.banner_image}`}
               alt={event.title}
               onError={() => setImgError(true)}
               className="w-full h-full object-cover object-center"
@@ -389,7 +389,7 @@ export default function EventDetail() {
           )}
 
           {/* Tabs Navigation */}
-          <div className="flex border-b border-slate-200 gap-6 text-sm font-bold">
+          <div className="flex border-b border-slate-200 gap-6 text-sm font-bold overflow-x-auto scrollbar-none">
             {(event.status === 'cancelled'
               ? ['Details', 'Gallery']
               : ['Details', 'Gallery', 'Feedback']
@@ -397,7 +397,7 @@ export default function EventDetail() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 relative transition-colors inline-flex items-center gap-1.5 cursor-pointer ${
+                className={`pb-3 relative transition-colors inline-flex items-center gap-1.5 shrink-0 cursor-pointer min-h-[44px] ${
                   activeTab === tab ? 'text-primary-700 font-black' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -536,60 +536,34 @@ export default function EventDetail() {
                   )}
                 </div>
 
-                {/* If single photo: Featured Hero Frame */}
-                {images.length === 1 ? (
-                  <div
-                    onClick={() => openLightbox(0)}
-                    className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-900 shadow-xs hover:shadow-lg transition-all duration-300 max-h-[420px] flex items-center justify-center"
-                  >
-                    <img
-                      src={images[0].image_url}
-                      alt={event?.title || 'Event photo'}
-                      className="max-h-[420px] w-full object-contain sm:object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+                {/* Photo Grid (Matches production) */}
+                <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4">
+                  {images.map((img, idx) => (
+                    <div
+                      key={img.id || idx}
+                      onClick={() => openLightbox(idx)}
+                      className="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 shadow-2xs hover:shadow-md hover:border-primary-300 hover:-translate-y-0.5 transition-all duration-200"
+                    >
+                      <img
+                        src={img.image_url.startsWith('http') ? img.image_url : `${ASSET_BASE_URL}${img.image_url.startsWith('/') ? '' : '/'}${img.image_url}`}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                    {images[0].is_banner === 1 && (
-                      <span className="absolute top-3 left-3 rounded-full bg-emerald-600/90 backdrop-blur-md px-3 py-1 text-[10.5px] font-extrabold uppercase text-white shadow-md">
-                        Cover Banner
-                      </span>
-                    )}
+                      {img.is_banner === 1 && (
+                        <span className="absolute top-2 left-2 rounded-full bg-primary-700/90 backdrop-blur-xs px-2 py-0.5 text-[9px] font-extrabold uppercase text-white shadow-sm">
+                          Cover
+                        </span>
+                      )}
 
-                    <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/70 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-white shadow-lg group-hover:bg-black/90 transition">
-                      <Maximize2 size={13} className="text-emerald-300" />
-                      <span>View Full Resolution</span>
-                    </div>
-                  </div>
-                ) : (
-                  /* Multi-photo Responsive Grid */
-                  <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4">
-                    {images.map((img, idx) => (
-                      <div
-                        key={img.id || idx}
-                        onClick={() => openLightbox(idx)}
-                        className="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 shadow-2xs hover:shadow-md hover:border-primary-300 hover:-translate-y-0.5 transition-all duration-200"
-                      >
-                        <img
-                          src={img.image_url}
-                          alt=""
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                        {img.is_banner === 1 && (
-                          <span className="absolute top-2 left-2 rounded-full bg-primary-700/90 backdrop-blur-xs px-2 py-0.5 text-[9px] font-extrabold uppercase text-white shadow-sm">
-                            Cover
-                          </span>
-                        )}
-
-                        <div className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 backdrop-blur-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Maximize2 size={13} />
-                        </div>
+                      <div className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 backdrop-blur-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 size={13} />
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )
           )}
@@ -1116,7 +1090,7 @@ export default function EventDetail() {
       </div>
 
       {/* 3. Mobile Sticky Bottom Registration & Action Bar (Viewports < 1024px) */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-slate-200/90 bg-white/95 backdrop-blur-md px-4 py-3 shadow-[0_-8px_20px_-6px_rgba(0,0,0,0.1)]">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-slate-200/90 bg-white/95 backdrop-blur-md px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_20px_-6px_rgba(0,0,0,0.1)]">
         <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 truncate">
@@ -1129,28 +1103,28 @@ export default function EventDetail() {
 
           <div className="shrink-0">
             {event.status === 'cancelled' ? (
-              <span className="inline-flex items-center px-4 py-2 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
+              <span className="inline-flex items-center px-4 py-2 min-h-[44px] rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
                 Cancelled
               </span>
             ) : user?.role === 'student' ? (
               event.is_registered ? (
-                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shadow-2xs">
                   <CheckCircle2 size={14} className="text-emerald-600" />
                   <span>Registered</span>
                 </span>
               ) : liveStatus === 'ended' ? (
-                <span className="inline-flex items-center px-4 py-2 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
+                <span className="inline-flex items-center px-4 py-2 min-h-[44px] rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
                   Concluded
                 </span>
               ) : event.max_participants && (event.registered_count ?? event.registration_count ?? 0) >= event.max_participants ? (
-                <span className="inline-flex items-center px-4 py-2 rounded-full bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200">
+                <span className="inline-flex items-center px-4 py-2 min-h-[44px] rounded-full bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200">
                   Full
                 </span>
               ) : (
                 <button
                   type="button"
                   onClick={() => navigate(`/events/${id}/register`)}
-                  className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-full px-4.5 py-2 text-xs font-bold shadow-md cursor-pointer active:scale-95"
+                  className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 min-h-[44px] text-xs font-bold shadow-md cursor-pointer active:scale-95"
                 >
                   <span>{liveStatus === 'ongoing' ? 'Join Now' : 'Register'}</span>
                   <ArrowRight size={13} />
@@ -1159,7 +1133,7 @@ export default function EventDetail() {
             ) : !user ? (
               <Link
                 to={`/login?redirect=/events/${id}/register`}
-                className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-full px-4.5 py-2 text-xs font-bold shadow-md cursor-pointer active:scale-95"
+                className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 min-h-[44px] text-xs font-bold shadow-md cursor-pointer active:scale-95"
               >
                 <span>Register</span>
                 <ArrowRight size={13} />
@@ -1168,7 +1142,7 @@ export default function EventDetail() {
               <button
                 type="button"
                 onClick={() => navigate(`/${user.role === 'admin' ? 'admin' : 'faculty'}/events/${id}/edit`)}
-                className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold cursor-pointer"
+                className="skeuo-btn-secondary inline-flex items-center gap-1.5 rounded-full px-4 py-2 min-h-[44px] text-xs font-bold cursor-pointer"
               >
                 <Edit3 size={13} /> Edit
               </button>

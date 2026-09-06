@@ -105,7 +105,7 @@ export default function MyRegistrations() {
 
         <button
           onClick={() => navigate('/events')}
-          className="inline-flex items-center gap-2 self-start sm:self-auto rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all"
+          className="inline-flex items-center justify-center gap-2 w-full sm:w-auto rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:shadow-md active:scale-95 transition-all min-h-[44px] cursor-pointer"
         >
           <CalendarDays size={16} /> Explore All Events
         </button>
@@ -220,17 +220,17 @@ export default function MyRegistrations() {
               ? 'Explore our upcoming hackathons, guest lectures, and campus festivals to register!'
               : 'Events you attend will appear in your past activity logs once concluded.'}
           </p>
-          <div className="mt-5 flex items-center justify-center gap-3">
+          <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
             <button
               onClick={() => navigate('/events')}
-              className="rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs active:scale-95 transition-all"
+              className="rounded-xl bg-primary-700 hover:bg-primary-800 px-5 py-2.5 text-xs font-bold text-white shadow-xs active:scale-95 transition-all w-full sm:w-auto min-h-[44px] flex items-center justify-center cursor-pointer"
             >
               Browse Campus Events
             </button>
             {activeTab !== 'all' && (
               <button
                 onClick={() => setSearchParams({ tab: 'all' })}
-                className="rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs active:scale-95 transition-all"
+                className="rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-white shadow-xs active:scale-95 transition-all w-full sm:w-auto min-h-[44px] flex items-center justify-center cursor-pointer"
               >
                 View All ({registrations.length})
               </button>

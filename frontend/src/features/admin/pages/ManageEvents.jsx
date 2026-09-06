@@ -18,7 +18,7 @@ import { ACADEMIC_STRUCTURE } from '../../../shared/utils/academicCascade';
 import { DEPARTMENT_DESIGNATIONS, COMMUNITIES } from '../../../shared/utils/facultyStructure';
 import { ALL_CATEGORIES } from '../../../shared/utils/categoryColors';
 
-const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+const ASSET_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
 
 const CATEGORIES = ['All', ...ALL_CATEGORIES];
 const ORGANIZING_DEPARTMENTS = [
@@ -505,7 +505,7 @@ export default function ManageEvents() {
                 <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-100 ring-1 ring-black/5">
                   {ev.banner_image ? (
                     <img
-                      src={ev.banner_image}
+                      src={ev.banner_image.startsWith('http') ? ev.banner_image : `${ASSET_BASE_URL}${ev.banner_image.startsWith('/') ? '' : '/'}${ev.banner_image}`}
                       alt={ev.title}
                       loading="lazy"
                       referrerPolicy="no-referrer"

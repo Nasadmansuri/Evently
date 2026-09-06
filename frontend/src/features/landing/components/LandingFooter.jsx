@@ -154,18 +154,18 @@ export default function LandingFooter() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your college email"
                     required
-                    className="w-full rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
+                    className="w-full rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors min-h-[44px]"
                   />
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-600 text-white hover:bg-primary-500 disabled:opacity-60 transition-all hover:scale-105 active:scale-95 shadow-xs cursor-pointer"
+                    className="flex h-11 w-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full bg-primary-600 text-white hover:bg-primary-500 disabled:opacity-60 transition-all hover:scale-105 active:scale-95 shadow-xs cursor-pointer"
                     title="Subscribe"
                   >
                     {isSubmitting ? (
-                      <Loader2 size={15} className="animate-spin text-white" />
+                      <Loader2 size={16} className="animate-spin text-white" />
                     ) : (
-                      <Send size={15} />
+                      <Send size={16} />
                     )}
                   </button>
                 </motion.form>

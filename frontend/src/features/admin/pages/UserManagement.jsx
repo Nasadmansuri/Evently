@@ -332,6 +332,7 @@ export default function UserManagement() {
       )}
 
       <div className="skeuo-card overflow-hidden rounded-[18px]">
+        <div className="overflow-x-auto">
         {loading ? (
           <div className="space-y-3 p-4">
             {[1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-slate-100" />)}
@@ -524,6 +525,7 @@ export default function UserManagement() {
             )}
           </>
         )}
+        </div>
       </div>
 
       {/* Rich User Profile Detail Modal */}

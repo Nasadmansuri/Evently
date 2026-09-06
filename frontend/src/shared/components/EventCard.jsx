@@ -5,7 +5,7 @@ import { getEventStatus } from '../utils/eventStatus';
 import { getCategoryStyle } from '../utils/categoryColors';
 import VenueLocationModal from './VenueLocationModal';
 
-const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+const ASSET_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
 
 function formatEventDate(value) {
   return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -22,7 +22,13 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
 
   const style = getCategoryStyle(event.category);
   const liveStatus = getEventStatus(event.event_date, event.event_time, event.status, event.publish_at);
-  const hasBanner = event.banner_image && !imgError;
+  const rawBanner = event.banner_image;
+  const bannerSrc = rawBanner?.startsWith('http')
+    ? rawBanner
+    : rawBanner
+    ? `${ASSET_BASE_URL}${rawBanner.startsWith('/') ? '' : '/'}${rawBanner}`
+    : null;
+  const hasBanner = bannerSrc && !imgError;
 
   return (
     <>
@@ -31,7 +37,7 @@ export default function EventCard({ event, isPast, onViewDetails, onRegister, sh
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[16px] bg-slate-950 border border-slate-900/10 shadow-inner">
           {hasBanner ? (
             <img
-              src={event.banner_image}
+              src={bannerSrc}
               alt={event.title}
               loading="lazy"
               referrerPolicy="no-referrer"

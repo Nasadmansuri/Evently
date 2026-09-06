@@ -444,7 +444,7 @@ export default function FeedbackBuilder() {
           <button
             type="button"
             onClick={addQuestion}
-            className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 py-3 text-xs font-bold text-slate-600 transition hover:border-primary-400 hover:bg-primary-50/50 hover:text-primary-700"
+            className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 py-3 text-xs font-bold text-slate-600 transition hover:border-primary-400 hover:bg-primary-50/50 hover:text-primary-700 min-h-[44px] cursor-pointer"
           >
             <Plus size={15} /> Add Another Question
           </button>
@@ -453,7 +453,7 @@ export default function FeedbackBuilder() {
         <button
           type="submit"
           disabled={submitting}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-600 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 active:scale-[0.98] disabled:opacity-50 min-h-[48px] cursor-pointer"
         >
           {submitting ? <Loader2 className="animate-spin" size={16} /> : null}
           {submitting ? 'Creating Form...' : 'Publish Feedback Form'}

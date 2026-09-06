@@ -23,7 +23,7 @@ const ORGANIZING_DEPARTMENTS = [
 ];
 const MAX_IMAGES = 10;
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const ASSET_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+const ASSET_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -385,9 +385,9 @@ export default function CreateEvent() {
 
   return (
     <div className="mx-auto max-w-3xl pb-16">
-      <div className="skeuo-card rounded-2xl p-6 sm:p-8">
+      <div className="skeuo-card rounded-2xl p-4 sm:p-6 md:p-8">
         {/* Header Strip */}
-        <div className="flex items-start justify-between pb-5 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3.5 pb-5 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="skeuo-badge-embossed rounded-full bg-primary-50 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-primary-800">

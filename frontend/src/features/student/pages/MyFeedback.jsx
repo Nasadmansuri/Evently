@@ -167,12 +167,12 @@ export default function MyFeedback() {
       </div>
 
       {/* 2. Interactive KPI Tab Cards (Click card to filter view) */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
         {/* Metric 1: Eligible Events */}
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'all' })}
-          className={`skeuo-card rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+          className={`skeuo-card rounded-2xl p-4 sm:p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[120px] ${
             activeTab === 'all'
               ? 'ring-2 ring-primary-600 bg-primary-50/30'
               : 'hover:border-slate-300'
@@ -193,7 +193,7 @@ export default function MyFeedback() {
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'pending' })}
-          className={`skeuo-card rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+          className={`skeuo-card rounded-2xl p-4 sm:p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[120px] ${
             activeTab === 'pending'
               ? 'ring-2 ring-primary-600 bg-primary-50/30'
               : 'hover:border-slate-300'
@@ -221,7 +221,7 @@ export default function MyFeedback() {
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'submitted' })}
-          className={`skeuo-card rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+          className={`skeuo-card rounded-2xl p-4 sm:p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[120px] ${
             activeTab === 'submitted'
               ? 'ring-2 ring-primary-600 bg-primary-50/30'
               : 'hover:border-slate-300'
@@ -242,7 +242,7 @@ export default function MyFeedback() {
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'unavailable' })}
-          className={`skeuo-card rounded-2xl p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+          className={`skeuo-card rounded-2xl p-4 sm:p-5 text-left transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[120px] ${
             activeTab === 'unavailable'
               ? 'ring-2 ring-primary-600 bg-primary-50/30'
               : 'hover:border-slate-300'

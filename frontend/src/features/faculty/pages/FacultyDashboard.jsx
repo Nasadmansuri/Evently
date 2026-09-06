@@ -109,61 +109,61 @@ export default function FacultyDashboard() {
         </div>
       )}
 
-      {/* 2. Sophisticated 4-KPI Metric Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 2. Sophisticated 4-KPI Metric Grid (2x2 on Mobile, 4-col on Desktop) */}
+      <div className="grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
         {/* Metric 1: Total Events */}
-        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[115px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Events</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs">
-              <CalendarDays size={16} />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Events</p>
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 shadow-2xs shrink-0">
+              <CalendarDays size={15} />
             </div>
           </div>
-          <div className="mt-3">
-            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.totalEvents}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">Events managed by you</p>
+          <div className="mt-2.5 sm:mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.totalEvents}</p>
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-500 font-medium truncate">Events managed by you</p>
           </div>
         </div>
 
         {/* Metric 2: Upcoming Events */}
-        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[115px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Upcoming Events</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-200/60 shadow-2xs">
-              <Clock size={16} />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">Upcoming Events</p>
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-700 border border-primary-200/60 shadow-2xs shrink-0">
+              <Clock size={15} />
             </div>
           </div>
-          <div className="mt-3">
-            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.upcomingEvents}</p>
-            <p className="mt-1 text-xs text-primary-700 font-semibold">Upcoming active events</p>
+          <div className="mt-2.5 sm:mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.upcomingEvents}</p>
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-primary-700 font-semibold truncate">Upcoming active events</p>
           </div>
         </div>
 
         {/* Metric 3: Total Registrations */}
-        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[115px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Registrations</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-700 border border-violet-200/60 shadow-2xs">
-              <Users size={16} />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">Registrations</p>
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-700 border border-violet-200/60 shadow-2xs shrink-0">
+              <Users size={15} />
             </div>
           </div>
-          <div className="mt-3">
-            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.totalRegistrations}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">Total student signups</p>
+          <div className="mt-2.5 sm:mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.totalRegistrations}</p>
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-500 font-medium truncate">Total student signups</p>
           </div>
         </div>
 
         {/* Metric 4: Completed Events */}
-        <div className="skeuo-card rounded-2xl p-5 flex flex-col justify-between">
+        <div className="skeuo-card rounded-2xl p-4 sm:p-5 flex flex-col justify-between min-h-[115px]">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Completed Events</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs">
-              <CheckCircle2 size={16} />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">Completed Events</p>
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs shrink-0">
+              <CheckCircle2 size={15} />
             </div>
           </div>
-          <div className="mt-3">
-            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{loading ? '—' : stats.completedEvents}</p>
-            <p className="mt-1 text-xs text-slate-500 font-medium">Past concluded events</p>
+          <div className="mt-2.5 sm:mt-3">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{loading ? '—' : stats.completedEvents}</p>
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-500 font-medium truncate">Past concluded events</p>
           </div>
         </div>
       </div>

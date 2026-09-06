@@ -147,12 +147,12 @@ export default function BrowseEvents() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto w-full sm:w-auto">
           {/* List vs Calendar Toggle in a Recessed Skeuomorphic Tray */}
-          <div className="skeuo-tray flex rounded-xl p-1">
+          <div className="skeuo-tray flex rounded-xl p-1 w-full sm:w-auto">
             <button
               onClick={() => setViewMode('list')}
-              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`relative flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition-all cursor-pointer min-h-[40px] sm:min-h-[36px] ${
                 viewMode === 'list' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -167,7 +167,7 @@ export default function BrowseEvents() {
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`relative flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`relative flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition-all cursor-pointer min-h-[40px] sm:min-h-[36px] ${
                 viewMode === 'calendar' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -197,12 +197,12 @@ export default function BrowseEvents() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search title, venue, topic..."
-                className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-medium text-slate-900 placeholder:text-slate-400"
+                className="skeuo-input w-full rounded-xl py-2.5 pl-9 pr-8 text-xs font-medium text-slate-900 placeholder:text-slate-400 min-h-[44px]"
               />
               {search && (
                 <button
                   onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
                   title="Clear search"
                 >
                   <X size={13} />
@@ -218,7 +218,7 @@ export default function BrowseEvents() {
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
-              className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer"
+              className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer min-h-[44px]"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -235,7 +235,7 @@ export default function BrowseEvents() {
             <select
               value={activeDepartment}
               onChange={(e) => setActiveDepartment(e.target.value)}
-              className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer"
+              className="skeuo-input w-full rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer min-h-[44px]"
             >
               <option value="All">All Departments & Communities</option>
               {ORGANIZING_DEPARTMENTS.filter((dept) => dept !== 'All').map((dept) => (
@@ -252,7 +252,7 @@ export default function BrowseEvents() {
           <div className="flex items-end">
             <button
               onClick={resetFilters}
-              className="skeuo-btn-secondary w-full rounded-xl px-3 py-2.5 text-xs cursor-pointer"
+              className="skeuo-btn-secondary w-full rounded-xl px-3 py-2.5 text-xs cursor-pointer min-h-[44px] flex items-center justify-center font-bold"
             >
               Reset Filters
             </button>

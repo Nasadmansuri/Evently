@@ -403,7 +403,7 @@ export default function LandingContact() {
                                 key={topic.label}
                                 type="button"
                                 onClick={() => handleQuickTopic(topic)}
-                                className={`rounded-full px-3 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                                className={`rounded-full px-3.5 py-1.5 min-h-[32px] sm:min-h-[34px] flex items-center justify-center text-xs font-bold transition-all cursor-pointer ${
                                   isSelected
                                     ? 'bg-[#0B0F19] text-white shadow-xs'
                                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'

@@ -278,7 +278,7 @@ export default function Reports() {
         {/* Controls Toolbar */}
         <div className="flex flex-col gap-3.5 border-b border-slate-100 p-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between bg-slate-50/40">
           {/* Status Tabs */}
-          <div className="skeuo-tray flex flex-wrap items-center gap-1 rounded-xl p-1">
+          <div className="skeuo-tray flex items-center gap-1 rounded-xl p-1 overflow-x-auto scrollbar-none w-full sm:w-auto">
             {[
               { id: 'all', label: `All Events (${events.length})` },
               { id: 'concluded', label: `Concluded (${concludedCount})` },
@@ -289,7 +289,7 @@ export default function Reports() {
               <button
                 key={tab.id}
                 onClick={() => setFilterTab(tab.id)}
-                className={`relative rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                className={`relative rounded-lg px-3.5 py-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-h-[38px] flex items-center ${
                   filterTab === tab.id ? 'text-white' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -312,12 +312,12 @@ export default function Reports() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search event title, organizer, dept..."
-              className="skeuo-input w-full rounded-xl py-2 pl-9 pr-8 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none"
+              className="skeuo-input w-full rounded-xl py-2 pl-9 pr-8 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none min-h-[44px]"
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-md cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1.5 rounded-md cursor-pointer"
                 title="Clear search"
               >
                 <X size={13} />
@@ -431,7 +431,7 @@ export default function Reports() {
                       <button
                         onClick={() => handleGenerate(ev)}
                         disabled={isGenerating}
-                        className="skeuo-btn-primary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer disabled:opacity-50 shadow-2xs active:scale-95 transition"
+                        className="skeuo-btn-primary inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer disabled:opacity-50 shadow-2xs active:scale-95 transition w-full sm:w-auto min-h-[44px]"
                         title={`Generate PDF Report for ${ev.title}`}
                       >
                         {isGenerating ? (

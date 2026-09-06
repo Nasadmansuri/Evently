@@ -3,6 +3,9 @@ export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
+      screens: {
+        xs: '420px',
+      },
       fontFamily: {
         sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
@@ -40,7 +43,7 @@ export default {
           dark: '#B45309',
           text: '#92400E',
         },
-        // Category tag colors — deliberately distinct from primary/accent, never reused as UI chrome
+        // Category tag colors
         category: {
           technical: '#2563EB',
           cultural: '#6B7280',

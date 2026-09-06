@@ -425,7 +425,7 @@ export default function FeedbackForm() {
           </p>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-slate-50/80 border border-slate-100 p-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
                   key={n}
@@ -434,7 +434,7 @@ export default function FeedbackForm() {
                   onMouseEnter={() => setHoverRating(n)}
                   onMouseLeave={() => setHoverRating(0)}
                   aria-label={`${n} star${n > 1 ? 's' : ''}`}
-                  className="rounded-lg p-1 transition-all duration-150 hover:scale-125 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="rounded-xl p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-150 hover:scale-115 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
                 >
                   <Star
                     size={32}
@@ -498,14 +498,14 @@ export default function FeedbackForm() {
               )}
 
               {q.question_type === 'rating' && (
-                <div className="flex items-center gap-2 rounded-xl bg-slate-50/70 border border-slate-100 p-3">
+                <div className="flex items-center gap-1 sm:gap-2 rounded-xl bg-slate-50/70 border border-slate-100 p-3">
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button
                       key={n}
                       type="button"
                       onClick={() => setAnswer(q.id, n)}
                       aria-label={`${n} star${n > 1 ? 's' : ''}`}
-                      className="p-1 transition hover:scale-125 focus:outline-none"
+                      className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition hover:scale-115 focus:outline-none cursor-pointer"
                     >
                       <Star
                         size={26}
@@ -530,7 +530,7 @@ export default function FeedbackForm() {
                     return (
                       <label
                         key={oi}
-                        className={`flex items-center gap-3 rounded-xl border p-3 text-xs font-medium cursor-pointer transition ${
+                        className={`flex items-center gap-3 rounded-xl border p-3 text-xs font-medium cursor-pointer transition min-h-[44px] ${
                           isSelected
                             ? 'border-primary-500 bg-primary-50/50 text-primary-900 font-semibold'
                             : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
@@ -557,7 +557,7 @@ export default function FeedbackForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="skeuo-btn-primary flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm disabled:opacity-50 cursor-pointer"
+            className="skeuo-btn-primary flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold disabled:opacity-50 cursor-pointer min-h-[48px]"
           >
             {submitting ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
             {submitting ? 'Submitting Feedback...' : 'Submit Feedback'}

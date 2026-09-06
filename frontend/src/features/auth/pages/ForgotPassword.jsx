@@ -82,12 +82,12 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen lg:h-screen lg:max-h-screen bg-[#edf0f5] p-2.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
+    <div className="min-h-dvh lg:h-dvh lg:max-h-dvh bg-[#edf0f5] p-2.5 sm:p-3 md:p-4 selection:bg-primary-600 selection:text-white flex items-center justify-center overflow-y-auto lg:overflow-hidden">
       {/* Master Dual-Column Container */}
-      <div className="w-full max-w-[1400px] h-auto lg:h-[calc(100vh-2.5rem)] max-h-[860px] bg-white rounded-[28px] sm:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      <div className="w-full max-w-[1400px] h-auto lg:h-[calc(100dvh-2.5rem)] max-h-[860px] bg-white rounded-[20px] sm:rounded-[28px] md:rounded-[36px] shadow-2xl border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
         {/* Left Column: Wider Evently Brand Showcase Inset Card (lg:col-span-7) */}
-        <div className="lg:col-span-7 m-2.5 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-7 sm:p-9 lg:p-12 flex flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
+        <div className="hidden lg:flex lg:col-span-7 m-2.5 sm:m-3 lg:m-3.5 rounded-[22px] sm:rounded-[28px] bg-gradient-to-br from-[#023433] via-[#012626] to-[#011415] text-white p-7 sm:p-9 lg:p-12 flex-col justify-between relative overflow-hidden shadow-lg border border-emerald-900/40">
           {/* Flashlight Beam Sweep Effect */}
           <div className="animate-flashlight" />
 
@@ -179,7 +179,33 @@ export default function ForgotPassword() {
         </div>
 
         {/* Right Column: Clean Form Panel (lg:col-span-5) */}
-        <div className="lg:col-span-5 flex flex-col justify-center px-6 sm:px-8 lg:px-10 py-6 sm:py-8 h-full max-w-[450px] mx-auto w-full overflow-y-auto no-scrollbar">
+        <div className="lg:col-span-5 flex flex-col justify-center px-4 sm:px-6 md:px-8 lg:px-10 py-5 sm:py-7 lg:py-8 h-full max-w-[450px] mx-auto w-full overflow-y-auto no-scrollbar">
+          {/* Mobile Top Header: Logo + Navigation (Hidden on desktop where Left Column is visible) */}
+          <div className="flex lg:hidden items-center justify-between pb-4 mb-3 border-b border-slate-100">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-900 text-white shadow-xs">
+                <CalendarHeart size={16} className="text-emerald-300" />
+              </div>
+              <span className="text-lg font-black tracking-tight text-slate-900 font-sans">
+                Evently
+              </span>
+            </Link>
+            <div className="flex items-center gap-1 rounded-full bg-slate-100 p-0.5 border border-slate-200">
+              <Link
+                to="/login"
+                className="rounded-full bg-white px-3.5 py-1.5 min-h-[30px] flex items-center justify-center text-xs font-bold text-slate-900 shadow-xs"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup/student"
+                className="rounded-full px-3.5 py-1.5 min-h-[30px] flex items-center justify-center text-xs font-medium text-slate-600 hover:text-slate-900 transition"
+              >
+                Join Us
+              </Link>
+            </div>
+          </div>
+
           {/* Header */}
           <div className="mb-5 animate-slide-up">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">

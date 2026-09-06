@@ -37,21 +37,21 @@ export default class ErrorBoundary extends Component {
                 An unexpected display issue occurred. You can reload this view or navigate back to the campus events portal.
               </p>
             </div>
-            <div className="flex items-center justify-center gap-2.5 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2 w-full">
               <button
                 type="button"
                 onClick={this.handleReload}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 active:scale-95 transition"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 active:scale-95 transition w-full sm:w-auto min-h-[44px] cursor-pointer"
               >
-                <RefreshCw size={13} />
+                <RefreshCw size={14} />
                 <span>Reload View</span>
               </button>
               <button
                 type="button"
                 onClick={this.handleGoHome}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-primary-600 active:scale-95 transition"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary-700 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-primary-600 active:scale-95 transition w-full sm:w-auto min-h-[44px] cursor-pointer"
               >
-                <Home size={13} />
+                <Home size={14} />
                 <span>Return to Events</span>
               </button>
             </div>
