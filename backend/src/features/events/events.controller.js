@@ -427,6 +427,29 @@ const SLATE = '#334155';
 const CARD_BORDER = '#E4E4E7';
 
 // ---------- PDF Report Layout Helpers ----------
+function cleanPdfText(text) {
+  if (!text || typeof text !== 'string') return text || '';
+  return text
+    // 1. Convert keycap number emojis (e.g. 1️⃣, 2️⃣) to clean readable numbering
+    .replace(/([0-9#*])\uFE0F?\u20E3/g, (match, digit) => `${digit}. `)
+    // 2. Convert common arrows to safe ASCII equivalents
+    .replace(/[→➜➔]/g, '->')
+    .replace(/[←]/g, '<-')
+    // 3. Remove all Unicode emojis and extended pictographs
+    .replace(/\p{Extended_Pictographic}/gu, '')
+    // 4. Remove any remaining surrogate pairs (astral plane characters)
+    .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '')
+    // 5. Remove variation selectors and zero-width joiners / non-breaking spaces
+    .replace(/[\uFE00-\uFE0F\u200B-\u200D\uFEFF]/g, '')
+    // 6. Remove symbols and dingbats outside WinAnsi (e.g. ⚡ \u26A1)
+    .replace(/[\u2190-\u21FF\u2300-\u27BF\u2B00-\u2BFF\uE000-\uF8FF]/g, '')
+    // 7. Clean excessive spaces on each line while preserving linebreaks
+    .split('\n')
+    .map((line) => line.replace(/[ \t]{2,}/g, ' ').trim())
+    .join('\n')
+    .trim();
+}
+
 function ensureSpace(doc, y, needed) {
   const bottom = doc.page.height - doc.page.margins.bottom;
   if (y + needed > bottom) {
@@ -496,7 +519,7 @@ function drawHeader(doc, event, reportId, left, right) {
   y += 14;
 
   doc.font('Helvetica-Bold').fontSize(19).fillColor(TEXT_DARK)
-    .text(event.title, left, y, { width: right - left, align: 'center' });
+    .text(cleanPdfText(event.title), left, y, { width: right - left, align: 'center' });
   const titleBottom = doc.y;
 
   return titleBottom + 14;
@@ -521,7 +544,8 @@ function drawMetaGrid(doc, items, x, y, width) {
       const dotSpace = item.badgeColor ? 12 : 0;
       const valueWidth = colWidth - pad - dotSpace;
       doc.font(item.badgeColor ? 'Helvetica-Bold' : 'Helvetica').fontSize(10);
-      const h = doc.heightOfString(String(item.value ?? '—'), { width: valueWidth });
+      const valStr = cleanPdfText(String(item.value ?? '—'));
+      const h = doc.heightOfString(valStr, { width: valueWidth });
       maxValueH = Math.max(maxValueH, h);
     }
     rowHeights.push(Math.max(29, 12 + maxValueH + 6));
@@ -548,10 +572,10 @@ function drawMetaGrid(doc, items, x, y, width) {
       const dotY = cy + 12 + 4.5;
       doc.circle(dotX, dotY, dotR).fill(item.badgeColor);
       doc.font('Helvetica-Bold').fontSize(10).fillColor(item.badgeColor)
-        .text(String(item.value ?? '—'), cx + dotR * 2 + 6, cy + 12, { width: colWidth - dotR * 2 - 6 - pad });
+        .text(cleanPdfText(String(item.value ?? '—')), cx + dotR * 2 + 6, cy + 12, { width: colWidth - dotR * 2 - 6 - pad });
     } else {
       doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK)
-        .text(String(item.value ?? '—'), cx, cy + 12, { width: colWidth - pad });
+        .text(cleanPdfText(String(item.value ?? '—')), cx, cy + 12, { width: colWidth - pad });
     }
   });
 
@@ -631,7 +655,15 @@ function drawParticipantsTable(doc, participants, x, yStart, width, isTeamEvent)
     const contactCol = `${p.email}\n${p.phone || '—'}`;
     const dateCol = new Date(p.registered_at).toLocaleDateString();
     const teamCol = p.team_members || '—';
-    const cellValues = { idx: String(i + 1), name: p.full_name, contact: contactCol, college: collegeCol, sem: semCol, team: teamCol, date: dateCol };
+    const cellValues = {
+      idx: String(i + 1),
+      name: cleanPdfText(p.full_name),
+      contact: cleanPdfText(contactCol),
+      college: cleanPdfText(collegeCol),
+      sem: cleanPdfText(semCol),
+      team: cleanPdfText(teamCol),
+      date: dateCol,
+    };
 
     doc.font('Helvetica').fontSize(8.5);
     let maxLines = 1;
@@ -680,8 +712,8 @@ function drawFeedbackSection(doc, form, responses, x, y, width) {
     let contentH = 34;
     answered.forEach((q) => {
       const a = r.answers[q.id];
-      contentH += doc.heightOfString(`Q: ${q.question_text}`, { width: width - cardPad * 2 }) + 2;
-      contentH += doc.heightOfString(`A: ${a}`, { width: width - cardPad * 2 }) + 6;
+      contentH += doc.heightOfString(`Q: ${cleanPdfText(q.question_text)}`, { width: width - cardPad * 2 }) + 2;
+      contentH += doc.heightOfString(`A: ${cleanPdfText(a)}`, { width: width - cardPad * 2 }) + 6;
     });
     const cardH = contentH + cardPad * 2;
 
@@ -692,7 +724,7 @@ function drawFeedbackSection(doc, form, responses, x, y, width) {
 
     let cy = y + cardPad;
     doc.font('Helvetica-Bold').fontSize(10).fillColor(TEXT_DARK)
-      .text(r.full_name, x + cardPad, cy, { continued: true, width: width - cardPad * 2 - 60 });
+      .text(cleanPdfText(r.full_name), x + cardPad, cy, { continued: true, width: width - cardPad * 2 - 60 });
     doc.font('Helvetica').fontSize(8).fillColor(TEXT_MUTED)
       .text(`   ${new Date(r.submitted_at).toLocaleDateString()}`);
     doc.font('Helvetica-Bold').fontSize(9).fillColor(TEAL)
@@ -701,10 +733,10 @@ function drawFeedbackSection(doc, form, responses, x, y, width) {
 
     answered.forEach((q) => {
       doc.font('Helvetica-Bold').fontSize(8.5).fillColor(TEXT_BODY)
-        .text(`Q: ${q.question_text}`, x + cardPad, cy, { width: width - cardPad * 2 });
+        .text(`Q: ${cleanPdfText(q.question_text)}`, x + cardPad, cy, { width: width - cardPad * 2 });
       cy = doc.y + 2;
       doc.font('Helvetica').fontSize(8.5).fillColor(TEXT_BODY)
-        .text(`A: ${r.answers[q.id]}`, x + cardPad, cy, { width: width - cardPad * 2 });
+        .text(`A: ${cleanPdfText(r.answers[q.id])}`, x + cardPad, cy, { width: width - cardPad * 2 });
       cy = doc.y + 6;
     });
 
@@ -792,14 +824,14 @@ async function generateReport(req, res) {
     doc.font('Helvetica-Bold').fontSize(9).fillColor(TEXT_DARK).text('Description', left, y);
     y = doc.y + 4;
     doc.font('Helvetica').fontSize(9.5).fillColor(TEXT_BODY)
-      .text(event.description || '—', left, y, { width: contentWidth, lineGap: 3 });
+      .text(cleanPdfText(event.description) || '—', left, y, { width: contentWidth, lineGap: 3 });
     y = doc.y + 14;
 
     if (event.rules_eligibility) {
       y = ensureSpace(doc, y, 50);
       y = drawSectionLabel(doc, 'Rules & Guidelines', left, y, contentWidth);
       doc.font('Helvetica').fontSize(9.5).fillColor(TEXT_BODY)
-        .text(event.rules_eligibility, left, y, { width: contentWidth, lineGap: 3 });
+        .text(cleanPdfText(event.rules_eligibility), left, y, { width: contentWidth, lineGap: 3 });
       y = doc.y + 14;
     }
 
@@ -807,7 +839,7 @@ async function generateReport(req, res) {
       y = ensureSpace(doc, y, 50);
       y = drawSectionLabel(doc, 'Prizes & Awards', left, y, contentWidth);
       doc.font('Helvetica').fontSize(9.5).fillColor(TEXT_BODY)
-        .text(event.prize_info, left, y, { width: contentWidth, lineGap: 3 });
+        .text(cleanPdfText(event.prize_info), left, y, { width: contentWidth, lineGap: 3 });
       y = doc.y + 14;
     }
 

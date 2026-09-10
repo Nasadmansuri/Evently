@@ -291,7 +291,7 @@ export default function FeedbackForm() {
 
                       <div className="mt-2.5">
                         {q.question_type === 'rating' ? (
-                          <div className="flex items-center gap-1 bg-white inline-flex px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                          <div className="inline-flex items-center gap-1 bg-white px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
                             {[1, 2, 3, 4, 5].map((n) => (
                               <Star
                                 key={n}
